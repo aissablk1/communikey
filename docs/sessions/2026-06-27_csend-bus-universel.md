@@ -1,10 +1,10 @@
 ---
 session_id: 6cb99775-csend-bus-universel
 date_debut: 2026-06-27
-date_fin: en cours
+date_fin: 2026-06-27
 workspace: /Volumes/Professionnel/Projets/Développement/Outils/csend
 auteur: Aïssa BELKOUSSA
-statut: en cours
+statut: phases 0 et 1 livrées (vert, committé) — phases 2+ à venir
 tags: [csend, inter-agent, architecture, crypto, pqc, memoire]
 ---
 
@@ -45,12 +45,26 @@ tags: [csend, inter-agent, architecture, crypto, pqc, memoire]
 - 2026-06-27 — `git init` du dépôt ; arborescence `docs/`.
 - 2026-06-27 — Spec écrite : `docs/superpowers/specs/2026-06-27-csend-bus-universel-design.md`.
 - 2026-06-27 — Journal de session créé (ce fichier).
+- 2026-06-27 — Commit `4f198d1` : socle + spec sous git.
+- 2026-06-27 — Phase 0 : fix bug self (TDD `callerRef`/`isSelf`) → commit `6a101b5`.
+- 2026-06-27 — Phase 0 : Makefile + CI GitHub Actions + PROJECT.nfo + README v2 → `fa33244`.
+- 2026-06-27 — Phase 1 : couche crypto E2E hybride (Ed25519+X25519+ML-KEM) + vault → `e625e7e`.
+- 2026-06-27 — Phase 1 : pilier mémoire (registre + journal interrogeable) → `8469b16`.
+- 2026-06-27 — Phase 1 : backbone coopératif (inbox + router + CLI recv/inbox/id, hors cmux),
+  smoke E2E vérifié → `24b7e23`.
+- 2026-06-27 — Stretch : recovery Shamir GF(256) + CLI split/combine, smoke E2E → `a20dd40`.
+- 2026-06-27 — Couche providers pluggable (Claude réel, extension Codex/Gemini) → `08a3db2`.
+- 2026-06-27 — Suite verte tout du long (`go test -race`), 8 commits.
 
-## Actions à mener à l'avenir
+## Actions à mener à l'avenir (honnête — non fait cette session)
 
-- Phase 0 : fix bug self (TDD) ; Makefile ; CI ; PROJECT.nfo.
-- Phase 1 : registre/mémoire persistante ; transport inbox coopératif ; crypto base ; router.
-- Stretch : Shamir+BIP-39 ; backend tmux ; adaptateurs Codex/Gemini.
+- **Backend tmux/screen** (injection live hors cmux) : nécessite d'abstraire le contrat
+  transport ; reporté pour ne pas fragiliser le vert en fin de session (§32).
+- **Encodage mot des parts** (BIP-39 / SLIP-39 wordlist) : la math Shamir est faite ;
+  l'habillage « phrase » reste à brancher (pas de wordlist inventée, §2).
+- **Adaptateurs Codex/Gemini réels** : à calibrer sur de vrais écrans capturés (§2).
+- **Phase 2+** : passkey WebAuthn ; Phase 3 réseau multi-machine (TLS hybride PQC) ;
+  Phase 4 mobile + Windows + bridge Agent Teams ; Phase 5 PQC complet + audit externe.
 
 ## Notes / Décisions / Blocages
 
