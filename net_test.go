@@ -24,7 +24,7 @@ func TestNetworkLoopbackDeliver(t *testing.T) {
 	}()
 
 	addr := ln.Addr().String()
-	if err := sendRemote(addr, InboxMessage{From: "A", To: "BOB", Body: "hello over tcp"}); err != nil {
+	if err := sendRemote(addr, InboxMessage{From: "A", To: "BOB", Body: "hello over tcp"}, nil); err != nil {
 		t.Fatal(err)
 	}
 	msgs, _ := s.Inbox().Receive("BOB", true)

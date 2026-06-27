@@ -10,6 +10,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -20,8 +21,15 @@ import (
 const defaultServeAddr = "127.0.0.1:9777"
 
 // serveBus listens and delivers each received frame to the local inbox. Blocking.
-func serveBus(s *Store, addr string) error {
-	ln, err := net.Listen("tcp", addr)
+// A non-nil cfg makes it a TLS 1.3 listener (hybrid PQC in Go 1.24).
+func serveBus(s *Store, addr string, cfg *tls.Config) error {
+	var ln net.Listener
+	var err error
+	if cfg != nil {
+		ln, err = tls.Listen("tcp", addr, cfg)
+	} else {
+		ln, err = net.Listen("tcp", addr)
+	}
 	if err != nil {
 		return err
 	}
@@ -70,9 +78,16 @@ func handleBusConn(s *Store, conn net.Conn) {
 	fmt.Fprintln(conn, `{"ok":true}`)
 }
 
-// sendRemote delivers one message to a remote csend serve.
-func sendRemote(addr string, m InboxMessage) error {
-	conn, err := net.DialTimeout("tcp", addr, 5*time.Second)
+// sendRemote delivers one message to a remote csend serve. A non-nil cfg dials over
+// TLS 1.3 (hybrid PQC) with optional fingerprint pinning.
+func sendRemote(addr string, m InboxMessage, cfg *tls.Config) error {
+	var conn net.Conn
+	var err error
+	if cfg != nil {
+		conn, err = tls.DialWithDialer(&net.Dialer{Timeout: 5 * time.Second}, "tcp", addr, cfg)
+	} else {
+		conn, err = net.DialTimeout("tcp", addr, 5*time.Second)
+	}
 	if err != nil {
 		return fmt.Errorf("connexion à %s impossible: %w", addr, err)
 	}
@@ -107,23 +122,55 @@ func isLoopbackAddr(addr string) bool {
 
 func cmdServe(args []string) {
 	addr := defaultServeAddr
+	useTLS := false
 	for i := 0; i < len(args); i++ {
-		if args[i] == "--addr" && i+1 < len(args) {
-			addr = args[i+1]
-			i++
+		switch args[i] {
+		case "--addr":
+			if i+1 < len(args) {
+				addr = args[i+1]
+				i++
+			}
+		case "--tls":
+			useTLS = true
 		}
 	}
-	if err := serveBus(mustStore(), addr); err != nil {
+	s := mustStore()
+	var cfg *tls.Config
+	if useTLS {
+		c, fp, err := serverTLSConfig(s)
+		if err != nil {
+			fail(err.Error())
+		}
+		cfg = c
+		fmt.Printf("TLS 1.3 hybride PQC actif. Fingerprint à épingler côté client :\n  %s\n", fp)
+	}
+	if err := serveBus(s, addr, cfg); err != nil {
 		fail(err.Error())
 	}
 }
 
 func cmdRemote(args []string) {
-	if len(args) < 3 {
-		fail("usage: csend remote <hôte:port> <agent> <message…>")
+	useTLS := false
+	pin := ""
+	var pos []string
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--tls":
+			useTLS = true
+		case "--pin":
+			if i+1 < len(args) {
+				pin = args[i+1]
+				i++
+			}
+		default:
+			pos = append(pos, args[i])
+		}
 	}
-	addr, to := args[0], args[1]
-	body := strings.Join(args[2:], " ")
+	if len(pos) < 3 {
+		fail("usage: csend remote [--tls --pin <fingerprint>] <hôte:port> <agent> <message…>")
+	}
+	addr, to := pos[0], pos[1]
+	body := strings.Join(pos[2:], " ")
 	m := InboxMessage{ID: newID(), TS: nowRFC3339(), From: selfAgentID(), To: to}
 	enc := ""
 	if sealed, ok := maybeSeal(mustStore(), to, body); ok {
@@ -132,8 +179,14 @@ func cmdRemote(args []string) {
 	} else {
 		m.Body = body
 	}
-	if err := sendRemote(addr, m); err != nil {
+	var cfg *tls.Config
+	tlsNote := ""
+	if useTLS {
+		cfg = tlsClientConfig(pin)
+		tlsNote = " · TLS PQC"
+	}
+	if err := sendRemote(addr, m, cfg); err != nil {
 		fail(err.Error())
 	}
-	fmt.Printf("✓ envoyé à %s via %s [network]%s\n", to, addr, enc)
+	fmt.Printf("✓ envoyé à %s via %s [network%s]%s\n", to, addr, tlsNote, enc)
 }

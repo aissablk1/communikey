@@ -37,8 +37,8 @@ Usage:
   csend recovery combine <part…>   reconstitue l'identité depuis ≥ K parts
   csend recovery phrase            phrase de récupération BIP-39 (24 mots)
   csend recovery from-phrase <…>   reconstitue l'identité depuis la phrase
-  csend serve [--addr H:P]         écoute réseau (défaut 127.0.0.1:9777) → inbox
-  csend remote <h:p> <agent> <msg> envoie à une autre machine (loopback/LAN)
+  csend serve [--addr H:P] [--tls]  écoute réseau → inbox (--tls = TLS 1.3 hybride PQC)
+  csend remote [--tls --pin <fp>] <h:p> <agent> <msg>  envoie à une autre machine
   csend link <enfant> <parent>     déclare <parent> comme parent de <enfant>
   csend unlink <enfant>            détache <enfant> de son parent
   csend help
