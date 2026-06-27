@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func loadIdentity(s *Store, pass []byte) (*Identity, error) {
@@ -101,7 +102,51 @@ func cmdRecovery(args []string) {
 			fmt.Println("  (définis CSEND_VAULT_PASS pour ré-écrire le vault local)")
 		}
 
+	case "phrase":
+		pass := os.Getenv("CSEND_VAULT_PASS")
+		if pass == "" {
+			fail("définis CSEND_VAULT_PASS pour ouvrir le vault à encoder en phrase")
+		}
+		id, err := loadIdentity(s, []byte(pass))
+		if err != nil {
+			fail(err.Error())
+		}
+		master, err := id.MarshalSecret()
+		if err != nil {
+			fail(err.Error())
+		}
+		phrase, err := EntropyToMnemonic(master)
+		if err != nil {
+			fail(err.Error())
+		}
+		fmt.Printf("Phrase de récupération (24 mots) de l'identité %s.\n", fingerprint(id.Public()))
+		fmt.Print("Conserve-la HORS-LIGNE (papier, coffre). Quiconque l'a possède l'identité.\n\n")
+		fmt.Printf("  %s\n", phrase)
+
+	case "from-phrase":
+		// Accepte la phrase entre guillemets (1 arg) OU mot par mot (N args).
+		if len(args) < 2 {
+			fail("usage: csend recovery from-phrase \"<12 à 24 mots>\"")
+		}
+		master, err := MnemonicToEntropy(strings.Join(args[1:], " "))
+		if err != nil {
+			fail(err.Error())
+		}
+		id, err := UnmarshalIdentity(master)
+		if err != nil {
+			fail(err.Error())
+		}
+		fmt.Printf("✓ identité reconstituée depuis la phrase : %s\n", fingerprint(id.Public()))
+		if pass := os.Getenv("CSEND_VAULT_PASS"); pass != "" {
+			if err := saveIdentity(s, id, []byte(pass)); err != nil {
+				fail(err.Error())
+			}
+			fmt.Printf("  vault ré-écrit : %s\n", identityVaultPath(s))
+		} else {
+			fmt.Println("  (définis CSEND_VAULT_PASS pour ré-écrire le vault local)")
+		}
+
 	default:
-		fail("sous-commande inconnue: " + args[0] + " (split | combine)")
+		fail("sous-commande inconnue: " + args[0] + " (split | combine | phrase | from-phrase)")
 	}
 }

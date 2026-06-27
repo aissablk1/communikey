@@ -30,6 +30,8 @@ Usage:
   csend id [--create]              affiche/crée l'identité crypto locale (vault chiffré)
   csend recovery split <K> <N>     découpe l'identité en N parts Shamir (seuil K)
   csend recovery combine <part…>   reconstitue l'identité depuis ≥ K parts
+  csend recovery phrase            phrase de récupération BIP-39 (24 mots)
+  csend recovery from-phrase <…>   reconstitue l'identité depuis la phrase
   csend link <enfant> <parent>     déclare <parent> comme parent de <enfant>
   csend unlink <enfant>            détache <enfant> de son parent
   csend help

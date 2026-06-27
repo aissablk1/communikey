@@ -25,7 +25,6 @@ import (
 	"crypto/pbkdf2"
 	"crypto/rand"
 	"crypto/sha256"
-	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -38,6 +37,7 @@ type Identity struct {
 	Sign   ed25519.PrivateKey
 	X25519 *ecdh.PrivateKey
 	MLKEM  *mlkem.DecapsulationKey768
+	Master []byte // 32-byte seed everything derives from (recovery anchor)
 }
 
 // PublicBundle is the shareable public identity (what a sender needs).
@@ -57,21 +57,48 @@ type SealedMessage struct {
 	Sig       []byte `json:"sig"`        // Ed25519 signature over the transcript
 }
 
-// NewIdentity generates a fresh hybrid identity (classical + post-quantum).
+// NewIdentity generates a fresh hybrid identity from a random 32-byte master seed.
 func NewIdentity() (*Identity, error) {
-	_, signPriv, err := ed25519.GenerateKey(rand.Reader)
+	master := make([]byte, 32)
+	if _, err := rand.Read(master); err != nil {
+		return nil, err
+	}
+	return deriveIdentity(master)
+}
+
+// deriveIdentity deterministically derives the WHOLE hybrid identity from a single
+// 32-byte master seed (domain-separated HKDF per key). One seed ⇒ one identity ⇒
+// recoverable from one BIP-39 phrase or one Shamir secret.
+func deriveIdentity(master []byte) (*Identity, error) {
+	if len(master) != 32 {
+		return nil, errors.New("graine maître: 32 octets requis")
+	}
+	edSeed, err := hkdf.Key(sha256.New, master, nil, "csend/id/ed25519", 32)
 	if err != nil {
 		return nil, err
 	}
-	xPriv, err := ecdh.X25519().GenerateKey(rand.Reader)
+	xSeed, err := hkdf.Key(sha256.New, master, nil, "csend/id/x25519", 32)
 	if err != nil {
 		return nil, err
 	}
-	dk, err := mlkem.GenerateKey768()
+	mlSeed, err := hkdf.Key(sha256.New, master, nil, "csend/id/mlkem", 64)
 	if err != nil {
 		return nil, err
 	}
-	return &Identity{Sign: signPriv, X25519: xPriv, MLKEM: dk}, nil
+	xPriv, err := ecdh.X25519().NewPrivateKey(xSeed)
+	if err != nil {
+		return nil, err
+	}
+	dk, err := mlkem.NewDecapsulationKey768(mlSeed)
+	if err != nil {
+		return nil, err
+	}
+	return &Identity{
+		Sign:   ed25519.NewKeyFromSeed(edSeed),
+		X25519: xPriv,
+		MLKEM:  dk,
+		Master: append([]byte(nil), master...),
+	}, nil
 }
 
 // Public returns the shareable public bundle.
@@ -238,38 +265,17 @@ func OpenVault(b *VaultBlob, passphrase []byte) ([]byte, error) {
 
 // --- Identity serialization (private — only ever written inside a vault) ---
 
-type identitySecret struct {
-	SignSeed  []byte `json:"sign_seed"`   // 32 (ed25519 seed)
-	X25519Key []byte `json:"x25519_key"`  // 32 (x25519 private scalar)
-	MLKEMSeed []byte `json:"mlkem_seed"`  // 64 (ml-kem-768 seed)
-}
-
-// MarshalSecret serializes the private identity (to be wrapped by SealVault).
+// MarshalSecret returns the 32-byte master seed — the single secret from which the
+// whole identity derives. Wrap it with SealVault, split it with Shamir, or encode
+// it as a BIP-39 phrase.
 func (id *Identity) MarshalSecret() ([]byte, error) {
-	return json.Marshal(identitySecret{
-		SignSeed:  id.Sign.Seed(),
-		X25519Key: id.X25519.Bytes(),
-		MLKEMSeed: id.MLKEM.Bytes(),
-	})
+	if len(id.Master) != 32 {
+		return nil, errors.New("identité sans graine maître")
+	}
+	return append([]byte(nil), id.Master...), nil
 }
 
-// UnmarshalIdentity rebuilds an Identity from its serialized secret.
-func UnmarshalIdentity(data []byte) (*Identity, error) {
-	var s identitySecret
-	if err := json.Unmarshal(data, &s); err != nil {
-		return nil, err
-	}
-	xPriv, err := ecdh.X25519().NewPrivateKey(s.X25519Key)
-	if err != nil {
-		return nil, err
-	}
-	dk, err := mlkem.NewDecapsulationKey768(s.MLKEMSeed)
-	if err != nil {
-		return nil, err
-	}
-	return &Identity{
-		Sign:   ed25519.NewKeyFromSeed(s.SignSeed),
-		X25519: xPriv,
-		MLKEM:  dk,
-	}, nil
+// UnmarshalIdentity rebuilds an Identity from its 32-byte master seed.
+func UnmarshalIdentity(master []byte) (*Identity, error) {
+	return deriveIdentity(master)
 }
