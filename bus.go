@@ -42,6 +42,21 @@ func mustStore() *Store {
 	return s
 }
 
+// resolveVaultPass returns the vault passphrase. CSEND_VAULT_PASS_FILE wins (a file
+// avoids leaking the secret in `ps`/env dumps — §38) ; CSEND_VAULT_PASS is the
+// fallback. Returns (nil,false) if neither is set.
+func resolveVaultPass() ([]byte, bool) {
+	if f := os.Getenv("CSEND_VAULT_PASS_FILE"); f != "" {
+		if data, err := os.ReadFile(f); err == nil {
+			return []byte(strings.TrimRight(string(data), "\r\n")), true
+		}
+	}
+	if p := os.Getenv("CSEND_VAULT_PASS"); p != "" {
+		return []byte(p), true
+	}
+	return nil, false
+}
+
 func sha6(text string) string {
 	sum := sha256.Sum256([]byte(text))
 	return hex.EncodeToString(sum[:6])
@@ -104,15 +119,15 @@ func cmdID(args []string) {
 	}
 	s := mustStore()
 	if create {
-		pass := os.Getenv("CSEND_VAULT_PASS")
-		if pass == "" {
-			fail("définis CSEND_VAULT_PASS pour chiffrer le vault d'identité (§38 : jamais de clé en clair)")
+		pass, ok := resolveVaultPass()
+		if !ok {
+			fail("définis CSEND_VAULT_PASS_FILE (recommandé) ou CSEND_VAULT_PASS pour chiffrer le vault (§38)")
 		}
 		id, err := NewIdentity()
 		if err != nil {
 			fail(err.Error())
 		}
-		if err := saveIdentity(s, id, []byte(pass)); err != nil {
+		if err := saveIdentity(s, id, pass); err != nil {
 			fail(err.Error())
 		}
 		fmt.Printf("✓ identité créée (hybride Ed25519 + X25519 + ML-KEM-768)\n  fingerprint: %s\n  vault: %s\n",

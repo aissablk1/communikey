@@ -49,11 +49,11 @@ func cmdRecovery(args []string) {
 		if err1 != nil || err2 != nil {
 			fail("K et N doivent être des entiers")
 		}
-		pass := os.Getenv("CSEND_VAULT_PASS")
-		if pass == "" {
-			fail("définis CSEND_VAULT_PASS pour ouvrir le vault à découper")
+		pass, ok := resolveVaultPass()
+		if !ok {
+			fail("définis CSEND_VAULT_PASS_FILE ou CSEND_VAULT_PASS pour ouvrir le vault à découper")
 		}
-		id, err := loadIdentity(s, []byte(pass))
+		id, err := loadIdentity(s, pass)
 		if err != nil {
 			fail(err.Error())
 		}
@@ -93,21 +93,21 @@ func cmdRecovery(args []string) {
 			fail("parts insuffisantes ou invalides — identité non reconstituée (" + err.Error() + ")")
 		}
 		fmt.Printf("✓ identité reconstituée : fingerprint %s\n", fingerprint(id.Public()))
-		if pass := os.Getenv("CSEND_VAULT_PASS"); pass != "" {
-			if err := saveIdentity(s, id, []byte(pass)); err != nil {
+		if pass, ok := resolveVaultPass(); ok {
+			if err := saveIdentity(s, id, pass); err != nil {
 				fail(err.Error())
 			}
 			fmt.Printf("  vault ré-écrit : %s\n", identityVaultPath(s))
 		} else {
-			fmt.Println("  (définis CSEND_VAULT_PASS pour ré-écrire le vault local)")
+			fmt.Println("  (définis CSEND_VAULT_PASS_FILE ou CSEND_VAULT_PASS pour ré-écrire le vault)")
 		}
 
 	case "phrase":
-		pass := os.Getenv("CSEND_VAULT_PASS")
-		if pass == "" {
-			fail("définis CSEND_VAULT_PASS pour ouvrir le vault à encoder en phrase")
+		pass, ok := resolveVaultPass()
+		if !ok {
+			fail("définis CSEND_VAULT_PASS_FILE ou CSEND_VAULT_PASS pour ouvrir le vault")
 		}
-		id, err := loadIdentity(s, []byte(pass))
+		id, err := loadIdentity(s, pass)
 		if err != nil {
 			fail(err.Error())
 		}
@@ -137,13 +137,13 @@ func cmdRecovery(args []string) {
 			fail(err.Error())
 		}
 		fmt.Printf("✓ identité reconstituée depuis la phrase : %s\n", fingerprint(id.Public()))
-		if pass := os.Getenv("CSEND_VAULT_PASS"); pass != "" {
-			if err := saveIdentity(s, id, []byte(pass)); err != nil {
+		if pass, ok := resolveVaultPass(); ok {
+			if err := saveIdentity(s, id, pass); err != nil {
 				fail(err.Error())
 			}
 			fmt.Printf("  vault ré-écrit : %s\n", identityVaultPath(s))
 		} else {
-			fmt.Println("  (définis CSEND_VAULT_PASS pour ré-écrire le vault local)")
+			fmt.Println("  (définis CSEND_VAULT_PASS_FILE ou CSEND_VAULT_PASS pour ré-écrire le vault)")
 		}
 
 	default:
