@@ -111,13 +111,24 @@ func loadPublicBundle(s *Store) (PublicBundle, bool) {
 // cmdID shows the local identity, or creates one with `--create` (needs a vault
 // passphrase in CSEND_VAULT_PASS — we never persist a secret key in clear, §38).
 func cmdID(args []string) {
-	create := false
+	create, export := false, false
 	for _, a := range args {
-		if a == "--create" {
+		switch a {
+		case "--create":
 			create = true
+		case "--export":
+			export = true
 		}
 	}
 	s := mustStore()
+	if export {
+		b, ok := loadPublicBundle(s)
+		if !ok {
+			fail("aucune identité locale — crée-en une : csend id --create")
+		}
+		fmt.Printf("Jeton de clé PUBLIQUE (fingerprint %s) — partage-le avec tes pairs :\n\n%s\n", fingerprint(b), encodeBundle(b))
+		return
+	}
 	if create {
 		pass, ok := resolveVaultPass()
 		if !ok {
@@ -152,7 +163,14 @@ func cmdInbox(args []string) {
 	to := args[0]
 	body := strings.Join(args[1:], " ")
 	s := mustStore()
-	m := InboxMessage{ID: newID(), TS: nowRFC3339(), From: selfAgentID(), To: to, Body: body}
+	m := InboxMessage{ID: newID(), TS: nowRFC3339(), From: selfAgentID(), To: to}
+	enc := ""
+	if sealed, ok := maybeSeal(s, to, body); ok {
+		m.Sealed = sealed
+		enc = " · chiffré E2E"
+	} else {
+		m.Body = body
+	}
 	if err := s.Inbox().Deliver(m); err != nil {
 		fail(err.Error())
 	}
@@ -160,7 +178,7 @@ func cmdInbox(args []string) {
 		ID: m.ID, TS: m.TS, From: m.From, To: to, Channel: "inbox",
 		Action: "submitted", TextSHA: sha6(body), TextLen: len(body),
 	})
-	fmt.Printf("✓ déposé dans l'inbox de %s [inbox]\n", to)
+	fmt.Printf("✓ déposé dans l'inbox de %s [inbox]%s\n", to, enc)
 }
 
 // cmdRecv drains the calling agent's cooperative mailbox.
@@ -183,11 +201,7 @@ func cmdRecv(args []string) {
 	}
 	fmt.Printf("%d message(s) pour %s%s :\n", len(msgs), agent, peekSuffix(markRead))
 	for _, m := range msgs {
-		body := m.Body
-		if body == "" && m.Sealed != nil {
-			body = "[message chiffré E2E — déchiffrement à l'ouverture]"
-		}
-		fmt.Printf("  • [%s] de %s : %s\n", m.TS, m.From, body)
+		fmt.Printf("  • [%s] de %s : %s\n", m.TS, m.From, openBody(s, m))
 	}
 }
 
@@ -196,4 +210,36 @@ func peekSuffix(markRead bool) string {
 		return ""
 	}
 	return " (peek — non consommés)"
+}
+
+// cmdContact manages the public-key keyring of peers (enables E2E sealing).
+func cmdContact(args []string) {
+	s := mustStore()
+	if len(args) == 0 || args[0] == "list" {
+		cs, _ := s.ListContacts()
+		if len(cs) == 0 {
+			fmt.Println("Aucun contact. Ajoute la clé publique d'un pair : csend contact add <agent> <jeton>")
+			return
+		}
+		fmt.Println("Contacts (clés publiques connues) :")
+		for _, c := range cs {
+			fmt.Printf("  • %s\n", c)
+		}
+		return
+	}
+	if args[0] == "add" {
+		if len(args) < 3 {
+			fail("usage: csend contact add <agent> <jeton>")
+		}
+		b, err := decodeBundle(args[2])
+		if err != nil {
+			fail("jeton invalide: " + err.Error())
+		}
+		if err := s.SaveContact(args[1], b); err != nil {
+			fail(err.Error())
+		}
+		fmt.Printf("✓ contact « %s » ajouté (fingerprint %s) — les messages vers lui seront chiffrés E2E\n", args[1], fingerprint(b))
+		return
+	}
+	fail("usage: csend contact add <agent> <jeton>  |  csend contact list")
 }

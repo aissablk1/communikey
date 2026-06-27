@@ -27,7 +27,9 @@ Usage:
   csend read <cible> [--lines N]   lit l'écran d'une session
   csend recv [--peek]              lit (et vide) l'inbox coopératif de CETTE session
   csend inbox <cible> <message…>   dépose un message coopératif (hors cmux, tout OS)
-  csend id [--create]              affiche/crée l'identité crypto locale (vault chiffré)
+  csend id [--create|--export]     identité crypto locale (vault) ; --export = jeton public
+  csend contact add <agent> <jeton>  enregistre la clé publique d'un pair (→ chiffrement E2E)
+  csend contact list               liste les contacts connus
   csend recovery split <K> <N>     découpe l'identité en N parts Shamir (seuil K)
   csend recovery combine <part…>   reconstitue l'identité depuis ≥ K parts
   csend recovery phrase            phrase de récupération BIP-39 (24 mots)
@@ -72,6 +74,8 @@ func main() {
 		cmdInbox(os.Args[2:])
 	case "id":
 		cmdID(os.Args[2:])
+	case "contact":
+		cmdContact(os.Args[2:])
 	case "recovery":
 		cmdRecovery(os.Args[2:])
 	case "serve":

@@ -124,9 +124,16 @@ func cmdRemote(args []string) {
 	}
 	addr, to := args[0], args[1]
 	body := strings.Join(args[2:], " ")
-	m := InboxMessage{ID: newID(), TS: nowRFC3339(), From: selfAgentID(), To: to, Body: body}
+	m := InboxMessage{ID: newID(), TS: nowRFC3339(), From: selfAgentID(), To: to}
+	enc := ""
+	if sealed, ok := maybeSeal(mustStore(), to, body); ok {
+		m.Sealed = sealed
+		enc = " · chiffré E2E"
+	} else {
+		m.Body = body
+	}
 	if err := sendRemote(addr, m); err != nil {
 		fail(err.Error())
 	}
-	fmt.Printf("✓ envoyé à %s via %s [network]\n", to, addr)
+	fmt.Printf("✓ envoyé à %s via %s [network]%s\n", to, addr, enc)
 }
