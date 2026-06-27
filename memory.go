@@ -34,8 +34,12 @@ func OpenStore(dir string) (*Store, error) {
 	return &Store{Dir: dir}, nil
 }
 
-// DefaultStoreDir is ~/.claude/csend.
+// DefaultStoreDir is ~/.claude/csend, overridable via CSEND_STORE_DIR (tests,
+// confinement, alternate profiles).
 func DefaultStoreDir() string {
+	if d := os.Getenv("CSEND_STORE_DIR"); d != "" {
+		return d
+	}
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, ".claude", "csend")
 }

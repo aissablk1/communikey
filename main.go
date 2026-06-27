@@ -25,6 +25,9 @@ Usage:
         --to-siblings              vers les frères ; --to-descendants vers tout le sous-arbre
         --from <session>           change la base (défaut: la session courante)
   csend read <cible> [--lines N]   lit l'écran d'une session
+  csend recv [--peek]              lit (et vide) l'inbox coopératif de CETTE session
+  csend inbox <cible> <message…>   dépose un message coopératif (hors cmux, tout OS)
+  csend id [--create]              affiche/crée l'identité crypto locale (vault chiffré)
   csend link <enfant> <parent>     déclare <parent> comme parent de <enfant>
   csend unlink <enfant>            détache <enfant> de son parent
   csend help
@@ -57,6 +60,12 @@ func main() {
 	case "read":
 		mustBackend()
 		cmdRead(os.Args[2:])
+	case "recv":
+		cmdRecv(os.Args[2:]) // cooperative path — no cmux backend required
+	case "inbox":
+		cmdInbox(os.Args[2:])
+	case "id":
+		cmdID(os.Args[2:])
 	case "_why": // hidden diagnostic
 		mustBackend()
 		tgt, err := resolveTarget(os.Args[2])
