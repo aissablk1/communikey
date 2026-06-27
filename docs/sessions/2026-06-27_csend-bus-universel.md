@@ -63,11 +63,14 @@ tags: [csend, inter-agent, architecture, crypto, pqc, memoire]
 - 2026-06-27 — Install facilitée : module path → `go install`, `.goreleaser.yaml` (Homebrew),
   `site/install.sh`, README réécrit (humains + agents) → commit `bda3e2b`.
 - 2026-06-27 — `docs/PUBLISHING.md` : recommandation de publication + distribution.
+- 2026-06-27 — **Backend tmux** + abstraction transport (interface `Backend`, cmux+tmux
+  interchangeables). **E2E réel vérifié** (injection dans un pane tmux 3.6a exécutée) ;
+  self-fix confirmé en live (`(ici)` apparaît). Commit `89f4db2`. README+site MAJ (tmux livré).
 
 ## Actions à mener à l'avenir (honnête — non fait cette session)
 
-- **Backend tmux/screen** (injection live hors cmux) : nécessite d'abstraire le contrat
-  transport ; reporté pour ne pas fragiliser le vert en fin de session (§32).
+- **Backend screen / ConPTY** : le contrat transport est désormais abstrait (cmux + tmux
+  livrés) → screen/ConPTY = un struct de plus. Windows natif reste coop-only.
 - **Encodage mot des parts** (BIP-39 / SLIP-39 wordlist) : la math Shamir est faite ;
   l'habillage « phrase » reste à brancher (pas de wordlist inventée, §2).
 - **Adaptateurs Codex/Gemini réels** : à calibrer sur de vrais écrans capturés (§2).
