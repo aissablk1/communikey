@@ -66,16 +66,26 @@ tags: [csend, inter-agent, architecture, crypto, pqc, memoire]
 - 2026-06-27 — **Backend tmux** + abstraction transport (interface `Backend`, cmux+tmux
   interchangeables). **E2E réel vérifié** (injection dans un pane tmux 3.6a exécutée) ;
   self-fix confirmé en live (`(ici)` apparaît). Commit `89f4db2`. README+site MAJ (tmux livré).
+- 2026-06-27 — **BIP-39** : identité dérivée d'UNE graine maître → **récupérable par phrase
+  de 24 mots** ; wordlist officielle, vecteurs de test ; CLI `recovery phrase/from-phrase`.
+  Smoke E2E (phrase → même identité). Commit `…BIP-39`.
+- 2026-06-27 — **Réseau** `serve`/`remote` (loopback, payload E2E-ready) ; smoke 2 process
+  (`remote → serve → recv`). Commit réseau.
+- 2026-06-27 — **Durcissement vault** : passphrase via `CSEND_VAULT_PASS_FILE` (évite la fuite
+  `ps`, §38). Commit vault-file.
+- 2026-06-27 — **`docs/NEXT.md`** : triage honnête du reste (passkey, mobile, Codex/Gemini,
+  Agent Teams, screen, TLS/PQC) avec la raison réelle de chaque blocage.
+- 2026-06-27 — Recherche vérifiée **Sakana Fugu** (Sakana AI, 22 juin 2026) : routeur de
+  modèles cloud OpenAI-compatible → **catégorie différente** de csend (pas un concurrent).
 
-## Actions à mener à l'avenir (honnête — non fait cette session)
+## Actions à mener à l'avenir
 
-- **Backend screen / ConPTY** : le contrat transport est désormais abstrait (cmux + tmux
-  livrés) → screen/ConPTY = un struct de plus. Windows natif reste coop-only.
-- **Encodage mot des parts** (BIP-39 / SLIP-39 wordlist) : la math Shamir est faite ;
-  l'habillage « phrase » reste à brancher (pas de wordlist inventée, §2).
-- **Adaptateurs Codex/Gemini réels** : à calibrer sur de vrais écrans capturés (§2).
-- **Phase 2+** : passkey WebAuthn ; Phase 3 réseau multi-machine (TLS hybride PQC) ;
-  Phase 4 mobile + Windows + bridge Agent Teams ; Phase 5 PQC complet + audit externe.
+Triage complet et honnête dans **`docs/NEXT.md`** (raison réelle de chaque blocage) :
+- Reporté par choix (faible ROI) : backend `screen`.
+- Bloqué par prérequis physique : passkey WebAuthn (authentificateur), TLS hybride PQC,
+  clients mobiles, Windows natif (coop-only — limite physique assumée).
+- Bloqué par absence de vraies données (§2) : adaptateurs Codex/Gemini, bridge Agent Teams.
+- Publication (GitHub/Homebrew/site) : en attente du feu vert d'Aïssa.
 
 ## Notes / Décisions / Blocages
 
