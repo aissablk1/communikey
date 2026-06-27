@@ -131,8 +131,8 @@ func sendMessage(handle, text string, mode SubmitMode) (Outcome, error) {
 // deliverTo applies the guarded, state-aware delivery to an already-resolved
 // surface. Shared by single sends and family broadcasts.
 func deliverTo(tgt Surface, text string, mode SubmitMode) (Outcome, error) {
-	// Never inject into our own session.
-	if self := selfRef(); self != "" && tgt.Ref == self {
+	// Never inject into our own session (Here flag + authoritative ref cross-check).
+	if isSelf(tgt, selfRef()) {
 		return Outcome{}, fmt.Errorf("refus: %s est la session courante (pas d'auto-injection)", tgt.Ref)
 	}
 
@@ -303,7 +303,7 @@ func resolveFamily(baseKey string, dir Direction) ([]Surface, error) {
 		}
 		seen[k] = true
 		s, ok := byKey[k]
-		if !ok || s.Ref == self { // offline or self
+		if !ok || isSelf(s, self) { // offline or self
 			continue
 		}
 		out = append(out, s)

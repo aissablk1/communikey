@@ -76,15 +76,33 @@ func loadTree() (*treeJSON, error) {
 	return &t, nil
 }
 
-// selfRef returns the surface this process runs in, so we never target ourselves.
-func selfRef() string {
-	if r := os.Getenv("CMUX_SURFACE_ID"); r != "" {
-		return r
-	}
-	if t, err := loadTree(); err == nil {
+// callerRef returns the calling surface's ref in the SAME "surface:N" space as
+// every target ref. The tree's caller.surface_ref is AUTHORITATIVE; CMUX_SURFACE_ID
+// is only a fallback because some cmux builds set it to a UUID — which would never
+// equal a "surface:N" target ref and would thus silently defeat the never-inject-
+// into-self guard (the Phase-0 safety bug).
+func callerRef(t *treeJSON) string {
+	if t != nil && t.Caller.SurfaceRef != "" {
 		return t.Caller.SurfaceRef
 	}
-	return ""
+	return os.Getenv("CMUX_SURFACE_ID")
+}
+
+// selfRef returns the surface this process runs in, so we never target ourselves.
+func selfRef() string {
+	t, err := loadTree()
+	if err != nil {
+		t = nil
+	}
+	return callerRef(t)
+}
+
+// isSelf reports whether surface s is the calling session. cmux already marks the
+// caller with Here=true; we also cross-check the ref against the authoritative self
+// ref. Either signal is sufficient — Here is what cmux computes, ref-equality is the
+// cross-check that the old guard relied on alone (and that the UUID mismatch broke).
+func isSelf(s Surface, self string) bool {
+	return s.Here || (self != "" && s.Ref == self)
 }
 
 // listSurfaces flattens the tree, tagging each surface with its workspace ref+name.
