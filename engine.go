@@ -66,7 +66,7 @@ func listSessions() ([]Session, error) {
 		if screen, err := readScreen(s.Ref, s.WorkspaceRef, stateTailLines); err != nil {
 			st = StateUnreachable // socket read failed (rare: app/socket down)
 		} else {
-			st = DetectClaudeState(screen)
+			st, _ = DetectAnyState(screen) // provider-pluggable (couche 2)
 		}
 		sid := reSessionID.FindString(s.Title)
 		// Keep recognized live agent states, or any surface carrying a session-id
@@ -139,7 +139,7 @@ func deliverTo(tgt Surface, text string, mode SubmitMode) (Outcome, error) {
 	screen, readErr := readScreenRetry(tgt.Ref, tgt.WorkspaceRef, 8)
 	state := StateUnreachable
 	if readErr == nil {
-		state = DetectClaudeState(screen)
+		state, _ = DetectAnyState(screen)
 	}
 	out := Outcome{Ref: tgt.Ref, Workspace: tgt.Workspace, State: state}
 
