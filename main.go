@@ -28,6 +28,8 @@ Usage:
   csend recv [--peek]              lit (et vide) l'inbox coopératif de CETTE session
   csend inbox <cible> <message…>   dépose un message coopératif (hors cmux, tout OS)
   csend id [--create]              affiche/crée l'identité crypto locale (vault chiffré)
+  csend recovery split <K> <N>     découpe l'identité en N parts Shamir (seuil K)
+  csend recovery combine <part…>   reconstitue l'identité depuis ≥ K parts
   csend link <enfant> <parent>     déclare <parent> comme parent de <enfant>
   csend unlink <enfant>            détache <enfant> de son parent
   csend help
@@ -66,6 +68,8 @@ func main() {
 		cmdInbox(os.Args[2:])
 	case "id":
 		cmdID(os.Args[2:])
+	case "recovery":
+		cmdRecovery(os.Args[2:])
 	case "_why": // hidden diagnostic
 		mustBackend()
 		tgt, err := resolveTarget(os.Args[2])
