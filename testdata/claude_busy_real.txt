@@ -1,0 +1,24 @@
+  ⎿  Added 47 lines, removed 3 lines
+      36    }
+      37  }
+      38  
+      39 +// Signals are matched only against the live region (screen ta
+         +il), never the                                                
+      40 +// scrollback, so old transcript text can't be mistaken for cu
+         +rrent state.                                                  
+      41 +const stateTailLines = 24                                     
+      42 +                                                              
+      43 +var (                                                         
+      44 +  // Busy: the live footer Claude renders while a turn is runn
+         +ing.                                                          
+      45 +  reBusy = regexp.MustCompile(`(?i)esc to interrupt`)         
+      46 +                                                              
+      47 +  // Confirmation dialogs — several INDEPENDENT signals so a w
+         +ording change in                                              
+                          9 new messages (ctrl+End) ↓ 
+
+─────────────────────────────────────────────────────── csend-messaging-tool ──
+❯ 
+───────────────────────────────────────────────────────────────────────────────
+  mod:Opus 4.8 · aissabelkoussa · ctx:████░░░░░░ 44% (560.0k) · lim:5h:4% 7j:…
+  ⏵⏵ bypass permissions on (shift+tab to cycle) · ← for agents

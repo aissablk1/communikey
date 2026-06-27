@@ -1,0 +1,3 @@
+# Built binaries (produced by install.sh)
+/csend
+/.build/
