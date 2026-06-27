@@ -25,6 +25,9 @@ Usage:
         --to-siblings              vers les frères ; --to-descendants vers tout le sous-arbre
         --from <session>           change la base (défaut: la session courante)
   csend read <cible> [--lines N]   lit l'écran d'une session
+  csend register [--id X --provider P]  inscrit CETTE session sur le bus (tout OS/terminal)
+  csend agents                     flotte coopérative (tous terminaux/providers/OS)
+  csend whoami                     agent-id + identité + inbox de cette session
   csend recv [--peek]              lit (et vide) l'inbox coopératif de CETTE session
   csend inbox <cible> <message…>   dépose un message coopératif (hors cmux, tout OS)
   csend id [--create|--export]     identité crypto locale (vault) ; --export = jeton public
@@ -68,6 +71,12 @@ func main() {
 	case "read":
 		mustBackend()
 		cmdRead(os.Args[2:])
+	case "register":
+		cmdRegister(os.Args[2:]) // join the bus from ANY terminal/provider/OS
+	case "agents":
+		cmdAgents(os.Args[2:])
+	case "whoami":
+		cmdWhoami(os.Args[2:])
 	case "recv":
 		cmdRecv(os.Args[2:]) // cooperative path — no cmux backend required
 	case "inbox":
