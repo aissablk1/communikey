@@ -51,7 +51,18 @@ make install      # ou: voir install.sh — binaire universel + symlink ~/.local
 
 ## Stack
 
-Go (binaire unique, zéro dépendance), backend cmux (socket Unix). Backends
-tmux / AppleScript / ConPTY et providers Codex/Gemini à venir.
+Go (binaire unique, zéro dépendance, stdlib uniquement — crypto incluse),
+backend cmux (socket Unix).
+
+## Vision v2 — bus inter-agents universel
+
+`csend` évolue vers un **bus de messagerie inter-agents** : cross-session,
+cross-provider (Claude / Codex / Gemini…), cross-terminal (bash / cmux / tmux /
+Terminal) et cross-OS, avec **mémoire persistante**, **crypto E2E** (PQC-ready) et
+**vault à passkey**. Principe directeur : **inbox coopératif = colonne vertébrale
+universelle ; injection clavier live = repli Unix**. Windows natif et mobile sont
+coopératif-only (pas d'injection clavier — limite physique assumée).
+
+Design & roadmap : `docs/superpowers/specs/2026-06-27-csend-bus-universel-design.md`.
 
 **Auteur** : Aïssa BELKOUSSA · contact@aissabelkoussa.fr

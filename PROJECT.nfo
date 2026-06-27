@@ -1,0 +1,123 @@
+================================================================================
+
+    ╔═╗╦╔═╗╔═╗╔═╗   ╔╗ ╔═╗╦  ╦╔═╗╦ ╦╔═╗╔═╗╔═╗
+    ╠═╣║╚═╗╚═╗╠═╣   ╠╩╗║╣ ║  ╠╩╗║ ║║ ║╚═╗╚═╗╠═╣
+    ╩ ╩╩╚═╝╚═╝╩ ╩   ╚═╝╚═╝╩═╝╩ ╩╚═╝╚═╝╚═╝╚═╝╩ ╩
+
+                       c s e n d  ·  v0.2.0-dev
+
+================================================================================
+
+  Project ............ csend
+  Tagline ............ Bus de messagerie inter-agents universel pour CLI
+  Author ............. Aïssa BELKOUSSA
+  Contact ............ contact@aissabelkoussa.fr
+  Website ............ https://aissabelkoussa.fr
+  Repository ......... https://github.com/aissablk1/csend  (à publier)
+  License ............ MIT
+  Created ............ 2026-06-27
+  Updated ............ 2026-06-27
+  Version ............ 0.2.0-dev
+  Status ............. alpha
+
+────────────────────────────────────────────────────────────────────────────────
+  ▓▓ DESCRIPTION ▓▓
+────────────────────────────────────────────────────────────────────────────────
+
+  Messagerie inter-sessions pour agents CLI (Claude Code, Codex, Gemini…).
+  Injecte un message dans une AUTRE session en cours, en lisant son état
+  (idle/busy/confirmation) avant d'agir. Évolue vers un bus universel :
+  cross-session, cross-provider, cross-terminal, cross-OS, avec mémoire
+  persistante, crypto E2E (PQC-ready) et vault à passkey.
+
+────────────────────────────────────────────────────────────────────────────────
+  ▓▓ STACK ▓▓
+────────────────────────────────────────────────────────────────────────────────
+
+  Runtime ............ Go 1.24 (binaire universel arm64 + x86_64)
+  Language ........... Go
+  Dépendances ........ zéro (stdlib uniquement, crypto incluse : ed25519,
+                       ecdh/X25519, mlkem, aes-gcm, hkdf, pbkdf2)
+  Transport .......... socket cmux (JSON-RPC) ; tmux/screen/inbox à venir
+  Database ........... fichiers locaux (JSON / JSONL append-only)
+  CI/CD .............. GitHub Actions (go vet + go test + build)
+
+────────────────────────────────────────────────────────────────────────────────
+  ▓▓ STRUCTURE ▓▓
+────────────────────────────────────────────────────────────────────────────────
+
+  ./
+  ├── main.go           CLI (list/tree/send/read/link/recv…)
+  ├── engine.go         livraison gouvernée, broadcast famille, audit
+  ├── cmux.go           backend cmux : topologie + identité self (Here)
+  ├── socket.go         client JSON-RPC du socket cmux
+  ├── state.go          détection d'état (idle/busy/confirm) par scraping
+  ├── relations.go      graphe familial père/enfants (persisté)
+  ├── *_test.go         tests (fixtures d'écrans réels)
+  ├── docs/             spec, plan, journaux de session
+  ├── PROJECT.nfo       ce fichier
+  └── README.md         documentation d'entrée
+
+────────────────────────────────────────────────────────────────────────────────
+  ▓▓ INSTALL ▓▓
+────────────────────────────────────────────────────────────────────────────────
+
+  $ git clone https://github.com/aissablk1/csend
+  $ cd csend
+  $ make install          # binaire universel + symlink ~/.local/bin/csend
+
+────────────────────────────────────────────────────────────────────────────────
+  ▓▓ USAGE ▓▓
+────────────────────────────────────────────────────────────────────────────────
+
+  $ csend list                     sessions agent + état
+  $ csend tree                     graphe familial
+  $ csend send <cible> "msg"       message gouverné (auto/stage/send/force)
+  $ csend send --down "msg"        broadcast aux enfants
+  $ csend read <cible>             lire l'écran d'une session
+  $ make test                      lance la suite de tests
+  $ make vet                       go vet
+
+────────────────────────────────────────────────────────────────────────────────
+  ▓▓ ENV ▓▓
+────────────────────────────────────────────────────────────────────────────────
+
+  - CMUX_SOCKET_PATH     chemin du socket cmux (défaut: Application Support)
+  - CMUX_SURFACE_ID      ref de la surface appelante (fallback ; cmux tree fait foi)
+  Aucun secret. Le futur vault chiffré ne stocke jamais de clé en clair.
+
+────────────────────────────────────────────────────────────────────────────────
+  ▓▓ CRÉDITS ▓▓
+────────────────────────────────────────────────────────────────────────────────
+
+  Conception & développement ............... Aïssa BELKOUSSA
+
+  Bibliothèques tierces clés :
+  - (aucune)            —                     stdlib Go uniquement
+
+────────────────────────────────────────────────────────────────────────────────
+  ▓▓ CONTACT ▓▓
+────────────────────────────────────────────────────────────────────────────────
+
+  Email .............. contact@aissabelkoussa.fr
+  GitHub ............. https://github.com/aissablk1
+
+────────────────────────────────────────────────────────────────────────────────
+  ▓▓ NOTES ▓▓
+────────────────────────────────────────────────────────────────────────────────
+
+  Roadmap par phases (cf. docs/superpowers/specs/2026-06-27-…-design.md) :
+  P0 fix sûreté + infra · P1 inbox coopératif + mémoire + crypto · P2 tmux +
+  providers + passkey · P3 réseau multi-machine (TLS hybride PQC) + recovery
+  Shamir/BIP-39 · P4 mobile + Windows + Agent Teams · P5 PQC complet + audit.
+
+  Honnêteté : Windows natif et mobile = coopératif-only (pas d'injection clavier).
+  Crypto = primitives auditées (stdlib), jamais maison.
+
+================================================================================
+
+   © 2026 Aïssa BELKOUSSA — Sous licence MIT (voir License ci-dessus).
+
+   View with monospace font (Menlo, JetBrains Mono, Cascadia Code, Consolas).
+
+================================================================================
