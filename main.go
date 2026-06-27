@@ -32,6 +32,8 @@ Usage:
   csend recovery combine <part…>   reconstitue l'identité depuis ≥ K parts
   csend recovery phrase            phrase de récupération BIP-39 (24 mots)
   csend recovery from-phrase <…>   reconstitue l'identité depuis la phrase
+  csend serve [--addr H:P]         écoute réseau (défaut 127.0.0.1:9777) → inbox
+  csend remote <h:p> <agent> <msg> envoie à une autre machine (loopback/LAN)
   csend link <enfant> <parent>     déclare <parent> comme parent de <enfant>
   csend unlink <enfant>            détache <enfant> de son parent
   csend help
@@ -72,6 +74,10 @@ func main() {
 		cmdID(os.Args[2:])
 	case "recovery":
 		cmdRecovery(os.Args[2:])
+	case "serve":
+		cmdServe(os.Args[2:]) // réseau — indépendant du backend terminal
+	case "remote":
+		cmdRemote(os.Args[2:])
 	case "_why": // hidden diagnostic
 		mustBackend()
 		tgt, err := resolveTarget(os.Args[2])
