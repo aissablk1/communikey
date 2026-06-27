@@ -83,6 +83,9 @@ tags: [csend, inter-agent, architecture, crypto, pqc, memoire]
   Tests cross-store + smoke (0 clair dans le fichier déposé). Commit `…E2E`.
 - 2026-06-27 — **Aide** accessible via `h`, `-h`, `--h`, `help`, `-help`, `--help`, `-?`
   (demande d'Aïssa). 6 formes vérifiées.
+- 2026-06-27 — **Flotte coopérative cross-OS/provider** : `csend register` (rejoindre le bus
+  depuis tout terminal/provider/OS sans multiplexeur), `csend agents` (vue flotte), `csend
+  whoami`. Smoke 3 providers (bash/codex/gemini). Commit flotte.
 
 ## Actions à mener à l'avenir
 
