@@ -22,7 +22,7 @@ const defaultServeAddr = "127.0.0.1:9777"
 
 // serveBus listens and delivers each received frame to the local inbox. Blocking.
 // A non-nil cfg makes it a TLS 1.3 listener (hybrid PQC in Go 1.24).
-func serveBus(s *Store, addr string, cfg *tls.Config) error {
+func serveBus(s *Store, addr string, cfg *tls.Config, allow map[string]bool) error {
 	var ln net.Listener
 	var err error
 	if cfg != nil {
@@ -35,21 +35,21 @@ func serveBus(s *Store, addr string, cfg *tls.Config) error {
 	}
 	defer ln.Close()
 	fmt.Printf("csend serve — écoute sur %s (Ctrl+C pour arrêter)\n", ln.Addr())
-	if !isLoopbackAddr(addr) {
-		fmt.Println("⚠ hors loopback : sans TLS + auth, n'expose que sur un réseau de confiance (§38).")
+	if !isLoopbackAddr(addr) && allow == nil {
+		fmt.Println("⚠ hors loopback sans --authz : n'expose que sur un réseau de confiance (§38).")
 	}
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			return err
 		}
-		go handleBusConn(s, conn)
+		go handleBusConn(s, conn, allow)
 	}
 }
 
 // handleBusConn reads one JSON message frame and delivers it. Pure of the listener
 // so it is unit-testable over any net.Conn (real loopback in tests).
-func handleBusConn(s *Store, conn net.Conn) {
+func handleBusConn(s *Store, conn net.Conn, allow map[string]bool) {
 	defer conn.Close()
 	_ = conn.SetDeadline(time.Now().Add(10 * time.Second))
 	line, err := bufio.NewReader(conn).ReadBytes('\n')
@@ -59,6 +59,10 @@ func handleBusConn(s *Store, conn net.Conn) {
 	var m InboxMessage
 	if json.Unmarshal(line, &m) != nil || m.To == "" {
 		fmt.Fprintln(conn, `{"ok":false,"error":"frame invalide"}`)
+		return
+	}
+	if allow != nil && !senderAllowed(m, allow) {
+		fmt.Fprintln(conn, `{"ok":false,"error":"expediteur non autorise (E2E signe requis)"}`)
 		return
 	}
 	if m.ID == "" {
@@ -122,7 +126,8 @@ func isLoopbackAddr(addr string) bool {
 
 func cmdServe(args []string) {
 	addr := defaultServeAddr
-	useTLS := false
+	useTLS, authz := false, false
+	var allowFlags []string
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
 		case "--addr":
@@ -132,6 +137,13 @@ func cmdServe(args []string) {
 			}
 		case "--tls":
 			useTLS = true
+		case "--authz":
+			authz = true
+		case "--allow":
+			if i+1 < len(args) {
+				allowFlags = append(allowFlags, args[i+1])
+				i++
+			}
 		}
 	}
 	s := mustStore()
@@ -144,7 +156,16 @@ func cmdServe(args []string) {
 		cfg = c
 		fmt.Printf("TLS 1.3 hybride PQC actif. Fingerprint à épingler côté client :\n  %s\n", fp)
 	}
-	if err := serveBus(s, addr, cfg); err != nil {
+	var allow map[string]bool
+	if authz || len(allowFlags) > 0 {
+		a, configured := loadAllowlist(s, allowFlags)
+		if !configured {
+			fail("--authz sans allowlist : ajoute des fingerprints (allowed.json ou --allow <fp>)")
+		}
+		allow = a
+		fmt.Printf("Autorisation active : %d expéditeur(s) autorisé(s) — E2E signé requis.\n", len(allow))
+	}
+	if err := serveBus(s, addr, cfg, allow); err != nil {
 		fail(err.Error())
 	}
 }
@@ -185,7 +206,15 @@ func cmdRemote(args []string) {
 		cfg = tlsClientConfig(pin)
 		tlsNote = " · TLS PQC"
 	}
+	s := mustStore()
+	if n := flushOutbox(s, addr, cfg); n > 0 {
+		fmt.Printf("  (%d message(s) en file ré-envoyé(s) à %s)\n", n, addr)
+	}
 	if err := sendRemote(addr, m, cfg); err != nil {
+		if enqueueOutbox(s, addr, m) == nil {
+			fmt.Printf("⚠ %s injoignable — message mis en file (%d en attente). Relance plus tard: csend remote …\n", addr, pendingOutbox(s, addr))
+			return
+		}
 		fail(err.Error())
 	}
 	fmt.Printf("✓ envoyé à %s via %s [network%s]%s\n", to, addr, tlsNote, enc)

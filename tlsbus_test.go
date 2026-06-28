@@ -22,7 +22,7 @@ func TestNetworkTLSPinning(t *testing.T) {
 			if e != nil {
 				return
 			}
-			handleBusConn(s, c)
+			handleBusConn(s, c, nil)
 		}
 	}()
 	addr := ln.Addr().String()

@@ -19,7 +19,7 @@ func TestNetworkLoopbackDeliver(t *testing.T) {
 			if e != nil {
 				return
 			}
-			handleBusConn(s, c)
+			handleBusConn(s, c, nil)
 		}
 	}()
 
@@ -43,7 +43,7 @@ func TestNetworkRejectsBadFrame(t *testing.T) {
 			if e != nil {
 				return
 			}
-			handleBusConn(s, c)
+			handleBusConn(s, c, nil)
 		}
 	}()
 	conn, err := net.Dial("tcp", ln.Addr().String())
