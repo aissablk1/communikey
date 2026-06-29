@@ -136,3 +136,20 @@ Triage complet et honnête dans **`docs/NEXT.md`** (raison réelle de chaque blo
   jamais maison (§38). Recovery = BIP-39 + Shamir GF(256).
 - Honnêteté (§29) : Windows/mobile = coopératif-only (pas d'injection). Livré par phases ;
   rapport final distingue testé vs conçu.
+
+## Coordination inter-sessions (§7)
+
+- 2026-06-29 — **surface:45 (cœur) ↔ moi (distribution)** : territoires **disjoints** respectés.
+  surface:45 a livré/committé (suite verte) : `--json`, réception live `csend hook`/`watch`
+  (câblé `main.go` sur ordre d'Aïssa), `serve --authz` + file offline, verrou fichier anti
+  lost-update, anti-replay (nonce signé), CI cross-OS + fuzz, service launchd/systemd + démo
+  2 agents. Il n'a PAS touché README/site/provider.go/.gitignore/LICENSE/SECURITY/adapters/
+  CHANGELOG/Formula/docs-adoption/RELEASE — **mon** territoire, committé en 5 commits.
+- 2026-06-29 — **Publication faite (moi)** : repo **PUBLIC** `github.com/aissablk1/csend`,
+  `main` poussé → **les deux territoires sont publics**. CI rouge = **blocage facturation
+  GitHub** (compte verrouillé → Actions off), PAS le code (vert en local, `go install` marche).
+  Reste guidé à Aïssa dans `docs/PUBLISHING.md` : release binaires (goreleaser après déblocage),
+  Homebrew tap, site `csend.dev`, social.
+- 2026-06-29 — **OK pour le prochain cran de surface:45** : transcript signé incluant l'ID
+  (anti-replay total) — territoire réseau/sécurité, aucun conflit avec mes fichiers. Je fais
+  `git pull --ff-only` avant tout nouveau push pour rester fast-forward.
