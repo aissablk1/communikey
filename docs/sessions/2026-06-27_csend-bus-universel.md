@@ -86,6 +86,18 @@ tags: [csend, inter-agent, architecture, crypto, pqc, memoire]
 - 2026-06-27 — **Flotte coopérative cross-OS/provider** : `csend register` (rejoindre le bus
   depuis tout terminal/provider/OS sans multiplexeur), `csend agents` (vue flotte), `csend
   whoami`. Smoke 3 providers (bash/codex/gemini). Commit flotte.
+- 2026-06-29 — Session parallèle détectée (§7) : l'autre session traite distribution/projet
+  (LICENSE, SECURITY.md, adapters Codex/Gemini, CHANGELOG, Formula Homebrew, site, version).
+  Je travaille dans **mes** fichiers ; `main.go` committé sur autorisation explicite d'Aïssa.
+- 2026-06-29 — **M1 `--json`** (recv/agents/whoami) → pilotage par agents. Smoke. Commit.
+- 2026-06-29 — **M2 réception live** : `csend hook` (UserPromptSubmit → messages dans le
+  contexte, sans polling) + `csend watch` + `--install`. Câblage `main.go` finalisé. Smoke.
+- 2026-06-29 — **M3 auth + file offline** : `serve --authz` (n'accepte qu'un message E2E signé
+  d'un expéditeur allowlisté) ; `remote` met en file si injoignable et rejoue. Tests + smoke.
+- 2026-06-29 — **N verrou fichier** (`UpsertSession` anti lost-update) ; test `-race` (25
+  upserts concurrents = 25 agents). **O anti-replay** (dédup sur le nonce signé). Tests.
+- 2026-06-29 — **P CI cross-OS** (Linux/macOS/Windows) + race + **fuzz** du parser. **Q**
+  unités launchd/systemd + **démo runnable 2 agents** (collaboration via hook, prouvée).
 
 ## Actions à mener à l'avenir
 
