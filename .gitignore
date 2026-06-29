@@ -7,3 +7,6 @@
 
 # Sauvegardes locales (§6) — jamais versionnées
 /_backup/
+
+# Sorties de build goreleaser
+/dist/
