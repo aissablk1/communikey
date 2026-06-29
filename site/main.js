@@ -1,91 +1,81 @@
-/* csend site — motion.
-   Deux effets, pas vingt : (1) le terminal du hero "imprime" une vraie session,
-   (2) une séquence scroll signature fait descendre un paquet à travers les 8 couches.
-   Tout dégrade proprement : sans GSAP ou en prefers-reduced-motion, rien ne casse. */
+/* csend — landing. Vanilla, zéro dépendance, zéro appel réseau.
+   Deux effets nommés seulement :
+   (1) spotlight radial réactif au pointeur (transform → GPU)
+   (2) une séquence de reveal au scroll (opacity + translateY)
+   prefers-reduced-motion : tout est neutralisé. */
 (function () {
   "use strict";
-  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- 1. Terminal du hero ---------- */
-  var screen = document.getElementById("termScreen");
-  var termLines = [
-    '<span class="dim">$</span> <span class="p">csend</span> list',
-    '<span class="ok">●</span> idle     SACEM       c9003b80   build prod',
-    '<span class="p">◐</span> busy     ROYALEAI    ddb7d92f   backend',
-    '<span class="dim">⚠ confirm JOLANANAS  784932b9   rm -rf ./dist (y/N)</span>',
-    "",
-    '<span class="dim">$</span> <span class="p">csend</span> inbox SACEM <span class="ok">"lance le build de prod"</span>',
-    '<span class="ok">✓</span> déposé dans l’inbox de SACEM <span class="dim">[inbox]</span>',
-    "",
-    '<span class="dim">$</span> <span class="p">csend</span> recv',
-    '1 message pour SACEM :',
-    '  <span class="p">•</span> de ROYALEAI : <span class="ok">build vert, à toi ›</span>'
-  ];
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  function renderTerminal(animated) {
-    if (!screen) return;
-    screen.setAttribute("aria-hidden", "true");
-    if (!animated) {
-      screen.innerHTML = termLines.join("\n") + '<span class="cursor-block" style="height:1em"></span>';
-      return;
-    }
-    var i = 0;
-    screen.innerHTML = "";
-    (function step() {
-      if (i >= termLines.length) {
-        screen.innerHTML = termLines.slice(0, i).join("\n") +
-          '\n<span class="cursor-block" style="height:1em"></span>';
-        return;
-      }
-      screen.innerHTML = termLines.slice(0, i + 1).join("\n") +
-        '<span class="cursor-block" style="height:1em"></span>';
-      i++;
-      // empty lines flash by; real lines linger like a printing terminal
-      var delay = termLines[i - 1] === "" ? 90 : 300;
-      setTimeout(step, delay);
-    })();
+  /* ---- 1. Reveal au scroll (IntersectionObserver) ---- */
+  var revealables = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
+
+  if (reduce || !("IntersectionObserver" in window)) {
+    // Pas de motion : tout est visible immédiatement.
+    revealables.forEach(function (el) { el.classList.add("in-view"); });
+  } else {
+    var io = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        var d = parseInt(el.getAttribute("data-d") || "0", 10);
+        el.style.transitionDelay = (d * 90) + "ms";
+        el.classList.add("in-view");
+        obs.unobserve(el);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
+    revealables.forEach(function (el) { io.observe(el); });
   }
 
-  /* ---------- 2. Séquence scroll : le paquet traverse les couches ---------- */
-  function initScroll() {
-    var layers = Array.prototype.slice.call(document.querySelectorAll("#layers li"));
-    var packet = document.getElementById("packet");
-    var stack = document.querySelector(".stack");
-    if (!layers.length) return;
-
-    if (reduce || !window.gsap || !window.ScrollTrigger) {
-      // fallback honnête : tout est lisible, mis en avant, sans paquet animé
-      layers.forEach(function (l) { l.classList.add("is-active"); });
-      return;
+  /* ---- 2. Spotlight réactif au pointeur ---- */
+  var spot = document.querySelector(".spotlight");
+  if (spot && !reduce && window.matchMedia("(pointer:fine)").matches) {
+    var tx = 0, ty = 0, cx = 0, cy = 0, queued = false;
+    function apply() {
+      queued = false;
+      // suivi amorti vers la cible
+      cx += (tx - cx) * 0.16;
+      cy += (ty - cy) * 0.16;
+      spot.style.transform = "translate3d(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px,0)";
+      if (Math.abs(tx - cx) > 0.4 || Math.abs(ty - cy) > 0.4) {
+        requestAnimationFrame(apply);
+      }
     }
-    window.gsap.registerPlugin(window.ScrollTrigger);
+    window.addEventListener("pointermove", function (e) {
+      // décalage limité depuis le centre — un glow qui « respire », pas qui saute
+      tx = (e.clientX - window.innerWidth / 2) * 0.06;
+      ty = (e.clientY - window.innerHeight / 2) * 0.06;
+      if (!queued) { queued = true; requestAnimationFrame(apply); }
+    }, { passive: true });
+  }
 
-    function place(idx) {
-      var t = layers[idx];
-      var y = t.offsetTop + t.offsetHeight / 2 - 13;
-      window.gsap.to(packet, { y: y, duration: 0.25, overwrite: true, ease: "power2.out" });
-      layers.forEach(function (l, i) { l.classList.toggle("is-active", i === idx); });
-    }
-    place(0);
-
-    window.ScrollTrigger.create({
-      trigger: stack,
-      start: "top 62%",
-      end: "bottom 72%",
-      scrub: true,
-      onUpdate: function (self) {
-        var idx = Math.min(layers.length - 1, Math.floor(self.progress * layers.length));
-        if (idx < 0) idx = 0;
-        place(idx);
+  /* ---- 3. Copier la commande d’installation ---- */
+  var copyBtn = document.querySelector(".cmd__copy");
+  var cmdBox = document.querySelector(".cmd");
+  if (copyBtn && cmdBox) {
+    var original = copyBtn.textContent;
+    copyBtn.addEventListener("click", function () {
+      var text = cmdBox.getAttribute("data-copy") || "";
+      var done = function () {
+        copyBtn.textContent = "Copié ✓";
+        copyBtn.classList.add("is-copied");
+        setTimeout(function () {
+          copyBtn.textContent = original;
+          copyBtn.classList.remove("is-copied");
+        }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else { fallback(); }
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.setAttribute("readonly", "");
+        ta.style.position = "absolute"; ta.style.left = "-9999px";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) { /* silencieux */ }
+        document.body.removeChild(ta);
       }
     });
-  }
-
-  /* ---------- boot ---------- */
-  renderTerminal(!reduce);
-  if (document.readyState === "complete") {
-    initScroll();
-  } else {
-    window.addEventListener("load", initScroll);
   }
 })();

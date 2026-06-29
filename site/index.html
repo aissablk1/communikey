@@ -1,230 +1,355 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>csend — le bus de messagerie entre tous tes agents CLI</title>
-  <meta name="description" content="csend injecte un message dans une autre session d'agent CLI en cours — state-aware, cross-provider, cross-OS, chiffré de bout en bout. Open source, zéro dépendance.">
-  <link rel="canonical" href="https://csend.dev/">
-  <meta property="og:title" content="csend — bus de messagerie inter-agents">
-  <meta property="og:description" content="Parler à une session Claude / Codex / Gemini vivante. State-aware, chiffré E2E (PQC), zéro dépendance.">
-  <meta property="og:type" content="website">
-  <meta name="theme-color" content="#0C0D10">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230C0D10'/%3E%3Crect x='9' y='7' width='8' height='18' fill='%23FFB000'/%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>csend — bus de messages chiffré pour agents de code</title>
+<meta name="description" content="Le bus de messages chiffré de bout en bout, souverain et post-quantique, qui injecte un message dans une autre session d’agent de code déjà en cours. Cross-provider, cross-OS, zéro dépendance, MIT." />
+<link rel="canonical" href="https://csend.dev/" />
+<meta name="theme-color" content="#070809" />
+<meta name="color-scheme" content="dark" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="csend — le bus de messages chiffré entre tes agents de code" />
+<meta property="og:description" content="Injecte un message dans une autre session d’agent CLI déjà vivante. Chiffré E2E, hybride post-quantique, zéro dépendance. Go, MIT." />
+<meta property="og:url" content="https://csend.dev/" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070809'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='17' font-weight='700' text-anchor='middle' fill='%234af2b0'%3E%E2%80%BA_%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="scanlines" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
+<a class="skip-link" href="#main">Aller au contenu</a>
 
-  <!-- NAV -->
-  <header class="nav">
-    <a class="nav__mark" href="#top" aria-label="csend, accueil">
-      <span class="cursor-block" aria-hidden="true"></span>csend
-    </a>
-    <nav class="nav__links" aria-label="Principal">
-      <a href="#flux">Flux</a>
-      <a href="#usage">Usage</a>
-      <a href="#crypto">Crypto</a>
-      <a href="#statut">Statut</a>
-      <a class="nav__cta" href="#install">Installer&nbsp;›</a>
-    </nav>
-  </header>
+<div class="spotlight" aria-hidden="true"></div>
+<div class="lattice" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
 
-  <main id="top">
+<header class="topbar" role="banner">
+  <a class="brand" href="#main" aria-label="csend, accueil">
+    <span class="brand__mark" aria-hidden="true">›_</span>
+    <span class="brand__name">csend</span>
+    <span class="brand__ver">alpha · v0.2.0-dev</span>
+  </a>
+  <nav class="topnav" aria-label="Navigation principale">
+    <a href="#solo">Ce qu’il fait seul</a>
+    <a href="#securite">Sécurité</a>
+    <a href="#quickstart">Quickstart</a>
+    <a href="#roadmap">Roadmap</a>
+    <a class="topnav__repo" href="https://github.com/aissablk1/csend" rel="noopener">GitHub&nbsp;›</a>
+  </nav>
+</header>
 
-    <!-- HERO -->
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero__copy">
-        <p class="kicker"><span class="dot"></span>alpha · MIT · zéro dépendance</p>
-        <h1 id="hero-title" class="hero__title">
-          Parle à <em>n'importe quelle</em><br>session d'agent <span class="amber">vivante.</span>
-        </h1>
-        <p class="hero__lede">
-          Aucune API n'injecte un prompt dans une session Claude&nbsp;Code, Codex ou Gemini
-          <em>en cours</em>. <strong>csend</strong> le fait — en lisant son état avant d'agir,
-          à travers terminaux, providers et machines, chiffré de bout en bout.
-        </p>
-        <div class="hero__actions">
-          <a class="btn btn--solid" href="#install">Installer csend</a>
-          <a class="btn btn--ghost" href="https://github.com/aissablk1/csend" rel="noopener">Code source&nbsp;›</a>
+<main id="main">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__copy">
+      <p class="kicker reveal" data-d="0">
+        <span class="dot" aria-hidden="true"></span>
+        Bus de messages&nbsp;· chiffré&nbsp;E2E&nbsp;· hybride post-quantique
+      </p>
+      <h1 id="hero-title" class="hero__title">
+        <span class="reveal" data-d="1">Tes agents de code,</span>
+        <span class="reveal hero__title--accent" data-d="2">sur le même fil.</span>
+      </h1>
+      <p class="hero__lede reveal" data-d="3">
+        <strong>csend</strong> injecte un message dans une <em>autre</em> session
+        d’agent CLI <em>déjà en cours</em> — en lisant son état avant d’agir
+        (idle&nbsp;/ busy&nbsp;/ confirmation). Chiffré de bout en bout, souverain,
+        cross-provider, cross-OS. Go, <strong>zéro dépendance</strong>, MIT.
+      </p>
+
+      <div class="hero__cta reveal" data-d="4">
+        <a class="btn btn--ghost" href="#securite">Le modèle de sécurité&nbsp;›</a>
+        <a class="btn btn--line" href="https://github.com/aissablk1/csend" rel="noopener">Code source&nbsp;·&nbsp;GitHub&nbsp;›</a>
+      </div>
+    </div>
+
+    <!-- terminal d’install -->
+    <aside class="terminal reveal" data-d="3" aria-label="Installation de csend">
+      <div class="terminal__bar">
+        <span class="terminal__dot" aria-hidden="true"></span>
+        <span class="terminal__dot" aria-hidden="true"></span>
+        <span class="terminal__dot" aria-hidden="true"></span>
+        <span class="terminal__title">~ installer csend</span>
+      </div>
+      <div class="terminal__body">
+        <div class="cmd" data-copy="go install github.com/aissablk1/csend@latest">
+          <code><span class="cmd__p">$</span> go install github.com/aissablk1/csend@latest</code>
+          <button class="cmd__copy" type="button" aria-label="Copier la commande d’installation">Copier</button>
         </div>
-        <ul class="hero__stats" aria-label="En bref">
-          <li><b>8</b><span>couches</span></li>
-          <li><b>0</b><span>dépendance</span></li>
-          <li><b>E2E</b><span>hybride PQC</span></li>
-          <li><b>N/M</b><span>recovery Shamir</span></li>
+        <p class="terminal__alt">
+          ou&nbsp;: <code>brew install aissablk1/tap/csend</code>
+          &nbsp;·&nbsp; <code>curl&nbsp;-fsSL&nbsp;https://csend.dev/install.sh | sh</code>
+          <span class="terminal__note">(audite le script d’abord)</span>
+        </p>
+        <hr class="terminal__sep" aria-hidden="true" />
+        <pre class="terminal__demo" aria-label="Exemple d’utilisation"><span class="c-p">$</span> csend list                  <span class="c-c"># sessions agent + état</span>
+SACEM        <span class="c-ok">idle</span>      tour 4 · prêt
+build-bot    <span class="c-busy">busy</span>      compile…
+deploy       <span class="c-warn">confirm</span>   « Pousser en prod ? (y/N) »
+
+<span class="c-p">$</span> csend send SACEM <span class="c-s">"lance le build de prod"</span>
+<span class="c-ok">✓</span> remis · SACEM était idle · validé
+<span class="c-p">$</span> csend send --down <span class="c-s">"status ?"</span>     <span class="c-c"># broadcast aux enfants</span></pre>
+        <p class="terminal__legend">Sortie illustrative de la syntaxe réelle — aucune télémétrie.</p>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ================= LE TROU / SEUL ================= -->
+  <section id="solo" class="band" aria-labelledby="solo-title">
+    <div class="band__head reveal">
+      <p class="eyebrow">01 — Le trou que personne ne comble</p>
+      <h2 id="solo-title">Ce que <span class="ink-accent">csend</span> fait — seul.</h2>
+      <p class="band__intro">
+        <strong>Aucune API officielle n’injecte un prompt dans une session
+        d’agent CLI vivante.</strong> Les orchestrateurs lancent <em>leurs</em>
+        agents&nbsp;; <code>tmux</code> tape à l’aveugle&nbsp;; aucun ne parle,
+        chiffré, à une session déjà ouverte ailleurs. csend est ce fil-là.
+      </p>
+    </div>
+
+    <div class="cmp reveal" role="region" aria-label="Comparatif honnête">
+      <table class="cmp__table">
+        <caption class="visually-hidden">Comparaison de csend, Agent Teams, ruflo et tmux selon leur but de conception</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="cmp__rowhead">Capacité</th>
+            <th scope="col" class="cmp__me">csend</th>
+            <th scope="col">Agent Teams</th>
+            <th scope="col">ruflo&nbsp;/ claude-flow</th>
+            <th scope="col">tmux <code>send-keys</code></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Conçu pour</th>
+            <td class="cmp__me">Messager des sessions d’agents <em>déjà vivantes</em></td>
+            <td>Orchestrer des sous-agents que <em>tu</em> lances</td>
+            <td>Méta-harnais multi-agents (Node)</td>
+            <td>Multiplexer un terminal</td>
+          </tr>
+          <tr>
+            <th scope="row">Écrit dans une session indépendante déjà ouverte</th>
+            <td class="cmp__me"><span class="y">✓</span></td>
+            <td><span class="n">—</span></td>
+            <td><span class="n">—</span></td>
+            <td><span class="p">◐</span> à l’aveugle</td>
+          </tr>
+          <tr>
+            <th scope="row">Livraison state-aware (idle&nbsp;/ busy&nbsp;/ confirm)</th>
+            <td class="cmp__me"><span class="y">✓</span></td>
+            <td><span class="n">—</span></td>
+            <td><span class="n">—</span></td>
+            <td><span class="x">✗</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Chiffrement E2E (hybride post-quantique)</th>
+            <td class="cmp__me"><span class="y">✓</span></td>
+            <td><span class="n">—</span></td>
+            <td><span class="n">—</span></td>
+            <td><span class="x">✗</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Cross-provider visé (Claude&nbsp;· Codex&nbsp;· Gemini)</th>
+            <td class="cmp__me"><span class="y">✓</span> <small>Claude&nbsp;live&nbsp;· Codex&nbsp;/ Gemini calibrés</small></td>
+            <td>Claude</td>
+            <td>Claude&nbsp;· Codex</td>
+            <td><span class="p">◐</span> agnostique mais aveugle</td>
+          </tr>
+          <tr>
+            <th scope="row">Zéro dépendance externe</th>
+            <td class="cmp__me"><span class="y">✓</span> <small>Go stdlib</small></td>
+            <td><span class="n">—</span></td>
+            <td><span class="x">✗</span> Node&nbsp;+ deps</td>
+            <td><span class="y">✓</span> <small>C</small></td>
+          </tr>
+          <tr>
+            <th scope="row">Multi-machine</th>
+            <td class="cmp__me"><span class="p">◐</span> roadmap&nbsp;· TLS hybride PQC</td>
+            <td><span class="x">✗</span></td>
+            <td><span class="p">◐</span> federation</td>
+            <td><span class="x">✗</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="cmp__legend">
+        <span class="y">✓</span> oui&nbsp;·
+        <span class="p">◐</span> partiel&nbsp;/ roadmap&nbsp;·
+        <span class="n">—</span> hors périmètre de l’outil&nbsp;·
+        <span class="x">✗</span> non.
+        Comparaison selon le but de conception de chaque outil, pas un audit exhaustif.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= SÉCURITÉ ================= -->
+  <section id="securite" class="band band--sec" aria-labelledby="sec-title">
+    <div class="band__head reveal">
+      <p class="eyebrow">02 — Modèle de sécurité</p>
+      <h2 id="sec-title">Casser <span class="ink-accent">les deux</span> serrures pour lire.</h2>
+      <p class="band__intro">
+        Primitives auditées de la <strong>stdlib Go&nbsp;1.24</strong> — jamais de
+        crypto maison. Trois garanties, expliquées simplement.
+      </p>
+    </div>
+
+    <div class="sec-grid">
+      <article class="sec-card reveal" data-d="0">
+        <div class="sec-card__no" aria-hidden="true">E2E</div>
+        <h3>Chiffré de bout en bout</h3>
+        <p>
+          Chaque message est <strong>signé&nbsp;Ed25519</strong> puis chiffré sous
+          un secret <strong>X25519&nbsp;⊕&nbsp;ML-KEM-768</strong> et scellé en
+          <strong>AES-256-GCM</strong>. Seul le destinataire lit&nbsp;; le journal
+          ne garde qu’un <em>hash</em>, jamais le clair.
+        </p>
+        <ul class="chips" aria-label="Primitives">
+          <li>Ed25519</li><li>X25519</li><li>AES-256-GCM</li>
+        </ul>
+      </article>
+
+      <article class="sec-card sec-card--pq reveal" data-d="1">
+        <div class="sec-card__no" aria-hidden="true">PQC</div>
+        <h3>Hybride post-quantique</h3>
+        <p>
+          Le secret combine un KEM classique <em>et</em> un KEM à réseaux
+          euclidiens (<strong>ML-KEM-768</strong>). Il faut briser <strong>les
+          deux</strong> pour déchiffrer — la parade au
+          «&nbsp;Harvest&nbsp;Now,&nbsp;Decrypt&nbsp;Later&nbsp;», qui capte
+          aujourd’hui pour casser demain.
+        </p>
+        <div class="locks" aria-hidden="true">
+          <span class="lock">X25519</span>
+          <span class="lock__op">⊕</span>
+          <span class="lock lock--q">ML-KEM-768</span>
+        </div>
+      </article>
+
+      <article class="sec-card reveal" data-d="2">
+        <div class="sec-card__no" aria-hidden="true">N/M</div>
+        <h3>Vault&nbsp;+ recovery par seuil</h3>
+        <p>
+          L’identité vit dans un <strong>vault chiffré AES-256-GCM</strong>. La
+          clé se découpe en parts <strong>Shamir N-sur-M</strong> sur GF(2⁸)&nbsp;:
+          K-1 parts ne révèlent <em>rien</em>. Perds une part, garde l’accès.
+        </p>
+        <pre class="mini" aria-label="Exemple de recovery"><span class="c-p">$</span> csend recovery split 2 3
+<span class="c-ok">✓</span> 3 parts · seuil 2-sur-3
+<span class="c-p">$</span> csend recovery combine p1 p2
+<span class="c-ok">✓</span> identité reconstituée</pre>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= QUICKSTART ================= -->
+  <section id="quickstart" class="band" aria-labelledby="qs-title">
+    <div class="band__head reveal">
+      <p class="eyebrow">03 — Quickstart</p>
+      <h2 id="qs-title">Du <code>go install</code> au premier message.</h2>
+    </div>
+
+    <ol class="steps">
+      <li class="step reveal" data-d="0">
+        <span class="step__n" aria-hidden="true">1</span>
+        <div class="step__body">
+          <h3>Installe</h3>
+          <pre class="mini"><span class="c-p">$</span> go install github.com/aissablk1/csend@latest</pre>
+          <p>Binaire universel arm64&nbsp;+ x86_64. Aucune dépendance à résoudre.</p>
+        </div>
+      </li>
+      <li class="step reveal" data-d="1">
+        <span class="step__n" aria-hidden="true">2</span>
+        <div class="step__body">
+          <h3>Voie coopérative — marche partout</h3>
+          <pre class="mini"><span class="c-p">$</span> csend inbox SACEM <span class="c-s">"lance le build de prod"</span>
+<span class="c-p">$</span> csend recv                  <span class="c-c"># l’autre session relève</span></pre>
+          <p>L’inbox coopératif ne dépend d’aucun multiplexeur&nbsp;: tout OS, tout provider.</p>
+        </div>
+      </li>
+      <li class="step reveal" data-d="2">
+        <span class="step__n" aria-hidden="true">3</span>
+        <div class="step__body">
+          <h3>Voie cmux — pilotage state-aware</h3>
+          <pre class="mini"><span class="c-p">$</span> csend list                  <span class="c-c"># états live</span>
+<span class="c-p">$</span> csend tree                  <span class="c-c"># graphe père → enfants</span>
+<span class="c-p">$</span> csend send SACEM <span class="c-s">"go"</span>      <span class="c-c"># validé seulement si idle</span></pre>
+          <p>Par défaut <code>--auto</code>&nbsp;: valide si idle, dépose si busy, refuse sur un prompt y/N.</p>
+        </div>
+      </li>
+      <li class="step reveal" data-d="3">
+        <span class="step__n" aria-hidden="true">4</span>
+        <div class="step__body">
+          <h3>Identité&nbsp;+ recovery</h3>
+          <pre class="mini"><span class="c-p">$</span> CSEND_VAULT_PASS=… csend id --create
+<span class="c-p">$</span> csend recovery split 2 3     <span class="c-c"># seuil 2-sur-3</span></pre>
+          <p>Exposé aussi comme <strong>skill Claude Code</strong>&nbsp;: «&nbsp;dis à SACEM de…&nbsp;».</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ================= ROADMAP HONNÊTE ================= -->
+  <section id="roadmap" class="band band--road" aria-labelledby="road-title">
+    <div class="band__head reveal">
+      <p class="eyebrow">04 — État réel</p>
+      <h2 id="road-title">Honnête sur ce qui marche.</h2>
+      <p class="band__intro">
+        <code>csend</code> est en <strong>alpha</strong>. Voici la frontière
+        exacte entre le livré et le prévu — sans flou.
+      </p>
+    </div>
+
+    <div class="road">
+      <div class="road__col road__col--done reveal" data-d="0">
+        <h3><span class="road__tag road__tag--done">Livré &amp; testé</span></h3>
+        <ul>
+          <li>Inbox coopératif (universel)</li>
+          <li>Injection <strong>cmux&nbsp;+ tmux</strong> state-aware</li>
+          <li>Adaptateurs <strong>Codex&nbsp;+ Gemini</strong> (calibrés sur source)</li>
+          <li>Graphe familial père → enfants</li>
+          <li>Crypto E2E hybride PQC&nbsp;+ vault</li>
+          <li>Recovery Shamir N-sur-M</li>
+          <li>Mémoire&nbsp;/ journal interrogeable</li>
         </ul>
       </div>
-
-      <!-- live terminal -->
-      <div class="term" role="img" aria-label="Démonstration : une session dépose un message dans l'inbox d'une autre, qui le relève.">
-        <div class="term__bar"><i></i><i></i><i></i><span>csend — session SACEM</span></div>
-        <pre class="term__screen" id="termScreen" aria-hidden="true"></pre>
-      </div>
-    </section>
-
-    <!-- PROBLEM / editorial -->
-    <section class="manifest" aria-labelledby="manifest-title">
-      <p class="kicker amber">Le mur</p>
-      <h2 id="manifest-title" class="pullquote">
-        «&nbsp;There is no API, socket, or pipe to inject a prompt into an active session.&nbsp;»
-      </h2>
-      <div class="manifest__notes">
-        <p><span class="num">01</span> <code>TIOCSTI</code> est mort — désactivé par défaut sous Linux&nbsp;6.2, root-only sur macOS, supprimé d'OpenBSD.</p>
-        <p><span class="num">02</span> Écrire dans le PTY <em>slave</em> part vers l'affichage, jamais dans le stdin du process.</p>
-        <p><span class="num">03</span> Seul un programme qui <em>détient le PTY maître</em> peut injecter. C'est là que csend opère.</p>
-      </div>
-    </section>
-
-    <!-- SIGNATURE SCROLL: a message through the 8 layers -->
-    <section class="flux" id="flux" aria-labelledby="flux-title">
-      <div class="flux__intro">
-        <p class="kicker">La mécanique</p>
-        <h2 id="flux-title">Un message,<br><span class="amber">huit couches.</span></h2>
-        <p class="flux__lede">
-          Le principe : l'<strong>inbox coopératif</strong> est la colonne vertébrale universelle ;
-          l'<strong>injection clavier</strong> n'est qu'un repli Unix. Fais défiler — suis le paquet.
+      <div class="road__col road__col--next reveal" data-d="1">
+        <h3><span class="road__tag road__tag--next">En route</span></h3>
+        <ul>
+          <li>Backend screen&nbsp;/ ConPTY</li>
+          <li>Vault à passkey (WebAuthn)</li>
+          <li>Réseau multi-machine — TLS hybride PQC</li>
+          <li>Recovery en phrases (BIP-39)</li>
+          <li>Mobile&nbsp;· Windows natif&nbsp;· bridge Agent Teams</li>
+        </ul>
+        <p class="road__honest">
+          Windows natif et mobile resteront <em>coopératif-only</em>&nbsp;:
+          pas d’injection clavier. On le dit avant, pas après.
         </p>
       </div>
+    </div>
+  </section>
 
-      <div class="stack" aria-hidden="true">
-        <div class="packet" id="packet"><span>msg</span></div>
-        <ol class="layers" id="layers">
-          <li data-l="0"><b>00</b><h3>Sécurité &amp; crypto</h3><p>Signé Ed25519, chiffré X25519 ⊕ ML-KEM. Zero-trust.</p></li>
-          <li data-l="1"><b>01</b><h3>Identité &amp; registre</h3><p>Adresse stable + graphe familial père/enfants.</p></li>
-          <li data-l="2"><b>02</b><h3>Providers</h3><p>État idle / busy / confirmation. Claude, Codex, Gemini.</p></li>
-          <li data-l="3"><b>03</b><h3>Transports</h3><p>Inbox coopératif · injection cmux/tmux · bridges.</p></li>
-          <li data-l="4"><b>04</b><h3>Routeur</h3><p>inbox › bridge › injection › file. Le bon chemin, toujours.</p></li>
-          <li data-l="5"><b>05</b><h3>Réseau</h3><p>Fédération multi-machine, TLS hybride post-quantique.</p></li>
-          <li data-l="6"><b>06</b><h3>Mémoire</h3><p>Journal interrogeable. Les sessions passent, la mémoire reste.</p></li>
-          <li data-l="7"><b>07</b><h3>Surfaces</h3><p>CLI · skill · hook · MCP. Pour humains <em>et</em> agents.</p></li>
-        </ol>
-      </div>
-    </section>
+</main>
 
-    <!-- USAGE -->
-    <section class="usage" id="usage" aria-labelledby="usage-title">
-      <p class="kicker amber">En pratique</p>
-      <h2 id="usage-title">Deux verbes. Tout le reste suit.</h2>
-      <div class="usage__grid">
-        <article class="card card--cmd">
-          <h3>Dépose &amp; relève (coopératif — tout OS)</h3>
-          <pre><code><span class="c-dim"># une session écrit à une autre, sans cmux, partout</span>
-<span class="c-amber">csend</span> inbox SACEM <span class="c-str">"lance le build de prod"</span>
-<span class="c-dim"># la cible relève son inbox</span>
-<span class="c-amber">csend</span> recv</code></pre>
-        </article>
-        <article class="card card--cmd">
-          <h3>Pilote la flotte (state-aware)</h3>
-          <pre><code><span class="c-amber">csend</span> list        <span class="c-dim"># sessions + état (idle/busy/confirm)</span>
-<span class="c-amber">csend</span> tree        <span class="c-dim"># graphe familial père → enfants</span>
-<span class="c-amber">csend</span> send --down <span class="c-str">"go"</span>  <span class="c-dim"># broadcast aux enfants</span></code></pre>
-        </article>
-        <article class="card card--cmd">
-          <h3>Identité &amp; recovery par seuil</h3>
-          <pre><code><span class="c-amber">csend</span> id --create        <span class="c-dim"># vault chiffré (passkey à venir)</span>
-<span class="c-amber">csend</span> recovery split 2 3  <span class="c-dim"># 3 parts, seuil 2-sur-3</span>
-<span class="c-dim"># perds un device sans perdre le vault</span></code></pre>
-        </article>
-      </div>
-    </section>
+<footer class="footer" role="contentinfo">
+  <div class="footer__brand">
+    <span class="brand__mark" aria-hidden="true">›_</span>
+    <span class="brand__name">csend</span>
+  </div>
+  <nav class="footer__links" aria-label="Liens du pied de page">
+    <a href="https://github.com/aissablk1/csend" rel="noopener">GitHub&nbsp;›</a>
+    <a href="#securite">Sécurité</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="mailto:contact@aissabelkoussa.fr">contact@aissabelkoussa.fr</a>
+  </nav>
+  <p class="footer__legal">
+    Licence <strong>MIT</strong>&nbsp;· © 2026 Aïssa BELKOUSSA&nbsp;· Go&nbsp;1.24&nbsp;· zéro dépendance.
+  </p>
+</footer>
 
-    <!-- CRYPTO -->
-    <section class="crypto" id="crypto" aria-labelledby="crypto-title">
-      <div class="crypto__head">
-        <p class="kicker">Sécurité</p>
-        <h2 id="crypto-title">Chiffré par conception.<br><span class="teal">Primitives auditées, jamais maison.</span></h2>
-      </div>
-      <ul class="crypto__list">
-        <li><b>Hybride PQC</b><p>X25519 ⊕ ML-KEM-768 : il faut casser <em>les deux</em> KEM pour lire. Anti «&nbsp;Harvest Now, Decrypt Later&nbsp;».</p></li>
-        <li><b>Vault à passkey</b><p>Clés au repos en AES-256-GCM, déverrouillage WebAuthn/FIDO2 — MFA résistant au phishing.</p></li>
-        <li><b>Recovery Shamir</b><p>Secret découpé N-sur-M sur GF(2⁸). K-1 parts ne révèlent <em>rien</em> — sûreté de seuil.</p></li>
-        <li><b>Tout en stdlib Go</b><p>Ed25519, ML-KEM, AES-GCM, HKDF, PBKDF2 — zéro dépendance externe à auditer.</p></li>
-      </ul>
-    </section>
-
-    <!-- INSTALL -->
-    <section class="install" id="install" aria-labelledby="install-title">
-      <p class="kicker amber">Installer</p>
-      <h2 id="install-title">Pour les humains. Et pour les agents.</h2>
-      <div class="install__grid">
-        <article class="card">
-          <h3>Homebrew <span class="tag">macOS · Linux</span></h3>
-          <pre><code><span class="c-amber">brew</span> install aissablk1/tap/csend</code></pre>
-        </article>
-        <article class="card">
-          <h3>Go <span class="tag">toute plateforme</span></h3>
-          <pre><code><span class="c-amber">go</span> install github.com/aissablk1/csend@latest</code></pre>
-        </article>
-        <article class="card">
-          <h3>Script <span class="tag">audite-le d'abord</span></h3>
-          <pre><code><span class="c-amber">curl</span> -fsSL https://csend.dev/install.sh | sh</code></pre>
-        </article>
-        <article class="card">
-          <h3>Source <span class="tag">zéro confiance</span></h3>
-          <pre><code><span class="c-amber">git</span> clone github.com/aissablk1/csend
-<span class="c-amber">cd</span> csend && make install</code></pre>
-        </article>
-      </div>
-      <p class="install__agents">
-        <span class="cursor-block" aria-hidden="true"></span>
-        <strong>Agents&nbsp;:</strong> csend est exposé comme <em>skill</em> Claude Code
-        (<code>~/.claude/skills/csend</code>) — une session peut écrire, relever et coordonner
-        ses paires en langage naturel.
-      </p>
-    </section>
-
-    <!-- STATUS (honesty instead of fake proof) -->
-    <section class="status" id="statut" aria-labelledby="status-title">
-      <p class="kicker">Transparence</p>
-      <h2 id="status-title">Ce qui marche. Ce qui arrive.</h2>
-      <p class="status__intro">Pas de témoignage inventé, pas d'étoile achetée. csend est jeune&nbsp;: voici l'état réel.</p>
-      <div class="status__cols">
-        <div class="status__col status__col--done">
-          <h3><span class="check">▴</span> Livré &amp; testé</h3>
-          <ul>
-            <li>Inbox coopératif (tout OS, hors multiplexeur)</li>
-            <li>Injection cmux + tmux, state-aware + graphe familial</li>
-            <li>Crypto E2E hybride PQC + vault chiffré</li>
-            <li>Recovery Shamir N-sur-M</li>
-            <li>Mémoire / journal interrogeable</li>
-          </ul>
-        </div>
-        <div class="status__col status__col--soon">
-          <h3><span class="check">▾</span> En route</h3>
-          <ul>
-            <li>Backend screen · ConPTY (Windows = coop-only)</li>
-            <li>Adaptateurs Codex / Gemini calibrés</li>
-            <li>Passkey WebAuthn · réseau multi-machine</li>
-            <li>Clients mobiles · bridge Agent Teams</li>
-            <li>Recovery en phrases (BIP-39 / SLIP-39)</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="finale" aria-labelledby="finale-title">
-      <h2 id="finale-title">Tes agents forment une armée.<br><span class="amber">Donne-leur une voix commune.</span></h2>
-      <div class="hero__actions">
-        <a class="btn btn--solid" href="https://github.com/aissablk1/csend" rel="noopener">Étoile sur GitHub&nbsp;›</a>
-        <a class="btn btn--ghost" href="#install">Installer</a>
-      </div>
-    </section>
-  </main>
-
-  <footer class="foot">
-    <p class="foot__mark"><span class="cursor-block" aria-hidden="true"></span>csend</p>
-    <p>Bus de messagerie inter-agents · open source MIT · zéro dépendance.</p>
-    <p class="foot__by">Conçu &amp; développé par <a href="https://aissabelkoussa.fr" rel="noopener">Aïssa&nbsp;BELKOUSSA</a> · <a href="mailto:contact@aissabelkoussa.fr">contact@aissabelkoussa.fr</a></p>
-  </footer>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-  <script src="./main.js" defer></script>
+<script src="main.js" defer></script>
 </body>
 </html>
