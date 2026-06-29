@@ -117,6 +117,14 @@ tags: [csend, inter-agent, architecture, crypto, pqc, memoire]
   des liens dans 9 outils d'agents tiers (`.codex`/`.cursor`/`.continue`/`.hermes`/…) + 8
   dossiers dans `~/.agents`. Révertés (72 liens + 8 dossiers) avec manifestes de backup ;
   `~/.claude` et le reste du store `~/.agents` (skills vidéo utilisables) préservés (choix Aïssa).
+- 2026-06-29 — **Release binaires v0.2.0 (goreleaser local)** : sur ordre d'Aïssa — `goreleaser`
+  installé en local (`go install`, in-user), tag `v0.2.0` (`4c51d4c`), puis
+  `goreleaser release --clean --skip=homebrew --release-notes RELEASE-v0.2.0.md` → **6 binaires**
+  (darwin/linux/windows × amd64/arm64) + `checksums.txt` + **GitHub Release publiée via l'API**
+  (contourne les Actions bloquées par la facturation). Vérifié : binaire `csend 0.2.0`,
+  `releases/latest/download/…` → HTTP 200 (résolution `install.sh`). Tap Homebrew **sauté**
+  (repo `homebrew-tap` inexistant) → reste à faire. Déprécations goreleaser (`format`, `brews`)
+  à moderniser avant la prochaine release.
 
 ## Actions à mener à l'avenir
 
