@@ -178,20 +178,25 @@ func (s *Store) UpsertSession(r SessionRecord) error {
 	if r.LastSeen == "" {
 		r.LastSeen = now
 	}
-	m, err := s.loadRegistry()
-	if err != nil {
-		return err
-	}
-	if prev, ok := m[r.SessionID]; ok {
-		r.FirstSeen = prev.FirstSeen // immutable
-		if r.Provider == "" {
-			r.Provider = prev.Provider
+	// Sérialise le read-modify-write : sans verrou, deux sessions qui s'enregistrent
+	// en même temps peuvent s'écraser (lost update). Le journal, lui, est en append
+	// atomique (O_APPEND) et n'a pas besoin de verrou.
+	return withLock(s.registryPath(), func() error {
+		m, err := s.loadRegistry()
+		if err != nil {
+			return err
 		}
-	} else if r.FirstSeen == "" {
-		r.FirstSeen = r.LastSeen
-	}
-	m[r.SessionID] = r
-	return s.saveRegistry(m)
+		if prev, ok := m[r.SessionID]; ok {
+			r.FirstSeen = prev.FirstSeen // immutable
+			if r.Provider == "" {
+				r.Provider = prev.Provider
+			}
+		} else if r.FirstSeen == "" {
+			r.FirstSeen = r.LastSeen
+		}
+		m[r.SessionID] = r
+		return s.saveRegistry(m)
+	})
 }
 
 // GetSession returns a record by id.
