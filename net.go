@@ -11,6 +11,7 @@ package main
 import (
 	"bufio"
 	"crypto/tls"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -63,6 +64,16 @@ func handleBusConn(s *Store, conn net.Conn, allow map[string]bool) {
 	}
 	if allow != nil && !senderAllowed(m, allow) {
 		fmt.Fprintln(conn, `{"ok":false,"error":"expediteur non autorise (E2E signe requis)"}`)
+		return
+	}
+	// Anti-replay : un message scellé est dédupliqué sur son NONCE signé (inaltérable
+	// sans casser la signature) ; sinon sur l'id. Un doublon est acquitté, pas re-livré.
+	dedup := m.ID
+	if m.Sealed != nil && len(m.Sealed.Nonce) > 0 {
+		dedup = "n:" + hex.EncodeToString(m.Sealed.Nonce)
+	}
+	if !s.markSeen(dedup) {
+		fmt.Fprintln(conn, `{"ok":true,"duplicate":true}`)
 		return
 	}
 	if m.ID == "" {
