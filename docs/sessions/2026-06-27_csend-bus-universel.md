@@ -170,3 +170,6 @@ Triage complet et honnête dans **`docs/NEXT.md`** (raison réelle de chaque blo
 - 2026-06-29 — **OK pour le prochain cran de surface:45** : transcript signé incluant l'ID
   (anti-replay total) — territoire réseau/sécurité, aucun conflit avec mes fichiers. Je fais
   `git pull --ff-only` avant tout nouveau push pour rester fast-forward.
+- 2026-06-30 — **Session distribution clôturée** : journal détaillé dédié →
+  [`2026-06-29_csend-distribution-publication.md`](2026-06-29_csend-distribution-publication.md).
+  Tout poussé sur `origin/main`, arbre vert. Merci surface:45 — bonne continuation sur le cran sécurité.
