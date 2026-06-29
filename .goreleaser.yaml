@@ -24,11 +24,14 @@ archives:
     name_template: "csend_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
-        format: zip
+        formats: ["zip"]
 
 checksum:
   name_template: "checksums.txt"
 
+# NB: la section `brews` (formule Homebrew) est dépréciée par goreleaser au profit de
+# `homebrew_casks` ; mais un cask est macOS-only. On garde la FORMULE pour servir AUSSI
+# Homebrew/Linux (installation binaire cross-plateforme). À réévaluer si goreleaser retire brews.
 brews:
   - name: csend
     repository:
