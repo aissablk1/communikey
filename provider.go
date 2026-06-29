@@ -21,12 +21,16 @@ type claudeProvider struct{}
 func (claudeProvider) Name() string          { return "claude" }
 func (claudeProvider) Detect(s string) State { return DetectClaudeState(s) }
 
-// providers is the ordered detection registry. Add a calibrated Provider here to
-// extend cross-provider support — no other code changes are required.
+// providers is the ordered detection registry. Claude stays FIRST so its
+// battle-tested detector wins on real Claude screens; the table-driven Codex and
+// Gemini adapters (adapters.go) fall through only when Claude abstains. Their
+// regexes are still provisional — calibrate on real screens (§2/§29) — but they're
+// safe to register: idle requires a dual distinctive signal, and busy/confirm only
+// widen the "do not submit" net (never a wrongful submit).
 var providers = []Provider{
 	claudeProvider{},
-	// codexProvider{},  // TODO: calibrer sur de vrais écrans Codex CLI (§2)
-	// geminiProvider{}, // TODO: calibrer sur de vrais écrans Gemini CLI (§2)
+	newCodexProvider(),  // provisoire — patterns à calibrer sur de vrais écrans (§2/§29)
+	newGeminiProvider(), // provisoire — patterns à calibrer sur de vrais écrans (§2/§29)
 }
 
 // DetectAnyState tries each registered provider; the first non-Unknown match wins.
