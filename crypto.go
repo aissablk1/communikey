@@ -110,14 +110,37 @@ func (id *Identity) Public() PublicBundle {
 	}
 }
 
-// transcript is the exact byte sequence that is both AEAD-bound and signed.
-func transcript(ephPub, mlkemCt, nonce, ct []byte) []byte {
-	t := make([]byte, 0, len(ephPub)+len(mlkemCt)+len(nonce)+len(ct))
+// transcript is the exact byte sequence that is both AEAD-bound and signed. Il lie
+// désormais AUSSI la clé publique de l'expéditeur et l'AAD applicative (from→to) :
+// la signature s'engage sur QUI parle et À QUI — un message ré-emballé sous une
+// autre identité (nouveau From/To) ne vérifie plus (durcissement anti-replay §41).
+func transcript(ephPub, mlkemCt, nonce, ct, senderPub, aad []byte) []byte {
+	t := make([]byte, 0, len(ephPub)+len(mlkemCt)+len(nonce)+len(ct)+len(senderPub)+len(aad))
 	t = append(t, ephPub...)
 	t = append(t, mlkemCt...)
 	t = append(t, nonce...)
 	t = append(t, ct...)
+	t = append(t, senderPub...)
+	t = append(t, aad...)
 	return t
+}
+
+// sealAAD lie l'identité applicative (expéditeur → destinataire) au message. Passée
+// à Seal/Open, elle est liée dans l'AEAD ET la signature. Couple vide → nil (rétro-
+// compat des appels sans contexte applicatif, ex. tests crypto purs).
+func sealAAD(from, to string) []byte {
+	if from == "" && to == "" {
+		return nil
+	}
+	return []byte(from + "\x1f" + to)
+}
+
+// firstAAD extrait l'AAD optionnelle (variadique → 0 ou 1 valeur).
+func firstAAD(aad [][]byte) []byte {
+	if len(aad) > 0 {
+		return aad[0]
+	}
+	return nil
 }
 
 func deriveKey(xShared, mlShared []byte) ([]byte, error) {
@@ -127,7 +150,7 @@ func deriveKey(xShared, mlShared []byte) ([]byte, error) {
 
 // Seal encrypts plaintext to `to` and signs it as `from`. Hybrid KEM: the AEAD key
 // derives from X25519 ⊕ ML-KEM, so confidentiality holds unless BOTH are broken.
-func Seal(to PublicBundle, from *Identity, plaintext []byte) (*SealedMessage, error) {
+func Seal(to PublicBundle, from *Identity, plaintext []byte, aad ...[]byte) (*SealedMessage, error) {
 	eph, err := ecdh.X25519().GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, err
@@ -158,24 +181,27 @@ func Seal(to PublicBundle, from *Identity, plaintext []byte) (*SealedMessage, er
 	if _, err := rand.Read(nonce); err != nil {
 		return nil, err
 	}
-	ct := gcm.Seal(nil, nonce, plaintext, nil)
+	a := firstAAD(aad)
+	ct := gcm.Seal(nil, nonce, plaintext, a)
 
 	ephPub := eph.PublicKey().Bytes()
-	sig := ed25519.Sign(from.Sign, transcript(ephPub, mlCt, nonce, ct))
+	senderPub := from.Sign.Public().(ed25519.PublicKey)
+	sig := ed25519.Sign(from.Sign, transcript(ephPub, mlCt, nonce, ct, senderPub, a))
 	return &SealedMessage{
 		EphX25519: ephPub, MLKEMCt: mlCt, Nonce: nonce, Ct: ct,
-		SenderPub: from.Sign.Public().(ed25519.PublicKey), Sig: sig,
+		SenderPub: senderPub, Sig: sig,
 	}, nil
 }
 
 // Open verifies the sender signature then decrypts. Returns the plaintext and the
 // sender's Ed25519 public key (for authorization decisions by the caller).
-func Open(id *Identity, m *SealedMessage) (plaintext, senderPub []byte, err error) {
+func Open(id *Identity, m *SealedMessage, aad ...[]byte) (plaintext, senderPub []byte, err error) {
+	a := firstAAD(aad)
 	if len(m.SenderPub) != ed25519.PublicKeySize {
 		return nil, nil, errors.New("clé d'expéditeur invalide")
 	}
-	if !ed25519.Verify(m.SenderPub, transcript(m.EphX25519, m.MLKEMCt, m.Nonce, m.Ct), m.Sig) {
-		return nil, nil, errors.New("signature invalide (message falsifié ou mauvais expéditeur)")
+	if !ed25519.Verify(m.SenderPub, transcript(m.EphX25519, m.MLKEMCt, m.Nonce, m.Ct, m.SenderPub, a), m.Sig) {
+		return nil, nil, errors.New("signature invalide (message falsifié, mauvais expéditeur, ou ré-emballé)")
 	}
 	ephPub, err := ecdh.X25519().NewPublicKey(m.EphX25519)
 	if err != nil {
@@ -197,7 +223,7 @@ func Open(id *Identity, m *SealedMessage) (plaintext, senderPub []byte, err erro
 	if err != nil {
 		return nil, nil, err
 	}
-	pt, err := gcm.Open(nil, m.Nonce, m.Ct, nil)
+	pt, err := gcm.Open(nil, m.Nonce, m.Ct, a)
 	if err != nil {
 		return nil, nil, fmt.Errorf("déchiffrement échoué: %w", err)
 	}

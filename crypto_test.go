@@ -56,6 +56,25 @@ func TestOpenRejectsWrongRecipient(t *testing.T) {
 	}
 }
 
+// §41 : un message scellé pour un couple from→to ne doit PAS s'ouvrir/vérifier sous
+// un autre couple — l'AAD (liée dans l'AEAD ET la signature) interdit le ré-emballage.
+func TestOpenRejectsRewrappedUnderDifferentIdentities(t *testing.T) {
+	alice, _ := NewIdentity()
+	bob, _ := NewIdentity()
+	sealed, err := Seal(bob.Public(), alice, []byte("ordre"), sealAAD("alice", "bob"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Même chiffré, ouvert sous un expéditeur usurpé (eve→bob) : doit échouer.
+	if _, _, err := Open(bob, sealed, sealAAD("eve", "bob")); err == nil {
+		t.Fatal("message ré-emballé sous une autre identité accepté")
+	}
+	// Le bon couple ouvre normalement.
+	if _, _, err := Open(bob, sealed, sealAAD("alice", "bob")); err != nil {
+		t.Fatalf("le bon aad devrait ouvrir: %v", err)
+	}
+}
+
 func TestVaultRoundtrip(t *testing.T) {
 	secret := []byte("clé privée très secrète")
 	pass := []byte("corret-horse-battery-staple")

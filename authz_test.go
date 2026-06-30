@@ -5,7 +5,7 @@ import "testing"
 func TestSenderAllowed(t *testing.T) {
 	alice, _ := NewIdentity()
 	bob, _ := NewIdentity()
-	sealed, err := Seal(bob.Public(), alice, []byte("hi"))
+	sealed, err := Seal(bob.Public(), alice, []byte("hi"), sealAAD("", "bob"))
 	if err != nil {
 		t.Fatal(err)
 	}

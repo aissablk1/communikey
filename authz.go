@@ -55,7 +55,7 @@ func senderAllowed(m InboxMessage, allow map[string]bool) bool {
 	if sm == nil || len(sm.SenderPub) != ed25519.PublicKeySize {
 		return false
 	}
-	if !ed25519.Verify(sm.SenderPub, transcript(sm.EphX25519, sm.MLKEMCt, sm.Nonce, sm.Ct), sm.Sig) {
+	if !ed25519.Verify(sm.SenderPub, transcript(sm.EphX25519, sm.MLKEMCt, sm.Nonce, sm.Ct, sm.SenderPub, sealAAD(m.From, m.To)), sm.Sig) {
 		return false
 	}
 	return allow[pubFingerprint(sm.SenderPub)]

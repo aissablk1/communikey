@@ -93,7 +93,7 @@ func maybeSeal(s *Store, toAgent, body string) (*SealedMessage, bool) {
 	if err != nil {
 		return nil, false
 	}
-	sealed, err := Seal(bundle, id, []byte(body))
+	sealed, err := Seal(bundle, id, []byte(body), sealAAD(selfAgentID(), toAgent))
 	if err != nil {
 		return nil, false
 	}
@@ -113,7 +113,7 @@ func openBody(s *Store, m InboxMessage) string {
 	if err != nil {
 		return "[chiffré E2E — vault inaccessible]"
 	}
-	pt, _, err := Open(id, m.Sealed)
+	pt, _, err := Open(id, m.Sealed, sealAAD(m.From, m.To))
 	if err != nil {
 		return "[chiffré E2E — déchiffrement échoué]"
 	}

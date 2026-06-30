@@ -35,7 +35,9 @@ func TestContactAndTokenRoundtrip(t *testing.T) {
 func TestE2EWireCrossStore(t *testing.T) {
 	os.Setenv("CSEND_VAULT_PASS", "tp")
 	os.Unsetenv("CSEND_VAULT_PASS_FILE")
+	os.Setenv("CSEND_AGENT_ID", "A") // l'aad lie from→to : le scellement et la lecture doivent l'accorder
 	defer os.Unsetenv("CSEND_VAULT_PASS")
+	defer os.Unsetenv("CSEND_AGENT_ID")
 
 	a, _ := OpenStore(t.TempDir()) // sender
 	b, _ := OpenStore(t.TempDir()) // recipient
@@ -55,7 +57,7 @@ func TestE2EWireCrossStore(t *testing.T) {
 	if !ok {
 		t.Fatal("maybeSeal devrait sceller (contact + vault présents)")
 	}
-	if got := openBody(b, InboxMessage{Sealed: sealed}); got != "message secret" {
+	if got := openBody(b, InboxMessage{From: "A", To: "B", Sealed: sealed}); got != "message secret" {
 		t.Fatalf("openBody (recipient) = %q", got)
 	}
 
@@ -68,7 +70,7 @@ func TestE2EWireCrossStore(t *testing.T) {
 		t.Fatal("openBody plaintext")
 	}
 	// Un tiers (A) ne peut PAS ouvrir un message scellé pour B.
-	if got := openBody(a, InboxMessage{Sealed: sealed}); got == "message secret" {
+	if got := openBody(a, InboxMessage{From: "A", To: "B", Sealed: sealed}); got == "message secret" {
 		t.Fatal("A n'aurait pas dû pouvoir déchiffrer un message destiné à B")
 	}
 }
