@@ -23,7 +23,7 @@ class Csend < Formula
   homepage "https://csend.dev"
   url "https://github.com/aissablk1/csend/archive/refs/tags/v0.2.0.tar.gz"
   sha256 "REMPLACER_PAR_LE_SHA256_DU_TARBALL_SOURCE_v0.2.0"
-  license "MIT"
+  license "Apache-2.0"
   head "https://github.com/aissablk1/csend.git", branch: "main"
 
   # csend ne dépend QUE de la toolchain Go pour compiler ; aucune dépendance runtime.

@@ -5,7 +5,7 @@ Tout est gratuit et souverain-compatible (§58). Ordre = priorité.
 
 ## 1. Le code — GitHub (canonique)
 
-- **Repo public** : `github.com/aissablk1/csend` (MIT). C'est la source de vérité.
+- **Repo public** : `github.com/aissablk1/csend` (Apache-2.0). C'est la source de vérité.
 - Authorship Git en `noreply` GitHub — **jamais** le Gmail perso (§35). Contact public =
   `contact@aissabelkoussa.fr`.
 - Active **GitHub Releases** : un `git tag vX.Y.Z` déclenche GoReleaser

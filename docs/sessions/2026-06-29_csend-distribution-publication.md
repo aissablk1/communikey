@@ -90,3 +90,14 @@ tags: [csend, distribution, publication, release, homebrew, goreleaser, oss]
   d'adoption sur le site ; calibration adaptateurs = sur source, confirmation live encore à faire.
 - **Garde-fous respectés** : §5 (confinement, hook `brew install` honoré), §7 (commits file-by-file,
   pas de bulk, convergence), §21 (zéro co-auteur IA), §29/§32 (vert avant commit), §35 (email noreply).
+
+## Addendum 2026-07-01 — Relicence Apache-2.0 (post-clôture)
+
+- Suite à la relicence **MIT → Apache-2.0** de surface:45 (`d069531`, grant de brevet), refs MIT
+  restantes de **mon territoire** passées en Apache-2.0 : `site/` (meta/og/hero/footer),
+  `docs/PUBLISHING.md`, `docs/adoption/playbook`, `Formula/csend.rb` (draft). **Gardé MIT** :
+  `RELEASE-v0.2.0.md` + entrées de journal — v0.2.0 *fut* publié sous MIT (exact historiquement ;
+  le **tag v0.2.0 reste MIT**).
+- Acté : **crypto breaking → prochaine release `v0.3.0`** (transcript signé liant
+  expéditeur+destinataire, incompatible v0.2.0). Au tag v0.3.0, la release + le tap Homebrew se
+  régénéreront en Apache-2.0.

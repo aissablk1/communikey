@@ -20,7 +20,7 @@ tags: [oss, adoption, distribution, securite, csend, go]
 
 **Technique : solide.** Phase 1 production-ready (`go build` ✅, `go test ./...` ✅),
 32 fichiers Go dont 12 de tests, CI/CD GitHub Actions, **zéro dépendance externe**
-(stdlib Go 1.24), licence MIT. Ce n'est pas un prototype.
+(stdlib Go 1.24), licence Apache-2.0. Ce n'est pas un prototype.
 
 **Stratégique : dépend du positionnement.** « Orchestrateur Claude Code » = doublon
 du natif (Agent Teams, février 2026) et de ruflo → faible. « Bus souverain E2E,
@@ -81,7 +81,7 @@ les sessions en cours. »
   → roadmap honnête (matrice OS sans survente).
 - **Confiance :** `SECURITY.md` (modèle crypto + « audit externe en attente »),
   `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, templates issues/PR, `good-first-issues`.
-- **Badges :** CI, version Go, licence MIT, Go Report Card.
+- **Badges :** CI, version Go, licence Apache-2.0, Go Report Card.
 - **Releases :** versioning sémantique + `CHANGELOG.md` + tag `v0.2.0`.
 
 ---
