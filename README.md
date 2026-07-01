@@ -13,6 +13,13 @@ lisant son état (idle / busy / confirmation) **avant** d'agir, à travers termi
 providers et machines, **chiffré de bout en bout** et résistant au quantique. Go,
 **zéro dépendance**, Apache-2.0.
 
+> **Ce que csend a et que les autres bus d'agents n'ont pas.** Chaque message est **signé**
+> (identité **Ed25519**) — tu sais *qui* parle, pas seulement que « quelqu'un avec le bon mot de
+> passe » parle. Là où les autres bus inter-sessions partagent un **secret unique** sans
+> authentifier l'expéditeur, csend chiffre **pour le destinataire** (X25519 ⊕ ML-KEM-768,
+> **post-quantique**) et offre une **recovery souveraine** (Shamir + BIP-39). Le bus d'agents
+> **auditable** : provenance, confidentialité, souveraineté.
+
 > **Le trou que csend comble.** Aucune API officielle n'injecte un prompt dans une
 > session d'agent CLI **vivante** (cf. les feature requests Claude Code fermées/ouvertes
 > [#24947](https://github.com/anthropics/claude-code/issues/24947),

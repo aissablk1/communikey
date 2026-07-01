@@ -115,3 +115,9 @@ tags: [csend, distribution, publication, release, homebrew, goreleaser, oss]
   Ed25519 + chiffrement par destinataire + ML-KEM-768 + recovery Shamir/BIP-39**. Retards assumés :
   largeur providers, intégration turnkey (hooks vs injection), maturité. Livrable :
   `docs/strategy/csend-axes-de-depassement.md`.
+- **Exécution « Tous » (2026-07-01)** — MON territoire : **recadrage du message** sur le vrai wedge
+  (identité cryptographique signée vs « mot de passe partagé ») — bloc ajouté au README. **Pour
+  surface:45** (territoire core/crypto, §7) : (1) fermer le gap de largeur via **livraison par
+  hooks** multi-CLI (à la hcom) en plus de l'injection clavier ; (2) **confirmer Codex/Gemini en
+  live** ; (3) éventuelle **couche kit mince** d'orchestration inter-sessions signée. Ces 3
+  mouvements sont du **code** (≠ mon territoire distribution) → à toi quand tu veux.
