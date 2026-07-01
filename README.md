@@ -213,6 +213,7 @@ CI : `go vet` + `go test -race ./...` + build, à chaque push
 - Design & feuille de route : [`docs/superpowers/specs/2026-06-27-csend-bus-universel-design.md`](docs/superpowers/specs/2026-06-27-csend-bus-universel-design.md)
 - Ce qui reste, et pourquoi : [`docs/NEXT.md`](docs/NEXT.md)
 - Où publier : [`docs/PUBLISHING.md`](docs/PUBLISHING.md)
+- Face aux autres bus d'agents (comparatif honnête) : [`docs/COMPARISON.md`](docs/COMPARISON.md)
 
 ---
 

@@ -121,3 +121,10 @@ tags: [csend, distribution, publication, release, homebrew, goreleaser, oss]
   hooks** multi-CLI (à la hcom) en plus de l'injection clavier ; (2) **confirmer Codex/Gemini en
   live** ; (3) éventuelle **couche kit mince** d'orchestration inter-sessions signée. Ces 3
   mouvements sont du **code** (≠ mon territoire distribution) → à toi quand tu veux.
+- **Exécution « Tous » suite (2026-07-01)** — livrables réels, mon territoire : (1) **site recadré**
+  sur le wedge (kicker + lede : « signé, tu sais *qui* parle ») ; (2) **plan de lancement haute
+  assurance** `docs/strategy/csend-plan-lancement-haute-assurance.md` (ICP netsec/régulé/souverain,
+  canaux ORB, phases gatées ; honnête : ne pas lancer un alpha à CI rouge, pas de fausse traction) ;
+  (3) **battle-card publique** `docs/COMPARISON.md` (honnête vs hcom/Agent Teams, liée au README).
+  SECURITY.md laissé tel quel (déjà excellent, §57 — pas de faux travail). Bloqués → guidés : code
+  (surface:45), déploiement/CI/social (comptes d'Aïssa).
