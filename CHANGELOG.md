@@ -5,11 +5,30 @@ Toutes les évolutions notables de csend sont consignées ici.
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le projet
 adopte le [versionnage sémantique](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [Non publié] — vers 0.3.0
 
-Voir [`docs/NEXT.md`](docs/NEXT.md) pour le détail de ce qui reste et pourquoi.
-Prochains jalons : adaptateurs Codex/Gemini, passkey WebAuthn, auth mutuelle réseau,
-clients mobiles, surface MCP, audit cryptographique externe.
+### ⚠️ Changements incompatibles (BREAKING)
+- **Cryptographie** : le transcript signé + l'AEAD lient désormais la clé publique de
+  l'expéditeur ET une AAD applicative `from→to`. Un message scellé par 0.2.0 ne se vérifie
+  plus sous 0.3.0 (durcissement anti-replay / anti-ré-emballage). `Seal`/`Open` acceptent une
+  AAD variadique optionnelle (appels sans contexte inchangés).
+
+### Ajouté
+- `csend journal [--json]` : trace du bus (de→à, **hash uniquement**, jamais le clair).
+- `csend key <cible> <touche>` : envoie une touche brute (enter/escape/ctrl+c/ctrl+u…).
+- `csend hook` **provider-aware** : identité auto-dérivée du `session_id` (zéro-config), forme
+  de sortie par éditeur (Claude/Codex `hookSpecificOutput` ; Gemini brut), `--install {claude|codex|gemini}`,
+  `--provider` pour forcer la forme.
+- Enveloppe *provider-aware* : champs `provider`/`kind` sur les messages (collaboration cross-vendor visible).
+- `docs/THREAT-MODEL.md` (modèle de menace honnête, crypto **non auditée**), `docs/cross-vendor-setup.md`
+  (câbler Claude+Codex+Gemini), `docs/CLA.md`, `NOTICE`.
+- Démo `scripts/demo-cross-vendor.sh` (« Green Build Relay » : 3 éditeurs, 1 bus).
+
+### Changé
+- **Licence** : MIT → **Apache-2.0** (grant de brevet, vital vu la crypto PQC).
+
+Voir [`docs/NEXT.md`](docs/NEXT.md) pour le reste (provenance SLSA/cosign — en attente de la
+facturation GitHub —, passkey WebAuthn, surface MCP, audit cryptographique externe).
 
 ## [0.2.0] — 2026-06-27
 
