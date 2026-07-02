@@ -1,16 +1,16 @@
 # GoReleaser — binaires multi-plateformes + tap Homebrew, en 1 push de tag.
 #   git tag v0.2.0 && git push --tags   →   CI publie la release + met à jour le tap.
 version: 2
-project_name: csend
+project_name: communikey
 
 before:
   hooks:
     - go mod tidy
 
 builds:
-  - id: csend
+  - id: communikey
     main: .
-    binary: csend
+    binary: communikey
     env: [CGO_ENABLED=0]
     goos: [darwin, linux, windows]
     goarch: [amd64, arm64]
@@ -18,10 +18,10 @@ builds:
       - -s -w -X main.version={{.Version}}
 
 archives:
-  - id: csend
+  - id: communikey
     # Nom STABLE (sans version) pour que site/install.sh résolve
-    # github.com/aissablk1/csend/releases/latest/download/csend_<os>_<arch>.tar.gz
-    name_template: "csend_{{ .Os }}_{{ .Arch }}"
+    # github.com/aissablk1/communikey/releases/latest/download/communikey_<os>_<arch>.tar.gz
+    name_template: "communikey_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
         formats: ["zip"]
@@ -33,7 +33,7 @@ checksum:
 # Nécessite `syft` au moment de la release (brew install syft). Le SLSA-in-Actions et la
 # signature cosign viennent en plus quand la CI est débloquée / une clé cosign est posée.
 sboms:
-  - id: csend
+  - id: communikey
     artifacts: archive
     documents: ["${artifact}.sbom.cdx.json"]
     cmd: syft
@@ -43,20 +43,20 @@ sboms:
 # `homebrew_casks` ; mais un cask est macOS-only. On garde la FORMULE pour servir AUSSI
 # Homebrew/Linux (installation binaire cross-plateforme). À réévaluer si goreleaser retire brews.
 brews:
-  - name: csend
+  - name: communikey
     repository:
       owner: aissablk1
       name: homebrew-tap
-    homepage: "https://csend.dev"
+    homepage: "https://communikey.dev"
     description: "Bus de messagerie inter-agents pour CLI (state-aware, chiffré, zéro dépendance)"
     license: "Apache-2.0"
     install: |
-      bin.install "csend"
+      bin.install "communikey"
     test: |
-      system "#{bin}/csend", "help"
+      system "#{bin}/communikey", "help"
 
 release:
   github:
     owner: aissablk1
-    name: csend
+    name: communikey
   draft: false

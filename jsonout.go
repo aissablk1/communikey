@@ -1,6 +1,6 @@
 package main
 
-// jsonout.go — sortie machine-lisible (`--json`) pour piloter csend depuis un
+// jsonout.go — sortie machine-lisible (`--json`) pour piloter communikey depuis un
 // AGENT (le besoin central : un agent ne peut pas parser de la prose). Les
 // commandes de lecture (list/recv/agents) émettent un JSON stable quand `--json`
 // est présent.

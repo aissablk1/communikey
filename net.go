@@ -2,8 +2,8 @@ package main
 
 // net.go — couche 5 (réseau) : fédération minimale machine-à-machine.
 //
-// `csend serve` ouvre un listener TCP qui reçoit des messages (JSON ligne par
-// ligne) et les dépose dans l'inbox local ; `csend remote` envoie vers une autre
+// `communikey serve` ouvre un listener TCP qui reçoit des messages (JSON ligne par
+// ligne) et les dépose dans l'inbox local ; `communikey remote` envoie vers une autre
 // machine. Le payload PEUT être chiffré E2E (SealedMessage), donc même un relais
 // ne voit que du chiffré. v1 = loopback/LAN de confiance ; TLS hybride PQC + auth
 // mutuelle = phase suivante (§38 : ne pas exposer hors loopback sans durcir).
@@ -35,7 +35,7 @@ func serveBus(s *Store, addr string, cfg *tls.Config, allow map[string]bool) err
 		return err
 	}
 	defer ln.Close()
-	fmt.Printf("csend serve — écoute sur %s (Ctrl+C pour arrêter)\n", ln.Addr())
+	fmt.Printf("communikey serve — écoute sur %s (Ctrl+C pour arrêter)\n", ln.Addr())
 	if !isLoopbackAddr(addr) && allow == nil {
 		fmt.Println("⚠ hors loopback sans --authz : n'expose que sur un réseau de confiance (§38).")
 	}
@@ -93,7 +93,7 @@ func handleBusConn(s *Store, conn net.Conn, allow map[string]bool) {
 	fmt.Fprintln(conn, `{"ok":true}`)
 }
 
-// sendRemote delivers one message to a remote csend serve. A non-nil cfg dials over
+// sendRemote delivers one message to a remote communikey serve. A non-nil cfg dials over
 // TLS 1.3 (hybrid PQC) with optional fingerprint pinning.
 func sendRemote(addr string, m InboxMessage, cfg *tls.Config) error {
 	var conn net.Conn
@@ -199,7 +199,7 @@ func cmdRemote(args []string) {
 		}
 	}
 	if len(pos) < 3 {
-		fail("usage: csend remote [--tls --pin <fingerprint>] <hôte:port> <agent> <message…>")
+		fail("usage: communikey remote [--tls --pin <fingerprint>] <hôte:port> <agent> <message…>")
 	}
 	addr, to := pos[0], pos[1]
 	body := strings.Join(pos[2:], " ")
@@ -223,7 +223,7 @@ func cmdRemote(args []string) {
 	}
 	if err := sendRemote(addr, m, cfg); err != nil {
 		if enqueueOutbox(s, addr, m) == nil {
-			fmt.Printf("⚠ %s injoignable — message mis en file (%d en attente). Relance plus tard: csend remote …\n", addr, pendingOutbox(s, addr))
+			fmt.Printf("⚠ %s injoignable — message mis en file (%d en attente). Relance plus tard: communikey remote …\n", addr, pendingOutbox(s, addr))
 			return
 		}
 		fail(err.Error())

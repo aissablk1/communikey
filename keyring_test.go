@@ -33,11 +33,11 @@ func TestContactAndTokenRoundtrip(t *testing.T) {
 
 // The real E2E wiring: A (with B's public key) seals a message that only B can read.
 func TestE2EWireCrossStore(t *testing.T) {
-	os.Setenv("CSEND_VAULT_PASS", "tp")
-	os.Unsetenv("CSEND_VAULT_PASS_FILE")
-	os.Setenv("CSEND_AGENT_ID", "A") // l'aad lie from→to : le scellement et la lecture doivent l'accorder
-	defer os.Unsetenv("CSEND_VAULT_PASS")
-	defer os.Unsetenv("CSEND_AGENT_ID")
+	os.Setenv("COMKEY_VAULT_PASS", "tp")
+	os.Unsetenv("COMKEY_VAULT_PASS_FILE")
+	os.Setenv("COMKEY_AGENT_ID", "A") // l'aad lie from→to : le scellement et la lecture doivent l'accorder
+	defer os.Unsetenv("COMKEY_VAULT_PASS")
+	defer os.Unsetenv("COMKEY_AGENT_ID")
 
 	a, _ := OpenStore(t.TempDir()) // sender
 	b, _ := OpenStore(t.TempDir()) // recipient

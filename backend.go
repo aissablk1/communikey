@@ -4,7 +4,7 @@ package main
 //
 // Tout le moteur (engine.go) parle à un Backend via des dispatchers (listSurfaces,
 // readScreen, sendText, sendKey, selfRef) ; le backend concret est choisi au
-// runtime (CSEND_BACKEND, sinon auto-détection). Ajouter screen/ConPTY = un struct.
+// runtime (COMKEY_BACKEND, sinon auto-détection). Ajouter screen/ConPTY = un struct.
 
 import (
 	"errors"
@@ -14,7 +14,7 @@ import (
 )
 
 var errNoBackend = errors.New("aucun backend de terminal (cmux/tmux) disponible — " +
-	"lance cmux ou tmux, ou utilise la voie coopérative (csend inbox/recv)")
+	"lance cmux ou tmux, ou utilise la voie coopérative (communikey inbox/recv)")
 
 // Backend is a surface-addressed terminal transport: it can enumerate live agent
 // surfaces and read/inject into any of them.
@@ -37,7 +37,7 @@ func backend() Backend {
 	if cachedBackend != nil {
 		return cachedBackend
 	}
-	if name := os.Getenv("CSEND_BACKEND"); name != "" {
+	if name := os.Getenv("COMKEY_BACKEND"); name != "" {
 		for _, b := range allBackends {
 			if b.Name() == name {
 				cachedBackend = b
@@ -58,7 +58,7 @@ func backend() Backend {
 // backendAvailable reports whether any (or the forced) backend can be used. It does
 // not cache, so it is safe to call before committing to a backend.
 func backendAvailable() bool {
-	if name := os.Getenv("CSEND_BACKEND"); name != "" {
+	if name := os.Getenv("COMKEY_BACKEND"); name != "" {
 		for _, b := range allBackends {
 			if b.Name() == name {
 				return b.Available()
@@ -160,7 +160,7 @@ func parseTmuxPanes(out, self string) []Surface {
 	return res
 }
 
-// tmuxKey maps csend's lowercase key names to tmux key syntax. Pure/testable.
+// tmuxKey maps communikey's lowercase key names to tmux key syntax. Pure/testable.
 func tmuxKey(key string) string {
 	switch strings.ToLower(key) {
 	case "enter":

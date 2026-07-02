@@ -2,7 +2,7 @@ package main
 
 // inbox.go — transport COOPÉRATIF (couche 3a) : la colonne vertébrale universelle.
 //
-// Une session « coopérante » (qui a le hook/listener/skill csend) reçoit ses
+// Une session « coopérante » (qui a le hook/listener/skill communikey) reçoit ses
 // messages en lisant son inbox. Ce chemin marche PARTOUT — tout OS, tout provider,
 // Agent Teams, sous-agents, distant — là où l'injection clavier ne peut pas aller.
 //

@@ -7,7 +7,7 @@ import (
 )
 
 // State is the runtime state of an agent CLI session, read from its on-screen
-// content. It is the heart of csend's "intelligent" delivery: we never submit a
+// content. It is the heart of communikey's "intelligent" delivery: we never submit a
 // message into a session that is not safely Idle.
 type State int
 
@@ -73,7 +73,7 @@ var (
 //
 // Safety-first ordering is deliberate: a confirmation prompt must NEVER be read
 // as idle (or we'd auto-answer a y/N), and anything ambiguous falls through to
-// Busy/Unknown rather than Idle — csend only auto-submits on a confident Idle.
+// Busy/Unknown rather than Idle — communikey only auto-submits on a confident Idle.
 func DetectClaudeState(screen string) State {
 	tail := tailLines(screen, stateTailLines)
 	switch {
@@ -90,7 +90,7 @@ func DetectClaudeState(screen string) State {
 }
 
 // StateDebug reports which individual signals fired, to diagnose detection on
-// real screens (hidden `csend _why` command).
+// real screens (hidden `communikey _why` command).
 func StateDebug(screen string) string {
 	tail := tailLines(screen, stateTailLines)
 	return fmt.Sprintf("confirmMenu=%v confirmYN=%v confirmWord=%v confirmTell=%v | busy=%v | idlePrompt=%v idleFooter=%v\n=> %s",

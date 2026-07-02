@@ -1,4 +1,4 @@
-// csend — inter-session messaging for CLI coding agents (Claude Code & co.),
+// communikey — inter-session messaging for CLI coding agents (Claude Code & co.),
 // state-aware and provider-agnostic, driven through the cmux / Vibe Island
 // control socket. MVP slice 1: cmux backend + Claude adapter + guarded delivery.
 package main
@@ -15,42 +15,42 @@ import (
 // défaut "dev" en build local / `go install`.
 var version = "dev"
 
-const usage = `csend — messagerie inter-sessions pour agents CLI (Claude Code & co.)
+const usage = `communikey — messagerie inter-sessions pour agents CLI (Claude Code & co.)
 
 Usage:
-  csend list                       liste les sessions agent + leur état
-  csend tree                       affiche le graphe familial (père/enfants) des sessions
-  csend send <cible> <message…>    envoie un message (auto: valide si la cible est idle)
+  communikey list                       liste les sessions agent + leur état
+  communikey tree                       affiche le graphe familial (père/enfants) des sessions
+  communikey send <cible> <message…>    envoie un message (auto: valide si la cible est idle)
         --stage                    dépose le texte sans valider (pas d'Entrée)
         --send                     valide même si la cible est occupée
         --force                    passe outre tous les garde-fous (dangereux)
-  csend send --down <message…>     broadcast vers les ENFANTS de la session courante
-  csend send --up <message…>       envoie au PARENT de la session courante
+  communikey send --down <message…>     broadcast vers les ENFANTS de la session courante
+  communikey send --up <message…>       envoie au PARENT de la session courante
         --to-siblings              vers les frères ; --to-descendants vers tout le sous-arbre
         --from <session>           change la base (défaut: la session courante)
-  csend read <cible> [--lines N]   lit l'écran d'une session
-  csend key <cible> <touche>       envoie une touche brute (enter|escape|ctrl+c|ctrl+u…)
-  csend register [--id X --provider P]  inscrit CETTE session sur le bus (tout OS/terminal)
-  csend agents                     flotte coopérative (tous terminaux/providers/OS)
-  csend whoami                     agent-id + identité + inbox de cette session
-  csend recv [--peek]              lit (et vide) l'inbox coopératif de CETTE session
-  csend inbox <cible> <message…>   dépose un message coopératif (hors cmux, tout OS)
-  csend hook [--install [P]] [--provider P]  réception live (hook UserPromptSubmit) ; --install = snippet
-  csend watch [--interval N]       tail live de l'inbox de CETTE session
-  csend journal [--json]           trace du bus (de→à, hash only, jamais le clair)
-  csend id [--create|--export]     identité crypto locale (vault) ; --export = jeton public
-  csend contact add <agent> <jeton>  enregistre la clé publique d'un pair (→ chiffrement E2E)
-  csend contact list               liste les contacts connus
-  csend recovery split <K> <N>     découpe l'identité en N parts Shamir (seuil K)
-  csend recovery combine <part…>   reconstitue l'identité depuis ≥ K parts
-  csend recovery phrase            phrase de récupération BIP-39 (24 mots)
-  csend recovery from-phrase <…>   reconstitue l'identité depuis la phrase
-  csend serve [--addr H:P] [--tls]  écoute réseau → inbox (--tls = TLS 1.3 hybride PQC)
-  csend remote [--tls --pin <fp>] <h:p> <agent> <msg>  envoie à une autre machine
-  csend link <enfant> <parent>     déclare <parent> comme parent de <enfant>
-  csend unlink <enfant>            détache <enfant> de son parent
-  csend version                    affiche la version
-  csend help
+  communikey read <cible> [--lines N]   lit l'écran d'une session
+  communikey key <cible> <touche>       envoie une touche brute (enter|escape|ctrl+c|ctrl+u…)
+  communikey register [--id X --provider P]  inscrit CETTE session sur le bus (tout OS/terminal)
+  communikey agents                     flotte coopérative (tous terminaux/providers/OS)
+  communikey whoami                     agent-id + identité + inbox de cette session
+  communikey recv [--peek]              lit (et vide) l'inbox coopératif de CETTE session
+  communikey inbox <cible> <message…>   dépose un message coopératif (hors cmux, tout OS)
+  communikey hook [--install [P]] [--provider P]  réception live (hook UserPromptSubmit) ; --install = snippet
+  communikey watch [--interval N]       tail live de l'inbox de CETTE session
+  communikey journal [--json]           trace du bus (de→à, hash only, jamais le clair)
+  communikey id [--create|--export]     identité crypto locale (vault) ; --export = jeton public
+  communikey contact add <agent> <jeton>  enregistre la clé publique d'un pair (→ chiffrement E2E)
+  communikey contact list               liste les contacts connus
+  communikey recovery split <K> <N>     découpe l'identité en N parts Shamir (seuil K)
+  communikey recovery combine <part…>   reconstitue l'identité depuis ≥ K parts
+  communikey recovery phrase            phrase de récupération BIP-39 (24 mots)
+  communikey recovery from-phrase <…>   reconstitue l'identité depuis la phrase
+  communikey serve [--addr H:P] [--tls]  écoute réseau → inbox (--tls = TLS 1.3 hybride PQC)
+  communikey remote [--tls --pin <fp>] <h:p> <agent> <msg>  envoie à une autre machine
+  communikey link <enfant> <parent>     déclare <parent> comme parent de <enfant>
+  communikey unlink <enfant>            détache <enfant> de son parent
+  communikey version                    affiche la version
+  communikey help
 
 Cible: nom de workspace (ex. SACEM), session-id (ex. 7f384610), ou ref (surface:42).
 Garde-fous: jamais d'auto-injection dans la session courante ; jamais d'Entrée sur
@@ -121,7 +121,7 @@ func main() {
 		}
 		fmt.Println(StateDebug(screen))
 	case "version", "-v", "--version", "-V":
-		fmt.Printf("csend %s\n", version)
+		fmt.Printf("communikey %s\n", version)
 	case "h", "-h", "--h", "help", "-help", "--help", "-?":
 		fmt.Println(usage)
 	default:
@@ -133,7 +133,7 @@ func main() {
 func mustBackend() {
 	if !backendAvailable() {
 		fail("aucun backend de terminal disponible (cmux ou tmux). Lance l'un des deux, " +
-			"ou utilise la voie coopérative : csend inbox / csend recv.")
+			"ou utilise la voie coopérative : communikey inbox / communikey recv.")
 	}
 }
 
@@ -233,7 +233,7 @@ func nodeLabel(id string, byKey map[string]Session, rel *Relations) string {
 
 func cmdLink(args []string) {
 	if len(args) < 2 {
-		fail("usage: csend link <enfant> <parent>")
+		fail("usage: communikey link <enfant> <parent>")
 	}
 	child, err := resolveTarget(args[0])
 	if err != nil {
@@ -261,7 +261,7 @@ func cmdLink(args []string) {
 
 func cmdUnlink(args []string) {
 	if len(args) < 1 {
-		fail("usage: csend unlink <enfant>")
+		fail("usage: communikey unlink <enfant>")
 	}
 	child, err := resolveTarget(args[0])
 	if err != nil {
@@ -320,7 +320,7 @@ func cmdSend(args []string) {
 		return
 	}
 	if len(pos) < 2 {
-		fail("usage: csend send <cible> <message…>  (ou un drapeau famille: --up/--down/--to-siblings/--to-descendants)")
+		fail("usage: communikey send <cible> <message…>  (ou un drapeau famille: --up/--down/--to-siblings/--to-descendants)")
 	}
 	out, err := sendMessage(pos[0], strings.Join(pos[1:], " "), mode)
 	if err != nil {
@@ -335,7 +335,7 @@ func cmdSend(args []string) {
 // cmdBroadcast delivers one message to a set of relatives (up/down the family).
 func cmdBroadcast(dir Direction, from string, pos []string, mode SubmitMode) {
 	if len(pos) < 1 {
-		fail("usage: csend send --" + dir.String() + " <message…>")
+		fail("usage: communikey send --" + dir.String() + " <message…>")
 	}
 	text := strings.Join(pos, " ")
 	baseKey := ""
@@ -357,7 +357,7 @@ func cmdBroadcast(dir Direction, from string, pos []string, mode SubmitMode) {
 		fail(err.Error())
 	}
 	if len(targets) == 0 {
-		fmt.Printf("Aucune cible en direction « %s » (lie des sessions avec `csend link`).\n", dir)
+		fmt.Printf("Aucune cible en direction « %s » (lie des sessions avec `communikey link`).\n", dir)
 		return
 	}
 	fmt.Printf("Broadcast → %s (%d cible(s)):\n", dir, len(targets))
@@ -402,7 +402,7 @@ func cmdRead(args []string) {
 		pos = append(pos, args[i])
 	}
 	if len(pos) < 1 {
-		fail("usage: csend read <cible> [--lines N]")
+		fail("usage: communikey read <cible> [--lines N]")
 	}
 	tgt, err := resolveTarget(pos[0])
 	if err != nil {
@@ -470,6 +470,6 @@ func reasonSuffix(r string) string {
 }
 
 func fail(msg string) {
-	fmt.Fprintln(os.Stderr, "csend: "+msg)
+	fmt.Fprintln(os.Stderr, "communikey: "+msg)
 	os.Exit(1)
 }

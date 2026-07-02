@@ -133,7 +133,7 @@ func TestAdapterConfirmBeatsBusy(t *testing.T) {
 }
 
 // TestAdaptersAbstainOnShellAndClaude: the adapters must NOT claim a plain shell
-// (so csend never injects into a non-agent surface) nor a Claude idle screen
+// (so communikey never injects into a non-agent surface) nor a Claude idle screen
 // (Claude uses `❯`, the adapters key on `›`/`>`), so adding them to the registry
 // can't pollute Claude detection or shell safety.
 func TestAdaptersAbstainOnShellAndClaude(t *testing.T) {

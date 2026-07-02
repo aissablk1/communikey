@@ -12,7 +12,7 @@ import (
 
 func cmdKey(args []string) {
 	if len(args) < 2 {
-		fail("usage: csend key <cible> <touche>   (enter | escape | ctrl+c | ctrl+u …)")
+		fail("usage: communikey key <cible> <touche>   (enter | escape | ctrl+c | ctrl+u …)")
 	}
 	tgt, err := resolveTarget(args[0])
 	if err != nil {

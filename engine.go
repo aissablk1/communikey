@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// SubmitMode controls how hard csend pushes a message in.
+// SubmitMode controls how hard communikey pushes a message in.
 type SubmitMode int
 
 const (
@@ -107,7 +107,7 @@ func resolveTarget(handle string) (Surface, error) {
 	}
 	switch len(matches) {
 	case 0:
-		return Surface{}, fmt.Errorf("aucune session ne correspond à %q (essaie `csend list`)", handle)
+		return Surface{}, fmt.Errorf("aucune session ne correspond à %q (essaie `communikey list`)", handle)
 	case 1:
 		return matches[0], nil
 	default:
@@ -238,7 +238,7 @@ func audit(tgt Surface, text string, out Outcome) {
 
 func auditPath() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".claude", "logs", "csend.jsonl")
+	return filepath.Join(home, ".claude", "logs", "communikey.jsonl")
 }
 
 // --- family broadcast: resolve a set of targets up/down the relation graph ---

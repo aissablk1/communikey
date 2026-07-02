@@ -61,11 +61,11 @@ func (s *Store) ListContacts() ([]string, error) {
 // encodeBundle renders a public bundle as one copy-pasteable token.
 func encodeBundle(b PublicBundle) string {
 	data, _ := json.Marshal(b)
-	return "csend1:" + base64.RawURLEncoding.EncodeToString(data)
+	return "communikey1:" + base64.RawURLEncoding.EncodeToString(data)
 }
 
 func decodeBundle(token string) (PublicBundle, error) {
-	token = strings.TrimPrefix(strings.TrimSpace(token), "csend1:")
+	token = strings.TrimPrefix(strings.TrimSpace(token), "communikey1:")
 	raw, err := base64.RawURLEncoding.DecodeString(token)
 	if err != nil {
 		return PublicBundle{}, err
@@ -107,7 +107,7 @@ func openBody(s *Store, m InboxMessage) string {
 	}
 	pass, ok := resolveVaultPass()
 	if !ok {
-		return "[chiffré E2E — définis CSEND_VAULT_PASS(_FILE) pour lire]"
+		return "[chiffré E2E — définis COMKEY_VAULT_PASS(_FILE) pour lire]"
 	}
 	id, err := loadIdentity(s, pass)
 	if err != nil {

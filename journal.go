@@ -1,6 +1,6 @@
 package main
 
-// journal.go — `csend journal` : trace des messages livrés sur le bus, corps en
+// journal.go — `communikey journal` : trace des messages livrés sur le bus, corps en
 // HASH uniquement (jamais le clair). Prouve que le contenu est chiffré de bout en
 // bout sans jamais le révéler — le « money-frame » de la démo cross-vendor :
 //

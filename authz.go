@@ -22,7 +22,7 @@ import (
 func allowlistPath(s *Store) string { return filepath.Join(s.Dir, "allowed.json") }
 
 // pubFingerprint is the short id of an Ed25519 public key — same scheme as the
-// identity fingerprint shown by `csend id`, so an allowed entry = a peer's fingerprint.
+// identity fingerprint shown by `communikey id`, so an allowed entry = a peer's fingerprint.
 func pubFingerprint(signPub []byte) string {
 	sum := sha256.Sum256(signPub)
 	return hex.EncodeToString(sum[:8])

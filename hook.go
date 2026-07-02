@@ -2,10 +2,10 @@ package main
 
 // hook.go — RÉCEPTION LIVE : faire qu'une session reçoive ses messages sans polling.
 //
-// `csend hook` est conçu pour être câblé comme hook `UserPromptSubmit` de Claude
+// `communikey hook` est conçu pour être câblé comme hook `UserPromptSubmit` de Claude
 // Code : à chaque prompt, il draine l'inbox de la session et imprime les messages
 // → ils surgissent dans le contexte de l'agent. C'est ce qui transforme la
-// plomberie en conversation. `csend watch` est l'équivalent « tail live » pour un
+// plomberie en conversation. `communikey watch` est l'équivalent « tail live » pour un
 // humain / un pane.
 
 import (
@@ -16,17 +16,17 @@ import (
 	"time"
 )
 
-const hookInstall = `Câble csend comme hook de réception. Dans ~/.claude/settings.json :
+const hookInstall = `Câble communikey comme hook de réception. Dans ~/.claude/settings.json :
 
   "hooks": {
     "UserPromptSubmit": [
-      { "hooks": [ { "type": "command", "command": "csend hook" } ] }
+      { "hooks": [ { "type": "command", "command": "communikey hook" } ] }
     ]
   }
 
 → à chaque prompt, les messages reçus via le bus inter-agents apparaissent dans le
   contexte de la session. (L'identité est dérivée du session_id du hook ; pose
-  CSEND_AGENT_ID pour la forcer.)`
+  COMKEY_AGENT_ID pour la forcer.)`
 
 // hookInstallFor rend le snippet de câblage adapté à l'éditeur. Pur affichage (aucune
 // écriture hors workspace, §5) — l'utilisateur applique le snippet lui-même. Les formats
@@ -34,15 +34,15 @@ const hookInstall = `Câble csend comme hook de réception. Dans ~/.claude/setti
 func hookInstallFor(provider string) string {
 	switch provider {
 	case "codex":
-		return `Câble csend dans Codex CLI (~/.codex/ — vérifie la doc Codex, le format évolue) :
-  hook UserPromptSubmit (et Stop pour l'async) → commande « csend hook ».
+		return `Câble communikey dans Codex CLI (~/.codex/ — vérifie la doc Codex, le format évolue) :
+  hook UserPromptSubmit (et Stop pour l'async) → commande « communikey hook ».
   IMPORTANT : Codex exige d'APPROUVER le hook (commande /hooks, ou
   --dangerously-bypass-hook-trust) sinon le message n'arrive jamais.
-  Au besoin : « csend hook --provider codex » si l'auto-détection échoue.`
+  Au besoin : « communikey hook --provider codex » si l'auto-détection échoue.`
 	case "gemini":
-		return `Câble csend dans Gemini CLI (~/.gemini/settings.json — vérifie la doc Gemini) :
-  event BeforeAgent → commande « csend hook »
-  (Gemini reçoit le contexte additionnel via le stdout brut de csend).`
+		return `Câble communikey dans Gemini CLI (~/.gemini/settings.json — vérifie la doc Gemini) :
+  event BeforeAgent → commande « communikey hook »
+  (Gemini reçoit le contexte additionnel via le stdout brut de communikey).`
 	default:
 		return hookInstall // Claude (UserPromptSubmit, hookSpecificOutput)
 	}
@@ -50,7 +50,7 @@ func hookInstallFor(provider string) string {
 
 // hookPayload est le sous-ensemble du JSON que les CLIs passent au hook sur stdin
 // (Claude/Codex : UserPromptSubmit ; Gemini : BeforeAgent). On ne l'EXIGE pas :
-// absent → on retombe sur CSEND_AGENT_ID / l'identité courante (rétro-compat).
+// absent → on retombe sur COMKEY_AGENT_ID / l'identité courante (rétro-compat).
 type hookPayload struct {
 	HookEventName string `json:"hook_event_name"`
 	SessionID     string `json:"session_id"`
@@ -58,10 +58,10 @@ type hookPayload struct {
 }
 
 // hookIdentity dérive une identité d'agent STABLE depuis le payload (session_id),
-// pour que la réception « marche toute seule » sans poser CSEND_AGENT_ID à la main.
+// pour que la réception « marche toute seule » sans poser COMKEY_AGENT_ID à la main.
 // C'est LE gap « zéro-config » du chemin hook.
 func hookIdentity(p hookPayload) string {
-	if env := os.Getenv("CSEND_AGENT_ID"); env != "" {
+	if env := os.Getenv("COMKEY_AGENT_ID"); env != "" {
 		return env
 	}
 	if p.SessionID != "" {
@@ -117,7 +117,7 @@ func cmdHook(args []string) {
 	if err != nil || len(msgs) == 0 {
 		return
 	}
-	text := fmt.Sprintf("[csend] %d message(s) reçus via le bus inter-agents :\n", len(msgs))
+	text := fmt.Sprintf("[communikey] %d message(s) reçus via le bus inter-agents :\n", len(msgs))
 	for _, m := range msgs {
 		who := m.From
 		if m.Provider != "" {
@@ -153,7 +153,7 @@ func cmdWatch(args []string) {
 	}
 	s := mustStore()
 	agent := selfAgentID()
-	fmt.Printf("csend watch — inbox de %s (Ctrl+C pour arrêter)\n", agent)
+	fmt.Printf("communikey watch — inbox de %s (Ctrl+C pour arrêter)\n", agent)
 	for {
 		if msgs, _ := s.Inbox().Receive(agent, true); len(msgs) > 0 {
 			for _, m := range msgs {

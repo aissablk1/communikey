@@ -1,6 +1,6 @@
 package main
 
-// memory.go — couche 6 (mémoire) du bus csend.
+// memory.go — couche 6 (mémoire) du bus communikey.
 //
 // Store durable et interrogeable : « les sessions passent, la mémoire reste ».
 //   · JOURNAL  append-only JSONL de tous les messages (qui→qui, quand, canal,
@@ -34,14 +34,14 @@ func OpenStore(dir string) (*Store, error) {
 	return &Store{Dir: dir}, nil
 }
 
-// DefaultStoreDir is ~/.claude/csend, overridable via CSEND_STORE_DIR (tests,
+// DefaultStoreDir is ~/.claude/communikey, overridable via COMKEY_STORE_DIR (tests,
 // confinement, alternate profiles).
 func DefaultStoreDir() string {
-	if d := os.Getenv("CSEND_STORE_DIR"); d != "" {
+	if d := os.Getenv("COMKEY_STORE_DIR"); d != "" {
 		return d
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".claude", "csend")
+	return filepath.Join(home, ".claude", "communikey")
 }
 
 func (s *Store) journalPath() string  { return filepath.Join(s.Dir, "journal.jsonl") }

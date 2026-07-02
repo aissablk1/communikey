@@ -2,10 +2,10 @@ package main
 
 // register.go — faire de TOUTE session un participant first-class du bus.
 //
-// `csend list` montre les surfaces d'un multiplexeur (cmux/tmux). Mais une session
+// `communikey list` montre les surfaces d'un multiplexeur (cmux/tmux). Mais une session
 // bash / Terminal / Windows / Codex / Gemini qui parle au bus par la voie
-// COOPÉRATIVE n'a pas de surface. `csend register` l'inscrit dans le registre
-// persistant → elle devient visible (`csend agents`) et adressable (`csend inbox
+// COOPÉRATIVE n'a pas de surface. `communikey register` l'inscrit dans le registre
+// persistant → elle devient visible (`communikey agents`) et adressable (`communikey inbox
 // <id>`), quel que soit le terminal, le provider ou l'OS.
 
 import (
@@ -64,7 +64,7 @@ func cmdRegister(args []string) {
 		fail(err.Error())
 	}
 	fmt.Printf("✓ session enregistrée sur le bus : %s%s\n", id, providerSuffix(provider))
-	fmt.Printf("  Adressable par : csend inbox %s \"…\"   (et csend recv pour relever)\n", id)
+	fmt.Printf("  Adressable par : communikey inbox %s \"…\"   (et communikey recv pour relever)\n", id)
 }
 
 func cmdWhoami(args []string) {
@@ -83,17 +83,17 @@ func cmdWhoami(args []string) {
 	if b, ok := loadPublicBundle(s); ok {
 		fmt.Printf("identité : %s\n", fingerprint(b))
 	} else {
-		fmt.Println("identité : aucune (csend id --create)")
+		fmt.Println("identité : aucune (communikey id --create)")
 	}
 	if n, _ := s.Inbox().Pending(id); n > 0 {
-		fmt.Printf("inbox    : %d message(s) en attente — csend recv\n", n)
+		fmt.Printf("inbox    : %d message(s) en attente — communikey recv\n", n)
 	} else {
 		fmt.Println("inbox    : vide")
 	}
 }
 
 // cmdAgents shows the cooperative fleet (registry) — agents on ANY terminal /
-// provider / OS — complementing `csend list` (live multiplexer surfaces only).
+// provider / OS — complementing `communikey list` (live multiplexer surfaces only).
 func cmdAgents(args []string) {
 	s := mustStore()
 	recs, err := s.ListSessions()
@@ -117,7 +117,7 @@ func cmdAgents(args []string) {
 		return
 	}
 	if len(recs) == 0 {
-		fmt.Println("Aucun agent coopératif enregistré. Dans une session : csend register")
+		fmt.Println("Aucun agent coopératif enregistré. Dans une session : communikey register")
 		return
 	}
 	fmt.Println("Agents coopératifs du bus (tous terminaux / providers / OS) :")

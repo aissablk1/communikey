@@ -1,6 +1,6 @@
 package main
 
-// tlsbus.go — TLS 1.3 pour le réseau csend, avec échange de clés HYBRIDE
+// tlsbus.go — TLS 1.3 pour le réseau communikey, avec échange de clés HYBRIDE
 // post-quantique. Go 1.24 négocie **X25519MLKEM768** par défaut en TLS 1.3 quand
 // les deux pairs le supportent : le transport résiste donc à « Harvest Now, Decrypt
 // Later » (§38.7) — en plus du payload déjà chiffrable E2E.
@@ -57,7 +57,7 @@ func loadOrCreateServerCert(s *Store) (tls.Certificate, string, error) {
 	}
 	tmpl := x509.Certificate{
 		SerialNumber:          serial,
-		Subject:               pkix.Name{CommonName: "csend"},
+		Subject:               pkix.Name{CommonName: "communikey"},
 		NotBefore:             time.Now().Add(-time.Hour),
 		NotAfter:              time.Now().AddDate(10, 0, 0),
 		KeyUsage:              x509.KeyUsageDigitalSignature,

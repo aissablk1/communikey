@@ -10,7 +10,7 @@ import (
 //
 // Relationships are LOGICAL, not spatial: a session's parent is the session that
 // spawned or owns it, which cmux's pane/workspace layout doesn't encode. So edges
-// are declared (`csend link`) or recorded at spawn time, and persisted here.
+// are declared (`communikey link`) or recorded at spawn time, and persisted here.
 // Nodes are keyed by stable agent session-id (see sessionKey) so a surface
 // renumber doesn't orphan the tree.
 
@@ -26,7 +26,7 @@ type Relations struct {
 
 func relationsPath() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".claude", "csend", "relations.json")
+	return filepath.Join(home, ".claude", "communikey", "relations.json")
 }
 
 func loadRelations() *Relations {

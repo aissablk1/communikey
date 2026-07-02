@@ -29,7 +29,7 @@ type Surface struct {
 	Title        string // tab title (carries the agent session-id for CLIs)
 	Workspace    string // human workspace title, e.g. "SACEM"
 	WorkspaceRef string // workspace ref, e.g. "workspace:2" — REQUIRED for socket I/O
-	Here         bool   // the surface this csend process runs in (never a target)
+	Here         bool   // the surface this communikey process runs in (never a target)
 }
 
 // cmuxAvailable reports whether the backend can be used: the `cmux` CLI (for

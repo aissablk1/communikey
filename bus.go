@@ -22,7 +22,7 @@ func nowRFC3339() string { return time.Now().UTC().Format(time.RFC3339) }
 // selfAgentID is the stable handle of the calling session for cooperative routing.
 // Priority: explicit env > cmux session key (if any) > hostname > "local".
 func selfAgentID() string {
-	if v := os.Getenv("CSEND_AGENT_ID"); v != "" {
+	if v := os.Getenv("COMKEY_AGENT_ID"); v != "" {
 		return v
 	}
 	if k, err := selfKey(); err == nil && k != "" {
@@ -42,16 +42,16 @@ func mustStore() *Store {
 	return s
 }
 
-// resolveVaultPass returns the vault passphrase. CSEND_VAULT_PASS_FILE wins (a file
-// avoids leaking the secret in `ps`/env dumps — §38) ; CSEND_VAULT_PASS is the
+// resolveVaultPass returns the vault passphrase. COMKEY_VAULT_PASS_FILE wins (a file
+// avoids leaking the secret in `ps`/env dumps — §38) ; COMKEY_VAULT_PASS is the
 // fallback. Returns (nil,false) if neither is set.
 func resolveVaultPass() ([]byte, bool) {
-	if f := os.Getenv("CSEND_VAULT_PASS_FILE"); f != "" {
+	if f := os.Getenv("COMKEY_VAULT_PASS_FILE"); f != "" {
 		if data, err := os.ReadFile(f); err == nil {
 			return []byte(strings.TrimRight(string(data), "\r\n")), true
 		}
 	}
-	if p := os.Getenv("CSEND_VAULT_PASS"); p != "" {
+	if p := os.Getenv("COMKEY_VAULT_PASS"); p != "" {
 		return []byte(p), true
 	}
 	return nil, false
@@ -109,7 +109,7 @@ func loadPublicBundle(s *Store) (PublicBundle, bool) {
 }
 
 // cmdID shows the local identity, or creates one with `--create` (needs a vault
-// passphrase in CSEND_VAULT_PASS — we never persist a secret key in clear, §38).
+// passphrase in COMKEY_VAULT_PASS — we never persist a secret key in clear, §38).
 func cmdID(args []string) {
 	create, export := false, false
 	for _, a := range args {
@@ -124,7 +124,7 @@ func cmdID(args []string) {
 	if export {
 		b, ok := loadPublicBundle(s)
 		if !ok {
-			fail("aucune identité locale — crée-en une : csend id --create")
+			fail("aucune identité locale — crée-en une : communikey id --create")
 		}
 		fmt.Printf("Jeton de clé PUBLIQUE (fingerprint %s) — partage-le avec tes pairs :\n\n%s\n", fingerprint(b), encodeBundle(b))
 		return
@@ -132,7 +132,7 @@ func cmdID(args []string) {
 	if create {
 		pass, ok := resolveVaultPass()
 		if !ok {
-			fail("définis CSEND_VAULT_PASS_FILE (recommandé) ou CSEND_VAULT_PASS pour chiffrer le vault (§38)")
+			fail("définis COMKEY_VAULT_PASS_FILE (recommandé) ou COMKEY_VAULT_PASS pour chiffrer le vault (§38)")
 		}
 		id, err := NewIdentity()
 		if err != nil {
@@ -147,7 +147,7 @@ func cmdID(args []string) {
 	}
 	b, ok := loadPublicBundle(s)
 	if !ok {
-		fmt.Println("Aucune identité locale. Crée-en une : CSEND_VAULT_PASS=… csend id --create")
+		fmt.Println("Aucune identité locale. Crée-en une : COMKEY_VAULT_PASS=… communikey id --create")
 		return
 	}
 	fmt.Printf("identité locale  fingerprint: %s\n  agent-id: %s\n", fingerprint(b), selfAgentID())
@@ -165,10 +165,10 @@ func selfProvider(s *Store) string {
 
 // cmdInbox delivers a message COOPERATIVELY to a recipient's mailbox (no cmux).
 //
-//	csend inbox <destinataire> <message…>
+//	communikey inbox <destinataire> <message…>
 func cmdInbox(args []string) {
 	if len(args) < 2 {
-		fail("usage: csend inbox <destinataire> <message…>")
+		fail("usage: communikey inbox <destinataire> <message…>")
 	}
 	to := args[0]
 	body := strings.Join(args[1:], " ")
@@ -236,7 +236,7 @@ func cmdContact(args []string) {
 	if len(args) == 0 || args[0] == "list" {
 		cs, _ := s.ListContacts()
 		if len(cs) == 0 {
-			fmt.Println("Aucun contact. Ajoute la clé publique d'un pair : csend contact add <agent> <jeton>")
+			fmt.Println("Aucun contact. Ajoute la clé publique d'un pair : communikey contact add <agent> <jeton>")
 			return
 		}
 		fmt.Println("Contacts (clés publiques connues) :")
@@ -247,7 +247,7 @@ func cmdContact(args []string) {
 	}
 	if args[0] == "add" {
 		if len(args) < 3 {
-			fail("usage: csend contact add <agent> <jeton>")
+			fail("usage: communikey contact add <agent> <jeton>")
 		}
 		b, err := decodeBundle(args[2])
 		if err != nil {
@@ -259,5 +259,5 @@ func cmdContact(args []string) {
 		fmt.Printf("✓ contact « %s » ajouté (fingerprint %s) — les messages vers lui seront chiffrés E2E\n", args[1], fingerprint(b))
 		return
 	}
-	fail("usage: csend contact add <agent> <jeton>  |  csend contact list")
+	fail("usage: communikey contact add <agent> <jeton>  |  communikey contact list")
 }

@@ -34,7 +34,7 @@ func (c Channel) String() string {
 // TargetInfo is what the router needs to decide. It is deliberately transport- and
 // provider-agnostic: discovery fills it in.
 type TargetInfo struct {
-	Cooperates bool // has a csend inbox/identity (can receive cooperatively)
+	Cooperates bool // has a communikey inbox/identity (can receive cooperatively)
 	Bridge     bool // reachable only via a native bridge (Agent Teams in-process)
 	Live       bool // a reachable TUI we can inject into right now (Unix multiplexer)
 }

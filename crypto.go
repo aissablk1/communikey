@@ -1,6 +1,6 @@
 package main
 
-// crypto.go — couche 0 (sécurité) du bus csend.
+// crypto.go — couche 0 (sécurité) du bus communikey.
 //
 // Primitives AUDITÉES uniquement (§38 : jamais de crypto maison), toutes dans la
 // stdlib Go 1.24 → zéro dépendance externe :
@@ -29,7 +29,7 @@ import (
 	"fmt"
 )
 
-const hkdfInfo = "csend/v1 hybrid-seal"
+const hkdfInfo = "communikey/v1 hybrid-seal"
 
 // Identity is an agent's long-term key material. The private halves live ONLY in
 // the vault (SealVault); peers need only the PublicBundle to send to this identity.
@@ -73,15 +73,15 @@ func deriveIdentity(master []byte) (*Identity, error) {
 	if len(master) != 32 {
 		return nil, errors.New("graine maître: 32 octets requis")
 	}
-	edSeed, err := hkdf.Key(sha256.New, master, nil, "csend/id/ed25519", 32)
+	edSeed, err := hkdf.Key(sha256.New, master, nil, "communikey/id/ed25519", 32)
 	if err != nil {
 		return nil, err
 	}
-	xSeed, err := hkdf.Key(sha256.New, master, nil, "csend/id/x25519", 32)
+	xSeed, err := hkdf.Key(sha256.New, master, nil, "communikey/id/x25519", 32)
 	if err != nil {
 		return nil, err
 	}
-	mlSeed, err := hkdf.Key(sha256.New, master, nil, "csend/id/mlkem", 64)
+	mlSeed, err := hkdf.Key(sha256.New, master, nil, "communikey/id/mlkem", 64)
 	if err != nil {
 		return nil, err
 	}
