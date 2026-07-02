@@ -29,6 +29,16 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
+# Provenance LOCALE (part de #38 faisable sans GitHub Actions) : SBOM CycloneDX par archive.
+# Nécessite `syft` au moment de la release (brew install syft). Le SLSA-in-Actions et la
+# signature cosign viennent en plus quand la CI est débloquée / une clé cosign est posée.
+sboms:
+  - id: csend
+    artifacts: archive
+    documents: ["${artifact}.sbom.cdx.json"]
+    cmd: syft
+    args: ["$artifact", "--output", "cyclonedx-json=$document"]
+
 # NB: la section `brews` (formule Homebrew) est dépréciée par goreleaser au profit de
 # `homebrew_casks` ; mais un cask est macOS-only. On garde la FORMULE pour servir AUSSI
 # Homebrew/Linux (installation binaire cross-plateforme). À réévaluer si goreleaser retire brews.
