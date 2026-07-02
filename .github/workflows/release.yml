@@ -1,0 +1,50 @@
+name: Release
+
+# Publie la release + PROVENANCE quand un tag vX.Y.Z est poussé (complète #38).
+# Ne tourne QUE sur tag → zéro bruit sur les push normaux (la CI de test = ci.yml).
+#
+# Chaîne : goreleaser (binaires multi-OS + SBOM CycloneDX via syft) → attestation
+# SLSA de provenance (native GitHub) → signature keyless cosign des checksums (OIDC).
+#
+# NB versions d'actions à re-vérifier/épingler avant un vrai release (elles évoluent).
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write # créer la release + uploader les assets/signatures
+  id-token: write # OIDC → cosign keyless + attestation de provenance
+  attestations: write # actions/attest-build-provenance (SLSA)
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - uses: anchore/sbom-action/download-syft@v0 # syft, requis par le bloc `sboms` de goreleaser
+      - uses: sigstore/cosign-installer@v3 # cosign, pour la signature keyless
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Attestation SLSA de provenance sur les artefacts
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: "dist/csend_*.tar.gz,dist/csend_*.zip,dist/checksums.txt"
+      - name: Signature keyless cosign des checksums (OIDC)
+        run: |
+          cosign sign-blob --yes dist/checksums.txt \
+            --output-signature dist/checksums.txt.sig \
+            --output-certificate dist/checksums.txt.pem
+          gh release upload "${GITHUB_REF_NAME}" \
+            dist/checksums.txt.sig dist/checksums.txt.pem --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
