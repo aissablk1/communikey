@@ -1,11 +1,11 @@
-# csend
+# communikey
 
-[![CI](https://github.com/aissablk1/csend/actions/workflows/ci.yml/badge.svg)](https://github.com/aissablk1/csend/actions/workflows/ci.yml)
+[![CI](https://github.com/aissablk1/communikey/actions/workflows/ci.yml/badge.svg)](https://github.com/aissablk1/communikey/actions/workflows/ci.yml)
 [![Licence : Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue.svg)](LICENSE)
 [![Go 1.24](https://img.shields.io/badge/Go-1.24-00ADD8?logo=go&logoColor=white)](https://go.dev/dl/)
-[![Go Report Card](https://goreportcard.com/badge/github.com/aissablk1/csend)](https://goreportcard.com/report/github.com/aissablk1/csend)
+[![Go Report Card](https://goreportcard.com/badge/github.com/aissablk1/communikey)](https://goreportcard.com/report/github.com/aissablk1/communikey)
 [![Zéro dépendance](https://img.shields.io/badge/dépendances-0%20(stdlib)-success)](go.mod)
-[![Release](https://img.shields.io/github/v/release/aissablk1/csend?sort=semver&color=success)](https://github.com/aissablk1/csend/releases/latest)
+[![Release](https://img.shields.io/github/v/release/aissablk1/communikey?sort=semver&color=success)](https://github.com/aissablk1/communikey/releases/latest)
 
 **Le bus de messages qui fait parler tes agents de code entre eux.** Une session
 d'agent CLI (Claude Code, Codex, Gemini…) écrit à une **autre session en cours** — en
@@ -13,17 +13,17 @@ lisant son état (idle / busy / confirmation) **avant** d'agir, à travers termi
 providers et machines, **chiffré de bout en bout** et résistant au quantique. Go,
 **zéro dépendance**, Apache-2.0.
 
-> **Ce que csend a et que les autres bus d'agents n'ont pas.** Chaque message est **signé**
+> **Ce que communikey a et que les autres bus d'agents n'ont pas.** Chaque message est **signé**
 > (identité **Ed25519**) — tu sais *qui* parle, pas seulement que « quelqu'un avec le bon mot de
 > passe » parle. Là où les autres bus inter-sessions partagent un **secret unique** sans
-> authentifier l'expéditeur, csend chiffre **pour le destinataire** (X25519 ⊕ ML-KEM-768,
+> authentifier l'expéditeur, communikey chiffre **pour le destinataire** (X25519 ⊕ ML-KEM-768,
 > **post-quantique**) et offre une **recovery souveraine** (Shamir + BIP-39). Le bus d'agents
 > **auditable** : provenance, confidentialité, souveraineté.
 
-> **Le trou que csend comble.** Aucune API officielle n'injecte un prompt dans une
+> **Le trou que communikey comble.** Aucune API officielle n'injecte un prompt dans une
 > session d'agent CLI **vivante** (cf. les feature requests Claude Code fermées/ouvertes
 > [#24947](https://github.com/anthropics/claude-code/issues/24947),
-> [#27441](https://github.com/anthropics/claude-code/issues/27441)). csend combine deux
+> [#27441](https://github.com/anthropics/claude-code/issues/27441)). communikey combine deux
 > chemins : un **inbox coopératif** = colonne vertébrale universelle (tout OS, tout
 > provider) et une **injection clavier live** = repli pour les TUI Unix. Une seule
 > adresse, un seul outil, et le message trouve toujours un chemin.
@@ -42,54 +42,54 @@ Tu pilotes plusieurs agents de code en parallèle (une fenêtre par tâche, parf
 plusieurs machines). Il manque le câble entre eux : qu'une session puisse en
 **prévenir**, **relancer** ou **coordonner** une autre, sans copier-coller à la main,
 sans tout réécrire dans un orchestrateur propriétaire, et **sans confier le contenu de
-tes prompts à un relais en clair**. csend est ce câble : souverain, chiffré, sans
+tes prompts à un relais en clair**. communikey est ce câble : souverain, chiffré, sans
 dépendance.
 
 ## Installation
 
 ```sh
 # Homebrew (macOS · Linux)
-brew install aissablk1/tap/csend
+brew install aissablk1/tap/communikey
 
 # Go (toute plateforme avec une toolchain Go 1.24+)
-go install github.com/aissablk1/csend@latest
+go install github.com/aissablk1/communikey@latest
 
-# Script (audite-le d'abord ; tire le binaire des GitHub Releases — une fois csend.dev en ligne)
-curl -fsSL https://csend.dev/install.sh | sh
+# Script (audite-le d'abord ; tire le binaire des GitHub Releases — une fois communikey.dev en ligne)
+curl -fsSL https://communikey.dev/install.sh | sh
 
 # Source (zéro confiance, binaire universel arm64 + x86_64 sur macOS)
-git clone https://github.com/aissablk1/csend && cd csend && make install
+git clone https://github.com/aissablk1/communikey && cd communikey && make install
 ```
 
 ## En 60 secondes
 
 ```sh
 # --- Voie coopérative : marche PARTOUT, sans multiplexeur ---
-csend register                               # cette session rejoint le bus (tout OS/provider)
-csend inbox SACEM "lance le build de prod"   # une session écrit à une autre
-csend recv                                   # cette session relève (et vide) son inbox
+communikey register                               # cette session rejoint le bus (tout OS/provider)
+communikey inbox SACEM "lance le build de prod"   # une session écrit à une autre
+communikey recv                                   # cette session relève (et vide) son inbox
 
 # --- Voie cmux/tmux : pilotage state-aware d'une flotte Unix ---
-csend list                  # sessions agent + état : ● idle  ◐ busy  ⚠ confirm
-csend tree                  # graphe familial père → enfants
-csend send SACEM "go"       # message gouverné (ne valide QUE si la cible est idle)
-csend send --down "build"   # broadcast aux sessions enfants
+communikey list                  # sessions agent + état : ● idle  ◐ busy  ⚠ confirm
+communikey tree                  # graphe familial père → enfants
+communikey send SACEM "go"       # message gouverné (ne valide QUE si la cible est idle)
+communikey send --down "build"   # broadcast aux sessions enfants
 
 # --- Identité chiffrée & recovery par seuil ---
-CSEND_VAULT_PASS=… csend id --create     # identité hybride (Ed25519 + X25519 + ML-KEM-768) en vault chiffré
-csend recovery split 2 3                 # 3 parts Shamir, seuil 2-sur-3
-csend recovery combine <part1> <part2>   # reconstitue depuis ≥ 2 parts
+COMKEY_VAULT_PASS=… communikey id --create     # identité hybride (Ed25519 + X25519 + ML-KEM-768) en vault chiffré
+communikey recovery split 2 3                 # 3 parts Shamir, seuil 2-sur-3
+communikey recovery combine <part1> <part2>   # reconstitue depuis ≥ 2 parts
 ```
 
 **Chiffrement de bout en bout, concrètement :** échange les jetons de clé publique
-(`csend id --export` → `csend contact add <pair> <jeton>`), et tout message vers ce
+(`communikey id --export` → `communikey contact add <pair> <jeton>`), et tout message vers ce
 pair part **scellé** — l'inbox, le journal et le relais réseau ne voient que du
-chiffré. Sans contact connu, csend retombe en clair (confiance locale, jamais sur le
+chiffré. Sans contact connu, communikey retombe en clair (confiance locale, jamais sur le
 réseau ouvert sans durcissement).
 
 ## Pour les agents IA
 
-csend est exposé comme **skill Claude Code** (`~/.claude/skills/csend`) : une session
+communikey est exposé comme **skill Claude Code** (`~/.claude/skills/communikey`) : une session
 peut **écrire à / relever / coordonner** ses paires en langage naturel (« dis à SACEM
 de relancer le build », « relève mon inbox », « broadcast à mes enfants »). La voie
 coopérative (`inbox` / `recv` / `register`) ne dépend d'aucun terminal — idéale pour
@@ -97,10 +97,10 @@ des flottes d'agents hétérogènes.
 
 ## Comparatif honnête
 
-Ce que csend fait, face aux outils voisins. `✅` = livré · `◐` = partiel · `❌` =
+Ce que communikey fait, face aux outils voisins. `✅` = livré · `◐` = partiel · `❌` =
 absent ou hors-modèle.
 
-| Capacité | **csend** | Agent Teams (natif) | ruflo (claude-flow) | tmux-orchestrator |
+| Capacité | **communikey** | Agent Teams (natif) | ruflo (claude-flow) | tmux-orchestrator |
 |---|:---:|:---:|:---:|:---:|
 | Cross-provider (Claude / Codex / Gemini) | ✅ <sup>1</sup> | ❌ Claude only | ◐ | ❌ |
 | Cross-OS + mobile | ✅ <sup>2</sup> | ❌ desktop | ❌ | ❌ Unix only |
@@ -118,13 +118,13 @@ attente. La voie coopérative, elle, est déjà provider-agnostique.
 (le mobile rejoint le bus comme client — voir, approuver, broadcaster —, il **n'injecte
 pas** au clavier : sandbox).
 <sup>3</sup> Injection live **Unix uniquement** (cmux / tmux) ; **Windows natif = ❌**
-(pas de PTY maître partageable). csend lit l'état de la cible **avant** d'écrire, là où
+(pas de PTY maître partageable). communikey lit l'état de la cible **avant** d'écrire, là où
 tmux-orchestrator envoie à l'aveugle.
 
 > Honnêteté (le comparatif doit rester vérifiable) : Agent Teams est une **fonction
 > native** d'un seul écosystème (Claude), pas un défaut ; ruflo (rebrand de
 > `claude-flow`) est un meta-harness npm bien plus large mais non chiffré et lourd ;
-> tmux-orchestrator est minimal, clair et Unix. csend occupe l'angle qu'aucun ne
+> tmux-orchestrator est minimal, clair et Unix. communikey occupe l'angle qu'aucun ne
 > couvre : **souverain, chiffré E2E, post-quantique, cross-provider**.
 
 ## Modèle de sécurité (résumé)
@@ -179,7 +179,7 @@ voie coopérative reste pleine et entière.
   registre des sessions.
 
 Conception détaillée :
-[`docs/superpowers/specs/2026-06-27-csend-bus-universel-design.md`](docs/superpowers/specs/2026-06-27-csend-bus-universel-design.md).
+[`docs/superpowers/specs/2026-06-27-communikey-bus-universel-design.md`](docs/superpowers/specs/2026-06-27-communikey-bus-universel-design.md).
 
 ## Feuille de route
 
@@ -210,10 +210,9 @@ CI : `go vet` + `go test -race ./...` + build, à chaque push
 
 - Modèle de sécurité : [`SECURITY.md`](SECURITY.md)
 - Journal des versions : [`CHANGELOG.md`](CHANGELOG.md)
-- Design & feuille de route : [`docs/superpowers/specs/2026-06-27-csend-bus-universel-design.md`](docs/superpowers/specs/2026-06-27-csend-bus-universel-design.md)
+- Design & feuille de route : [`docs/superpowers/specs/2026-06-27-communikey-bus-universel-design.md`](docs/superpowers/specs/2026-06-27-communikey-bus-universel-design.md)
 - Ce qui reste, et pourquoi : [`docs/NEXT.md`](docs/NEXT.md)
 - Où publier : [`docs/PUBLISHING.md`](docs/PUBLISHING.md)
-- Face aux autres bus d'agents (comparatif honnête) : [`docs/COMPARISON.md`](docs/COMPARISON.md)
 
 ---
 

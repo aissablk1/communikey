@@ -1,6 +1,6 @@
 # Changelog
 
-Toutes les évolutions notables de csend sont consignées ici.
+Toutes les évolutions notables de communikey sont consignées ici.
 
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le projet
 adopte le [versionnage sémantique](https://semver.org/lang/fr/).
@@ -14,9 +14,9 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   AAD variadique optionnelle (appels sans contexte inchangés).
 
 ### Ajouté
-- `csend journal [--json]` : trace du bus (de→à, **hash uniquement**, jamais le clair).
-- `csend key <cible> <touche>` : envoie une touche brute (enter/escape/ctrl+c/ctrl+u…).
-- `csend hook` **provider-aware** : identité auto-dérivée du `session_id` (zéro-config), forme
+- `communikey journal [--json]` : trace du bus (de→à, **hash uniquement**, jamais le clair).
+- `communikey key <cible> <touche>` : envoie une touche brute (enter/escape/ctrl+c/ctrl+u…).
+- `communikey hook` **provider-aware** : identité auto-dérivée du `session_id` (zéro-config), forme
   de sortie par éditeur (Claude/Codex `hookSpecificOutput` ; Gemini brut), `--install {claude|codex|gemini}`,
   `--provider` pour forcer la forme.
 - Enveloppe *provider-aware* : champs `provider`/`kind` sur les messages (collaboration cross-vendor visible).
@@ -92,5 +92,5 @@ vert) ; rien n'est promis sans être livré.
 - Adaptateurs Codex/Gemini, passkey, auth mutuelle réseau, clients mobiles et surface
   MCP : **non livrés** (feuille de route).
 
-[Non publié]: https://github.com/aissablk1/csend/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/aissablk1/csend/releases/tag/v0.2.0
+[Non publié]: https://github.com/aissablk1/communikey/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/aissablk1/communikey/releases/tag/v0.2.0

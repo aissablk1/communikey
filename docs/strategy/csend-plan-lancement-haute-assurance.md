@@ -1,25 +1,25 @@
 ---
-title: "csend — Plan de lancement « haute assurance »"
+title: "communikey — Plan de lancement « haute assurance »"
 date: 2026-07-01
 auteur: Aïssa BELKOUSSA
-projet: csend
+projet: communikey
 version: 1.0
 statut: validé
 tags: [stratégie, lancement, gtm, positionnement, haute-assurance]
 ---
 
-# csend — Plan de lancement « haute assurance »
+# communikey — Plan de lancement « haute assurance »
 
-> GTM (skill `launch-strategy`) pour la **seule niche où csend est structurellement supérieur** :
+> GTM (skill `launch-strategy`) pour la **seule niche où communikey est structurellement supérieur** :
 > le bus d'agents **authentifié + post-quantique + souverain**. Ancré sur la réalité (§29/§2) :
-> csend est un **alpha solo, ~0 adoption, gratuit**, face à `hcom` (plus mûr, plus large). Pas de
+> communikey est un **alpha solo, ~0 adoption, gratuit**, face à `hcom` (plus mûr, plus large). Pas de
 > faux chiffre, pas de faux-semblant de traction.
 
 ## 0. La réalité de départ (honnête)
 
 - **Produit** : alpha `v0.2.0`, **v0.3.0 crypto-breaking à venir** (transcript signé — surface:45).
 - **Audience owned** : quasi nulle (repo d'un jour, aucune liste e-mail, aucun trafic).
-- **Bloqueurs actifs** : facturation GitHub → **CI rouge + Pages OFF** ; **csend.dev pas en ligne**.
+- **Bloqueurs actifs** : facturation GitHub → **CI rouge + Pages OFF** ; **communikey.dev pas en ligne**.
 - **Concurrent** : `hcom` (10 CLIs, cross-machine, chiffré PSK, ~363★) — **plus mûr et plus large**.
 
 **Conclusion de cadrage :** ne PAS lancer maintenant (badge rouge, pas de site, crypto qui va casser).
@@ -28,7 +28,7 @@ Le lancement se **mérite** — d'abord la crédibilité technique, pas le bruit
 ## 1. Positionnement (énoncé)
 
 > Pour les **opérateurs multi-agents en contexte sensible** qui **ne peuvent pas faire confiance à
-> un bus « à mot de passe partagé »**, **csend** est le bus inter-agents à **vraie identité
+> un bus « à mot de passe partagé »**, **communikey** est le bus inter-agents à **vraie identité
 > cryptographique** : il **authentifie chaque expéditeur** (Ed25519 signé), **chiffre pour le
 > destinataire** (X25519 ⊕ ML-KEM-768, post-quantique) et offre une **recovery souveraine** —
 > contrairement à `hcom` et aux autres bus (PSK partagé ou clair, sans auth d'expéditeur).
@@ -46,7 +46,7 @@ Le lancement se **mérite** — d'abord la crédibilité technique, pas le bruit
 
 ## 3. Messaging (par audience)
 
-- **netsec** : *« Ton bus d'agents sait-il QUI parle ? Un PSK partagé, non. csend signe chaque
+- **netsec** : *« Ton bus d'agents sait-il QUI parle ? Un PSK partagé, non. communikey signe chaque
   message — provenance, pas juste confidentialité. »*
 - **régulé/souverain** : *« Coordination d'agents auto-hébergée, chiffrée par destinataire,
   post-quantique, zéro dépendance, zéro lock-in. »*
@@ -58,10 +58,10 @@ Le lancement se **mérite** — d'abord la crédibilité technique, pas le bruit
 | Type | Canal | Tactique |
 |---|---|---|
 | **Owned** | Repo GitHub | README (wedge ✅), SECURITY.md (modèle de menace ✅), page **COMPARISON** honnête vs hcom |
-| **Owned** | Site `csend.dev` | Hero recadré (✅) ; **à héberger** (Cloudflare Pages, indépendant de la facturation) |
+| **Owned** | Site `communikey.dev` | Hero recadré (✅) ; **à héberger** (Cloudflare Pages, indépendant de la facturation) |
 | **Owned** | Post technique | Write-up « pourquoi un PSK partagé ne suffit pas pour des agents » (le moat, pédagogique) |
 | **Rented** | **r/netsec, r/crypto, r/LocalLLaMA** | l'angle sécurité/souveraineté (PAS r/ClaudeAI en premier — mauvais public pour le moat) |
-| **Rented** | **Show HN** | *« csend — the authenticated, post-quantum message bus for AI agents »* — **après** v0.3.0 + site + CI verte |
+| **Rented** | **Show HN** | *« communikey — the authenticated, post-quantum message bus for AI agents »* — **après** v0.3.0 + site + CI verte |
 | **Rented** | X (dev/sécurité) | thread « signé vs mot de passe partagé » avec la démo réelle 2 agents |
 | **Borrowed** | Discussions bus d'agents | S'inserer là où le public est (issues/threads hcom, murmur, Agent Teams) — apport, pas spam |
 | **Borrowed** | awesome-lists | PR **plus tard** (quand v0.3.0 mûr) — un alpha se fait rejeter |

@@ -1,16 +1,16 @@
 ---
-title: "csend — Playbook d'adoption open source"
+title: "communikey — Playbook d'adoption open source"
 date: 2026-06-27
 auteur: Aïssa BELKOUSSA
-projet: csend
+projet: communikey
 version: 1.0
 statut: validé
-tags: [oss, adoption, distribution, securite, csend, go]
+tags: [oss, adoption, distribution, securite, communikey, go]
 ---
 
-# csend — Playbook d'adoption open source
+# communikey — Playbook d'adoption open source
 
-> Cap retenu (2026-06-27) : csend est **viable comme outil open source**, pas comme
+> Cap retenu (2026-06-27) : communikey est **viable comme outil open source**, pas comme
 > business. Objectif = adoption, diffusion, confiance — pas de chiffre d'affaires.
 > Ce playbook remplace le « founder pack » de vente par un plan de lancement OSS.
 
@@ -39,9 +39,9 @@ Foundation, 150+ orgs). Un bus tiers *générique* est comprimé entre les deux 
 post-quantique, pour agents de code — cross-provider, cross-OS, avec injection dans
 les sessions en cours. »
 
-**Comparatif (ce que csend fait seul) :**
+**Comparatif (ce que communikey fait seul) :**
 
-| Capacité | csend | Agent Teams (natif) | ruflo | tmux-orchestrator |
+| Capacité | communikey | Agent Teams (natif) | ruflo | tmux-orchestrator |
 |---|:---:|:---:|:---:|:---:|
 | Cross-provider (Claude/Codex/Gemini) | ✅ (Claude ✅, autres phase 2) | ❌ Claude only | ◐ | ❌ |
 | Cross-OS + mobile (client) | ✅ | ❌ desktop | ❌ | ❌ Unix only |
@@ -62,8 +62,8 @@ les sessions en cours. »
 1. **GitHub, base camp.** README qui prouve la valeur en 60 s, topics
    (`claude-code`, `ai-agents`, `mcp`, `e2e-encryption`, `post-quantum`, `tmux`,
    `cli`), releases taguées avec **binaires pré-compilés** (arm64 + x86_64).
-2. **Installation friction-zéro.** `go install github.com/aissablk1/csend@latest`
-   (fonctionne déjà) + **tap Homebrew** (`homebrew-csend`) + `install.sh` (fait).
+2. **Installation friction-zéro.** `go install github.com/aissablk1/communikey@latest`
+   (fonctionne déjà) + **tap Homebrew** (`homebrew-communikey`) + `install.sh` (fait).
 3. **Awesome-lists.** PR sur *awesome-claude-code*, *awesome-go*, et *awesome-mcp*
    (le jour où la surface MCP ship).
 4. **Communautés.** Show HN (Hacker News), r/ClaudeAI, r/commandline, Discord
@@ -89,9 +89,9 @@ les sessions en cours. »
 ## 5. Onboarding — friction zéro, humain ET IA
 
 - **Humain :** une commande (`brew install` / `go install` / `curl … | sh`),
-  puis `csend --help` et un quickstart qui marche du premier coup.
+  puis `communikey --help` et un quickstart qui marche du premier coup.
 - **IA :** surfaces skill + hook + MCP pour qu'un agent s'auto-installe et s'auto-
-  enregistre (`csend register`) sans intervention humaine.
+  enregistre (`communikey register`) sans intervention humaine.
 - Règle : **chaque étape d'install retirée = de l'adoption gagnée** (§57).
 
 ---

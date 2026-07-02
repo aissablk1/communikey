@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>csend — bus de messages chiffré pour agents de code</title>
+<title>communikey — bus de messages chiffré pour agents de code</title>
 <meta name="description" content="Le bus de messages chiffré de bout en bout, souverain et post-quantique, qui injecte un message dans une autre session d’agent de code déjà en cours. Cross-provider, cross-OS, zéro dépendance, Apache-2.0." />
-<link rel="canonical" href="https://csend.dev/" />
+<link rel="canonical" href="https://communikey.dev/" />
 <meta name="theme-color" content="#070809" />
 <meta name="color-scheme" content="dark" />
 
 <meta property="og:type" content="website" />
-<meta property="og:title" content="csend — le bus de messages chiffré entre tes agents de code" />
+<meta property="og:title" content="communikey — le bus de messages chiffré entre tes agents de code" />
 <meta property="og:description" content="Injecte un message dans une autre session d’agent CLI déjà vivante. Chiffré E2E, hybride post-quantique, zéro dépendance. Go, Apache-2.0." />
-<meta property="og:url" content="https://csend.dev/" />
+<meta property="og:url" content="https://communikey.dev/" />
 <meta name="twitter:card" content="summary_large_image" />
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070809'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='17' font-weight='700' text-anchor='middle' fill='%234af2b0'%3E%E2%80%BA_%3C/text%3E%3C/svg%3E" />
@@ -26,9 +26,9 @@
 <div class="scanlines" aria-hidden="true"></div>
 
 <header class="topbar" role="banner">
-  <a class="brand" href="#main" aria-label="csend, accueil">
+  <a class="brand" href="#main" aria-label="communikey, accueil">
     <span class="brand__mark" aria-hidden="true">›_</span>
-    <span class="brand__name">csend</span>
+    <span class="brand__name">communikey</span>
     <span class="brand__ver">alpha · v0.2.0-dev</span>
   </a>
   <nav class="topnav" aria-label="Navigation principale">
@@ -36,7 +36,7 @@
     <a href="#securite">Sécurité</a>
     <a href="#quickstart">Quickstart</a>
     <a href="#roadmap">Roadmap</a>
-    <a class="topnav__repo" href="https://github.com/aissablk1/csend" rel="noopener">GitHub&nbsp;›</a>
+    <a class="topnav__repo" href="https://github.com/aissablk1/communikey" rel="noopener">GitHub&nbsp;›</a>
   </nav>
 </header>
 
@@ -47,54 +47,52 @@
     <div class="hero__copy">
       <p class="kicker reveal" data-d="0">
         <span class="dot" aria-hidden="true"></span>
-        Bus de messages&nbsp;· signé, chiffré&nbsp;E2E&nbsp;· post-quantique&nbsp;· souverain
+        Bus de messages&nbsp;· chiffré&nbsp;E2E&nbsp;· hybride post-quantique
       </p>
       <h1 id="hero-title" class="hero__title">
         <span class="reveal" data-d="1">Tes agents de code,</span>
         <span class="reveal hero__title--accent" data-d="2">sur le même fil.</span>
       </h1>
       <p class="hero__lede reveal" data-d="3">
-        <strong>csend</strong> injecte un message dans une <em>autre</em> session
+        <strong>communikey</strong> injecte un message dans une <em>autre</em> session
         d’agent CLI <em>déjà en cours</em> — en lisant son état avant d’agir
-        (idle&nbsp;/ busy&nbsp;/ confirmation). <strong>Signé</strong> (tu sais <em>qui</em>
-        parle, pas juste « quelqu’un avec le bon secret »), <strong>chiffré pour son
-        destinataire</strong>, post-quantique, souverain, cross-provider, cross-OS. Go,
-        <strong>zéro dépendance</strong>, Apache-2.0.
+        (idle&nbsp;/ busy&nbsp;/ confirmation). Chiffré de bout en bout, souverain,
+        cross-provider, cross-OS. Go, <strong>zéro dépendance</strong>, Apache-2.0.
       </p>
 
       <div class="hero__cta reveal" data-d="4">
         <a class="btn btn--ghost" href="#securite">Le modèle de sécurité&nbsp;›</a>
-        <a class="btn btn--line" href="https://github.com/aissablk1/csend" rel="noopener">Code source&nbsp;·&nbsp;GitHub&nbsp;›</a>
+        <a class="btn btn--line" href="https://github.com/aissablk1/communikey" rel="noopener">Code source&nbsp;·&nbsp;GitHub&nbsp;›</a>
       </div>
     </div>
 
     <!-- terminal d’install -->
-    <aside class="terminal reveal" data-d="3" aria-label="Installation de csend">
+    <aside class="terminal reveal" data-d="3" aria-label="Installation de communikey">
       <div class="terminal__bar">
         <span class="terminal__dot" aria-hidden="true"></span>
         <span class="terminal__dot" aria-hidden="true"></span>
         <span class="terminal__dot" aria-hidden="true"></span>
-        <span class="terminal__title">~ installer csend</span>
+        <span class="terminal__title">~ installer communikey</span>
       </div>
       <div class="terminal__body">
-        <div class="cmd" data-copy="go install github.com/aissablk1/csend@latest">
-          <code><span class="cmd__p">$</span> go install github.com/aissablk1/csend@latest</code>
+        <div class="cmd" data-copy="go install github.com/aissablk1/communikey@latest">
+          <code><span class="cmd__p">$</span> go install github.com/aissablk1/communikey@latest</code>
           <button class="cmd__copy" type="button" aria-label="Copier la commande d’installation">Copier</button>
         </div>
         <p class="terminal__alt">
-          ou&nbsp;: <code>brew install aissablk1/tap/csend</code>
-          &nbsp;·&nbsp; <code>curl&nbsp;-fsSL&nbsp;https://csend.dev/install.sh | sh</code>
+          ou&nbsp;: <code>brew install aissablk1/tap/communikey</code>
+          &nbsp;·&nbsp; <code>curl&nbsp;-fsSL&nbsp;https://communikey.dev/install.sh | sh</code>
           <span class="terminal__note">(audite le script d’abord)</span>
         </p>
         <hr class="terminal__sep" aria-hidden="true" />
-        <pre class="terminal__demo" aria-label="Exemple d’utilisation"><span class="c-p">$</span> csend list                  <span class="c-c"># sessions agent + état</span>
+        <pre class="terminal__demo" aria-label="Exemple d’utilisation"><span class="c-p">$</span> communikey list                  <span class="c-c"># sessions agent + état</span>
 SACEM        <span class="c-ok">idle</span>      tour 4 · prêt
 build-bot    <span class="c-busy">busy</span>      compile…
 deploy       <span class="c-warn">confirm</span>   « Pousser en prod ? (y/N) »
 
-<span class="c-p">$</span> csend send SACEM <span class="c-s">"lance le build de prod"</span>
+<span class="c-p">$</span> communikey send SACEM <span class="c-s">"lance le build de prod"</span>
 <span class="c-ok">✓</span> remis · SACEM était idle · validé
-<span class="c-p">$</span> csend send --down <span class="c-s">"status ?"</span>     <span class="c-c"># broadcast aux enfants</span></pre>
+<span class="c-p">$</span> communikey send --down <span class="c-s">"status ?"</span>     <span class="c-c"># broadcast aux enfants</span></pre>
         <p class="terminal__legend">Sortie illustrative de la syntaxe réelle — aucune télémétrie.</p>
       </div>
     </aside>
@@ -104,22 +102,22 @@ deploy       <span class="c-warn">confirm</span>   « Pousser en prod ? (y/N) »
   <section id="solo" class="band" aria-labelledby="solo-title">
     <div class="band__head reveal">
       <p class="eyebrow">01 — Le trou que personne ne comble</p>
-      <h2 id="solo-title">Ce que <span class="ink-accent">csend</span> fait — seul.</h2>
+      <h2 id="solo-title">Ce que <span class="ink-accent">communikey</span> fait — seul.</h2>
       <p class="band__intro">
         <strong>Aucune API officielle n’injecte un prompt dans une session
         d’agent CLI vivante.</strong> Les orchestrateurs lancent <em>leurs</em>
         agents&nbsp;; <code>tmux</code> tape à l’aveugle&nbsp;; aucun ne parle,
-        chiffré, à une session déjà ouverte ailleurs. csend est ce fil-là.
+        chiffré, à une session déjà ouverte ailleurs. communikey est ce fil-là.
       </p>
     </div>
 
     <div class="cmp reveal" role="region" aria-label="Comparatif honnête">
       <table class="cmp__table">
-        <caption class="visually-hidden">Comparaison de csend, Agent Teams, ruflo et tmux selon leur but de conception</caption>
+        <caption class="visually-hidden">Comparaison de communikey, Agent Teams, ruflo et tmux selon leur but de conception</caption>
         <thead>
           <tr>
             <th scope="col" class="cmp__rowhead">Capacité</th>
-            <th scope="col" class="cmp__me">csend</th>
+            <th scope="col" class="cmp__me">communikey</th>
             <th scope="col">Agent Teams</th>
             <th scope="col">ruflo&nbsp;/ claude-flow</th>
             <th scope="col">tmux <code>send-keys</code></th>
@@ -238,9 +236,9 @@ deploy       <span class="c-warn">confirm</span>   « Pousser en prod ? (y/N) »
           clé se découpe en parts <strong>Shamir N-sur-M</strong> sur GF(2⁸)&nbsp;:
           K-1 parts ne révèlent <em>rien</em>. Perds une part, garde l’accès.
         </p>
-        <pre class="mini" aria-label="Exemple de recovery"><span class="c-p">$</span> csend recovery split 2 3
+        <pre class="mini" aria-label="Exemple de recovery"><span class="c-p">$</span> communikey recovery split 2 3
 <span class="c-ok">✓</span> 3 parts · seuil 2-sur-3
-<span class="c-p">$</span> csend recovery combine p1 p2
+<span class="c-p">$</span> communikey recovery combine p1 p2
 <span class="c-ok">✓</span> identité reconstituée</pre>
       </article>
     </div>
@@ -258,7 +256,7 @@ deploy       <span class="c-warn">confirm</span>   « Pousser en prod ? (y/N) »
         <span class="step__n" aria-hidden="true">1</span>
         <div class="step__body">
           <h3>Installe</h3>
-          <pre class="mini"><span class="c-p">$</span> go install github.com/aissablk1/csend@latest</pre>
+          <pre class="mini"><span class="c-p">$</span> go install github.com/aissablk1/communikey@latest</pre>
           <p>Binaire universel arm64&nbsp;+ x86_64. Aucune dépendance à résoudre.</p>
         </div>
       </li>
@@ -266,8 +264,8 @@ deploy       <span class="c-warn">confirm</span>   « Pousser en prod ? (y/N) »
         <span class="step__n" aria-hidden="true">2</span>
         <div class="step__body">
           <h3>Voie coopérative — marche partout</h3>
-          <pre class="mini"><span class="c-p">$</span> csend inbox SACEM <span class="c-s">"lance le build de prod"</span>
-<span class="c-p">$</span> csend recv                  <span class="c-c"># l’autre session relève</span></pre>
+          <pre class="mini"><span class="c-p">$</span> communikey inbox SACEM <span class="c-s">"lance le build de prod"</span>
+<span class="c-p">$</span> communikey recv                  <span class="c-c"># l’autre session relève</span></pre>
           <p>L’inbox coopératif ne dépend d’aucun multiplexeur&nbsp;: tout OS, tout provider.</p>
         </div>
       </li>
@@ -275,9 +273,9 @@ deploy       <span class="c-warn">confirm</span>   « Pousser en prod ? (y/N) »
         <span class="step__n" aria-hidden="true">3</span>
         <div class="step__body">
           <h3>Voie cmux — pilotage state-aware</h3>
-          <pre class="mini"><span class="c-p">$</span> csend list                  <span class="c-c"># états live</span>
-<span class="c-p">$</span> csend tree                  <span class="c-c"># graphe père → enfants</span>
-<span class="c-p">$</span> csend send SACEM <span class="c-s">"go"</span>      <span class="c-c"># validé seulement si idle</span></pre>
+          <pre class="mini"><span class="c-p">$</span> communikey list                  <span class="c-c"># états live</span>
+<span class="c-p">$</span> communikey tree                  <span class="c-c"># graphe père → enfants</span>
+<span class="c-p">$</span> communikey send SACEM <span class="c-s">"go"</span>      <span class="c-c"># validé seulement si idle</span></pre>
           <p>Par défaut <code>--auto</code>&nbsp;: valide si idle, dépose si busy, refuse sur un prompt y/N.</p>
         </div>
       </li>
@@ -285,8 +283,8 @@ deploy       <span class="c-warn">confirm</span>   « Pousser en prod ? (y/N) »
         <span class="step__n" aria-hidden="true">4</span>
         <div class="step__body">
           <h3>Identité&nbsp;+ recovery</h3>
-          <pre class="mini"><span class="c-p">$</span> CSEND_VAULT_PASS=… csend id --create
-<span class="c-p">$</span> csend recovery split 2 3     <span class="c-c"># seuil 2-sur-3</span></pre>
+          <pre class="mini"><span class="c-p">$</span> COMKEY_VAULT_PASS=… communikey id --create
+<span class="c-p">$</span> communikey recovery split 2 3     <span class="c-c"># seuil 2-sur-3</span></pre>
           <p>Exposé aussi comme <strong>skill Claude Code</strong>&nbsp;: «&nbsp;dis à SACEM de…&nbsp;».</p>
         </div>
       </li>
@@ -299,7 +297,7 @@ deploy       <span class="c-warn">confirm</span>   « Pousser en prod ? (y/N) »
       <p class="eyebrow">04 — État réel</p>
       <h2 id="road-title">Honnête sur ce qui marche.</h2>
       <p class="band__intro">
-        <code>csend</code> est en <strong>alpha</strong>. Voici la frontière
+        <code>communikey</code> est en <strong>alpha</strong>. Voici la frontière
         exacte entre le livré et le prévu — sans flou.
       </p>
     </div>
@@ -339,10 +337,10 @@ deploy       <span class="c-warn">confirm</span>   « Pousser en prod ? (y/N) »
 <footer class="footer" role="contentinfo">
   <div class="footer__brand">
     <span class="brand__mark" aria-hidden="true">›_</span>
-    <span class="brand__name">csend</span>
+    <span class="brand__name">communikey</span>
   </div>
   <nav class="footer__links" aria-label="Liens du pied de page">
-    <a href="https://github.com/aissablk1/csend" rel="noopener">GitHub&nbsp;›</a>
+    <a href="https://github.com/aissablk1/communikey" rel="noopener">GitHub&nbsp;›</a>
     <a href="#securite">Sécurité</a>
     <a href="#roadmap">Roadmap</a>
     <a href="mailto:contact@aissabelkoussa.fr">contact@aissabelkoussa.fr</a>

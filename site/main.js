@@ -1,4 +1,4 @@
-/* csend — landing. Vanilla, zéro dépendance, zéro appel réseau.
+/* communikey — landing. Vanilla, zéro dépendance, zéro appel réseau.
    Deux effets nommés seulement :
    (1) spotlight radial réactif au pointeur (transform → GPU)
    (2) une séquence de reveal au scroll (opacity + translateY)
