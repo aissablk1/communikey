@@ -1,8 +1,8 @@
-# csend — build, test, install
+# communikey — build, test, install
 # Binaire Go zéro-dépendance. `make install` produit un binaire universel
 # (arm64 + x86_64) et le symlinke sur le PATH via install.sh.
 
-BINARY := csend
+BINARY := communikey
 GO     ?= go
 
 .PHONY: all build vet test cover install clean

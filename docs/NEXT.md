@@ -1,4 +1,4 @@
-# csend — ce qui reste, et pourquoi (honnêteté §29)
+# communikey — ce qui reste, et pourquoi (honnêteté §29)
 
 État au 2026-06-27. Ce fichier liste ce qui n'est **pas** encore livré, avec la **raison
 réelle** (souvent un blocage physique : besoin d'un appareil, d'un autre runtime, ou de
@@ -29,7 +29,7 @@ fini.
 - **Clients mobiles (iOS / iPadOS / Android).** Runtime distinct (app/PWA). Rappel honnête :
   le mobile ne peut **pas** injecter au clavier (sandbox) → il rejoint le bus comme **client**
   (envoyer / relever / approuver / être notifié, façon omnara). *Plan* : client mince vers le
-  réseau csend (`serve`).
+  réseau communikey (`serve`).
 
 - **Windows natif (injection clavier).** Physiquement impossible : pas de PTY maître
   partageable, ConPTY ne s'attache pas à un process déjà lancé. Windows reste **coop-only**

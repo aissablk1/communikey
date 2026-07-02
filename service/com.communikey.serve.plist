@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- launchd (macOS) : lance `communikey serve` (nœud du bus) au login, en TLS hybride PQC.
+     Adapte le chemin du binaire si besoin (which communikey). Installe-le ainsi :
+       cp service/com.communikey.serve.plist ~/Library/LaunchAgents/
+       launchctl load ~/Library/LaunchAgents/com.communikey.serve.plist -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.communikey.serve</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/communikey</string>
+    <string>serve</string>
+    <string>--tls</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/tmp/communikey-serve.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/communikey-serve.err</string>
+</dict>
+</plist>

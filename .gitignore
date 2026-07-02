@@ -1,5 +1,5 @@
 # Built binaries (produced by install.sh)
-/csend
+/communikey
 /.build/
 
 # Vidéo de lancement + assets Hyperframes (générés, non versionnés)

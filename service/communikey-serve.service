@@ -1,0 +1,19 @@
+# systemd (Linux) : nœud du bus communikey en service utilisateur, TLS hybride PQC.
+# Installe-le ainsi :
+#   mkdir -p ~/.config/systemd/user
+#   cp service/communikey-serve.service ~/.config/systemd/user/
+#   systemctl --user enable --now communikey-serve
+[Unit]
+Description=communikey — bus de messages inter-agents (listener)
+After=network.target
+
+[Service]
+ExecStart=%h/.local/bin/communikey serve --tls
+Restart=on-failure
+RestartSec=2
+# Durcissement (§38)
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target
