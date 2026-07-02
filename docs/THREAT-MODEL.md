@@ -1,11 +1,11 @@
-# csend — Modèle de menace (honnête)
+# communikey — Modèle de menace (honnête)
 
-> Ce document dit ce que csend protège, contre qui, et **ce qu'il ne protège pas**.
+> Ce document dit ce que communikey protège, contre qui, et **ce qu'il ne protège pas**.
 > Principe : zéro fausse promesse de sécurité (cf. Kerckhoffs ; aucune sécurité par
 > l'obscurité). La cryptographie est **implémentée mais N'A PAS été auditée par un
 > tiers** — ne pas la traiter comme « Signal-grade » tant qu'un audit n'a pas eu lieu.
 
-## Ce que csend EST
+## Ce que communikey EST
 
 Un bus de messagerie inter-agents **local**, qui transporte des messages entre sessions
 de CLI d'agents (Claude Code, Codex, Gemini…) sur la **même machine** (voie coopérative
@@ -19,29 +19,29 @@ par fichiers) ou entre machines (`serve`/`remote`).
 
 ## Mécanismes en place
 
-| Menace (STRIDE) | Mitigation dans csend |
+| Menace (STRIDE) | Mitigation dans communikey |
 |---|---|
 | **Spoofing** (usurper un expéditeur) | Signature **Ed25519** sur le transcript ; identité dérivée d'une graine maître. Allowlist cryptographique (`serve --authz`) : seuls les expéditeurs signés et autorisés passent. |
 | **Tampering** (altérer le message) | AEAD **AES-256-GCM** + signature sur le transcript (eph keys, nonce, ciphertext, **SenderPub**, **AAD from→to**). Toute altération invalide la signature/AEAD. |
-| **Repudiation** | Journal append-only (hash + longueur, jamais le clair) ; `csend journal` trace de→à sans révéler le corps. |
+| **Repudiation** | Journal append-only (hash + longueur, jamais le clair) ; `communikey journal` trace de→à sans révéler le corps. |
 | **Information disclosure** | Chiffrement **E2E hybride post-quantique** : KEM X25519 ⊕ ML-KEM-768 → HKDF → AES-GCM (confidentialité tient sauf si **les deux** KEM sont cassés). Vault PBKDF2→AES-GCM. |
 | **Replay / ré-emballage** | Anti-replay (dédup sur le **nonce signé**). **AAD from→to** liée dans l'AEAD ET la signature (§41) : un payload ré-emballé sous un autre couple expéditeur→destinataire est rejeté. |
 | **Réseau** | TLS 1.3 **hybride PQC** (X25519MLKEM768) + pinning d'empreinte sur `serve`/`remote`. |
 
-## Limites HONNÊTES (ce que csend NE protège PAS)
+## Limites HONNÊTES (ce que communikey NE protège PAS)
 
 - **Crypto NON auditée.** Implémentation soignée (stdlib Go, primitives NIST), mais **aucun audit
-  indépendant**. Ne pas vendre « le Signal des agents » : Signal est audité, csend non.
+  indépendant**. Ne pas vendre « le Signal des agents » : Signal est audité, communikey non.
 - **Même machine = même utilisateur.** Pour deux process **sous le même UID**, la crypto E2E
   apporte peu : un attaquant qui exécute déjà du code sous cet UID lit la clé, le vault, la mémoire
   du process. La crypto ne prend toute sa valeur qu'en franchissant une **frontière de confiance**
   (inter-hôtes). Sur localhost, c'est surtout du *defense-in-depth*, pas une barrière.
-- **L'agent récepteur est une surface d'attaque (prompt injection).** csend **transporte** un message ;
+- **L'agent récepteur est une surface d'attaque (prompt injection).** communikey **transporte** un message ;
   il ne garantit pas que l'agent qui le reçoit ne sera pas détourné par son contenu. La défense
   prompt-injection est au niveau du **harnais/modèle** (Claude Code…), **pas** du bus. Un champ
   « ceci est de la donnée » dans l'enveloppe n'empêche pas l'agent de le concaténer dans son prompt.
 - **Le bus ne voit pas tout le trafic.** Les agents communiquent aussi par fichiers partagés, par le
-  canal natif de l'orchestrateur, par MCP, par stdout. csend n'est pas un moniteur de référence.
+  canal natif de l'orchestrateur, par MCP, par stdout. communikey n'est pas un moniteur de référence.
 - **Métadonnées.** Le journal/registre expose qui parle à qui et quand (pas le contenu). Pas d'anonymat.
 - **Quantique.** La couche KEM est hybride PQC (bon contre « Harvest Now, Decrypt Later »), mais les
   **signatures** restent Ed25519 (classique) ; migrer en ML-DSA si le modèle de menace l'exige.

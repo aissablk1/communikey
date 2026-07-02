@@ -1,6 +1,6 @@
 # Contributor License Agreement (léger / DCO)
 
-En soumettant une contribution à **csend** (pull request, patch, correctif), vous
+En soumettant une contribution à **communikey** (pull request, patch, correctif), vous
 certifiez que :
 
 1. la contribution est votre travail original, ou vous avez le droit de la soumettre ;

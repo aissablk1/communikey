@@ -8,12 +8,12 @@
 
 ================================================================================
 
-  Project ............ csend
+  Project ............ communikey
   Tagline ............ Bus de messagerie inter-agents universel pour CLI
   Author ............. Aïssa BELKOUSSA
   Contact ............ contact@aissabelkoussa.fr
   Website ............ https://aissabelkoussa.fr
-  Repository ......... https://github.com/aissablk1/csend  (à publier)
+  Repository ......... https://github.com/aissablk1/communikey  (à publier)
   License ............ Apache-2.0
   Created ............ 2026-06-27
   Updated ............ 2026-06-27
@@ -62,19 +62,19 @@
   ▓▓ INSTALL ▓▓
 ────────────────────────────────────────────────────────────────────────────────
 
-  $ git clone https://github.com/aissablk1/csend
-  $ cd csend
-  $ make install          # binaire universel + symlink ~/.local/bin/csend
+  $ git clone https://github.com/aissablk1/communikey
+  $ cd communikey
+  $ make install          # binaire universel + symlink ~/.local/bin/communikey
 
 ────────────────────────────────────────────────────────────────────────────────
   ▓▓ USAGE ▓▓
 ────────────────────────────────────────────────────────────────────────────────
 
-  $ csend list                     sessions agent + état
-  $ csend tree                     graphe familial
-  $ csend send <cible> "msg"       message gouverné (auto/stage/send/force)
-  $ csend send --down "msg"        broadcast aux enfants
-  $ csend read <cible>             lire l'écran d'une session
+  $ communikey list                     sessions agent + état
+  $ communikey tree                     graphe familial
+  $ communikey send <cible> "msg"       message gouverné (auto/stage/send/force)
+  $ communikey send --down "msg"        broadcast aux enfants
+  $ communikey read <cible>             lire l'écran d'une session
   $ make test                      lance la suite de tests
   $ make vet                       go vet
 

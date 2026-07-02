@@ -1,6 +1,6 @@
-# Câbler Claude Code + Codex + Gemini sur UN bus csend
+# Câbler Claude Code + Codex + Gemini sur UN bus communikey
 
-Le pari défendable de csend : faire collaborer **plusieurs éditeurs d'agents** (Claude Code,
+Le pari défendable de communikey : faire collaborer **plusieurs éditeurs d'agents** (Claude Code,
 Codex CLI, Gemini CLI) dans un même bus local — la « seconde opinion » cross-vendor que les
 orchestrateurs mono-éditeur ne donnent pas. Ce guide décrit le câblage **réel**.
 
@@ -10,12 +10,12 @@ orchestrateurs mono-éditeur ne donnent pas. Ce guide décrit le câblage **rée
 
 ## 1. Prérequis (honnêtes)
 
-- **csend** installé (`go install github.com/aissablk1/csend@latest` ou binaire de release).
+- **communikey** installé (`go install github.com/aissablk1/communikey@latest` ou binaire de release).
 - **Claude Code** : rien de plus (hook `UserPromptSubmit`).
 - **Codex CLI** : `npm i -g @openai/codex` ; Codex exige **d'approuver le hook** (`/hooks` ou
   `--dangerously-bypass-hook-trust`), sinon le message n'arrive jamais.
 - **Gemini CLI** : installé **et authentifié** (`GEMINI_API_KEY` ou login OAuth) ; hook `BeforeAgent`.
-- **Un store partagé** pour la voie coopérative locale : exporter le même `CSEND_STORE_DIR` dans les
+- **Un store partagé** pour la voie coopérative locale : exporter le même `COMKEY_STORE_DIR` dans les
   trois sessions (même machine). Pour des machines séparées : voir §5 (réseau).
 
 ## 2. Câbler la réception (hook) — une fois par session
@@ -23,26 +23,26 @@ orchestrateurs mono-éditeur ne donnent pas. Ce guide décrit le câblage **rée
 Dans chaque session, afficher puis appliquer le snippet adapté à l'éditeur :
 
 ```sh
-csend hook --install claude    # → snippet ~/.claude/settings.json (UserPromptSubmit)
-csend hook --install codex     # → ~/.codex/ (+ APPROUVER le hook)
-csend hook --install gemini    # → ~/.gemini/settings.json (BeforeAgent)
+communikey hook --install claude    # → snippet ~/.claude/settings.json (UserPromptSubmit)
+communikey hook --install codex     # → ~/.codex/ (+ APPROUVER le hook)
+communikey hook --install gemini    # → ~/.gemini/settings.json (BeforeAgent)
 ```
 
-Le hook `csend hook` :
+Le hook `communikey hook` :
 - dérive une **identité stable** du `session_id` passé sur stdin (zéro-config ; ou pose
-  `CSEND_AGENT_ID` pour la forcer),
+  `COMKEY_AGENT_ID` pour la forcer),
 - draine l'inbox et **injecte les messages reçus dans le contexte** de la session,
 - émet la **bonne forme** par éditeur (Claude/Codex : `hookSpecificOutput.additionalContext` ;
-  Gemini : stdout brut). Force la forme avec `csend hook --provider {claude|codex|gemini}` si le
+  Gemini : stdout brut). Force la forme avec `communikey hook --provider {claude|codex|gemini}` si le
   CLI ne passe pas `hook_event_name`.
 
-## 3. Rejoindre le bus (pour la visibilité `csend agents`)
+## 3. Rejoindre le bus (pour la visibilité `communikey agents`)
 
 ```sh
-CSEND_AGENT_ID=claude-dev csend register --provider claude
-CSEND_AGENT_ID=codex-exec csend register --provider codex
-CSEND_AGENT_ID=gemini-rev csend register --provider gemini
-csend agents          # → les trois éditeurs sur un bus
+COMKEY_AGENT_ID=claude-dev communikey register --provider claude
+COMKEY_AGENT_ID=codex-exec communikey register --provider codex
+COMKEY_AGENT_ID=gemini-rev communikey register --provider gemini
+communikey agents          # → les trois éditeurs sur un bus
 ```
 
 ## 4. Le motif « /second-opinion » (revue adversariale cross-vendor)
@@ -52,9 +52,9 @@ Claude écrit du code, puis demande une relecture **à froid** à un autre édit
 
 ```sh
 # depuis Claude
-csend inbox gemini-rev "relis ce diff et RÉFUTE-le si un cas limite casse (0,1,négatifs)"
+communikey inbox gemini-rev "relis ce diff et RÉFUTE-le si un cas limite casse (0,1,négatifs)"
 # Gemini, à son prochain tour, voit la demande, relit, et répond :
-csend inbox claude-dev "RÉFUTÉ : is_prime(1) doit renvoyer False — ajoute 'if n <= 1: return False'"
+communikey inbox claude-dev "RÉFUTÉ : is_prime(1) doit renvoyer False — ajoute 'if n <= 1: return False'"
 ```
 
 Le principe writer≠checker : demander à l'autre éditeur de **réfuter** (verdict ambigu = FAIL)
@@ -66,14 +66,14 @@ Pour du **chiffré de bout en bout** (et entre machines), donner à chaque agent
 et échanger les clés publiques :
 
 ```sh
-export CSEND_VAULT_PASS=…            # déverrouille le vault
-csend id --create                    # identité crypto locale
-csend id --export                    # jeton public à partager
-csend contact add <pair> <jeton>     # enregistre la clé publique d'un pair
-# entre machines : le destinataire lance `csend serve`, l'émetteur `csend remote <hôte:port> <agent> <msg>`
+export COMKEY_VAULT_PASS=…            # déverrouille le vault
+communikey id --create                    # identité crypto locale
+communikey id --export                    # jeton public à partager
+communikey contact add <pair> <jeton>     # enregistre la clé publique d'un pair
+# entre machines : le destinataire lance `communikey serve`, l'émetteur `communikey remote <hôte:port> <agent> <msg>`
 ```
 
-`csend journal` montre alors la trace **de→à : sha256:… (chiffré)** — le corps n'apparaît jamais.
+`communikey journal` montre alors la trace **de→à : sha256:… (chiffré)** — le corps n'apparaît jamais.
 
 ## 6. Démo
 
