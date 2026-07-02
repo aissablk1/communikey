@@ -142,3 +142,20 @@ tags: [csend, distribution, publication, release, homebrew, goreleaser, oss]
 - **Note d'état (§7)** : le working tree a des modifs non committées (README, site — dont un revert
   du wedge site en local) qui ne sont PAS les miennes ; **mon wedge reste committé dans HEAD** (public
   OK). Je n'y touche pas ; revert working-tree à confirmer par Aïssa/surface:45.
+
+## Addendum 2026-07-02 — Rebrand communikey (territoire distribution)
+
+- Aïssa a acté **csend → Communikey** (CLI `communikey` + alias `comkey`). surface:45 a fait
+  code/module/binaire/env `COMKEY_*`/service/skill + renommé le repo (`aissablk1/communikey`,
+  redirections). **Ma part (distribution)** : sweep `csend→communikey` / `CSEND_→COMKEY_` + alias
+  `comkey` dans README, site/ (index, styles, main.js, install.sh), install.sh, Formula
+  (`csend.rb`→`communikey.rb` + symlink comkey), CHANGELOG [Non publié], docs/adoption, docs/strategy,
+  COMPARISON, PUBLISHING. Commit `68155f7` (13 fichiers).
+- **Gardé en `csend` (historique, §29)** : CHANGELOG section [0.2.0], RELEASE-v0.2.0.md, journal.
+  Backup pré-sweep dans `_backup/rebrand-communikey-…` (§6).
+- **Méthode** : sed avec bypass justifié (§26) + backup + vérif grep (0 résiduel) ; symlinks/CHANGELOG
+  en édits ciblés. Remote local pointé sur `…/communikey.git`.
+- **À signaler (site)** : le **wedge du hero** (kicker/lede « signé — tu sais *qui* parle ») a été
+  **réverté** dans le working tree (flaggé « intentionnel ») ; non réimposé. Le wedge reste dans
+  README + COMPARISON. À re-ajouter au site si voulu.
+- **Domaine** : `communikey.dev` à réserver (csend.dev à migrer) — compte d'Aïssa.
