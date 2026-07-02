@@ -23,6 +23,7 @@ csend est en **alpha** — voir [SECURITY.md](../SECURITY.md).)
 | **Authentification d'expéditeur (signé)** | ✅ **Ed25519** | ❌ *« not authorization »* | ❌ | ❌ |
 | Post-quantique | ✅ **ML-KEM-768** | ❌ | ❌ | ❌ |
 | Recovery souveraine (Shamir/BIP-39) | ✅ | ❌ | ❌ | ❌ |
+| Releases signées + attestées (cosign/SLSA) + SBOM | ✅ <sub>v0.3.0+</sub> | ❌ | ❌ | ❌ |
 | Largeur providers / intégration turnkey | ◐ | ✅ | ✅ (natif) | ◐ |
 | Maturité / adoption | ◐ alpha, neuf | ✅ établi | expérimental | jeune |
 | Licence / coût | Apache-2.0, libre | MIT, libre | natif Claude | MIT/Apache, libre |
@@ -35,7 +36,9 @@ csend est en **alpha** — voir [SECURITY.md](../SECURITY.md).)
 - **Agent Teams (natif) gagne** si tu restes **100 % Claude Code** et veux zéro install.
 - **csend gagne** dès que la **confiance** compte : tu veux savoir **qui** a envoyé un message
   (signature, pas un mot de passe partagé), un **chiffrement par destinataire**, une **résistance
-  post-quantique** et une **identité/recovery souveraines**. C'est le bus d'agents **auditable**.
+  post-quantique** et une **identité/recovery souveraines** — et, à partir de v0.3.0, des **releases
+  signées (cosign keyless) + attestées SLSA + SBOM**. C'est le bus d'agents **auditable de bout en
+  bout**, du message jusqu'au binaire.
 
 ## Choisis…
 

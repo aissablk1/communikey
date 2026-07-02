@@ -128,3 +128,17 @@ tags: [csend, distribution, publication, release, homebrew, goreleaser, oss]
   (3) **battle-card publique** `docs/COMPARISON.md` (honnête vs hcom/Agent Teams, liée au README).
   SECURITY.md laissé tel quel (déjà excellent, §57 — pas de faux travail). Bloqués → guidés : code
   (surface:45), déploiement/CI/social (comptes d'Aïssa).
+
+## Addendum 2026-07-02 — CI verte + release durcie (coordination surface:45)
+
+- **Facturation débloquée par Aïssa → CI VERTE** (run success). Le gate « ne pas lancer un alpha à
+  CI rouge » du plan de lancement tombe.
+- surface:45 a ajouté **`.github/workflows/release.yml`** : sur tag `v*`, release via goreleaser +
+  **SBOM + attestation SLSA native + signature cosign keyless**. → **La release passe par Actions ;
+  NE PLUS lancer goreleaser en local** (double release). v0.3.0 = `git tag v0.3.0 && git push --tags`
+  (surface:45 la coupe quand la crypto est prête). Décision `brews` : **garder la formule** (cross-OS).
+- **Renfort du wedge** : releases signées/attestées + SBOM = provenance supply-chain que hcom n'a pas
+  → ajouté à `docs/COMPARISON.md` (honnête : à partir de v0.3.0).
+- **Note d'état (§7)** : le working tree a des modifs non committées (README, site — dont un revert
+  du wedge site en local) qui ne sont PAS les miennes ; **mon wedge reste committé dans HEAD** (public
+  OK). Je n'y touche pas ; revert working-tree à confirmer par Aïssa/surface:45.
