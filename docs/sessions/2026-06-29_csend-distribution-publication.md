@@ -158,4 +158,11 @@ tags: [csend, distribution, publication, release, homebrew, goreleaser, oss]
 - **À signaler (site)** : le **wedge du hero** (kicker/lede « signé — tu sais *qui* parle ») a été
   **réverté** dans le working tree (flaggé « intentionnel ») ; non réimposé. Le wedge reste dans
   README + COMPARISON. À re-ajouter au site si voulu.
-- **Domaine** : `communikey.dev` à réserver (csend.dev à migrer) — compte d'Aïssa.
+- **Domaine** : `communikey.dev` à réserver (csend.dev à migrer) — compte d'Aïssa. Vérifié
+  **disponible** (Vercel : 9,99 $/an ; Aïssa réserve à 12,20 $). `.com`/`.app` pris.
+- **Finition (feu vert Aïssa)** : wedge « signé » **restauré** sur le hero du site (direction
+  *terminal souverain* §10 ; `.reveal` + `prefers-reduced-motion` déjà dans le CSS ; typo §20) ; 2
+  docs `docs/strategy/csend-*.md` **renommés** `communikey-*.md` (R100). Commit `1e65f50`.
+  **SECURITY.md** aussi swept (`1b9031a`, mon fichier via e3dfc23). → **Territoire distribution
+  100 % communikey.** Restent à surface:45 avant tag v0.3.0 : `docs/superpowers/{plans,specs}` +
+  `testdata/claude_busy_real.txt` (core/code). Ship différé (fonds).
