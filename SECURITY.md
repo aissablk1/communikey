@@ -1,14 +1,14 @@
-# Politique de sécurité — csend
+# Politique de sécurité — communikey
 
-csend est un **bus de messages chiffré de bout en bout** pour agents de code. La
+communikey est un **bus de messages chiffré de bout en bout** pour agents de code. La
 sécurité est le cœur du projet, pas une option. Ce document décrit le modèle de menace,
 les primitives réellement employées, leurs limites honnêtes, et **comment signaler une
 faille**.
 
 > [!IMPORTANT]
 > **Statut : alpha (v0.2.0-dev).** Les primitives sont auditées et standard, mais
-> **l'assemblage cryptographique de csend n'a pas encore reçu d'audit externe**.
-> N'utilisez pas csend — en particulier le partage Shamir — pour protéger des secrets
+> **l'assemblage cryptographique de communikey n'a pas encore reçu d'audit externe**.
+> N'utilisez pas communikey — en particulier le partage Shamir — pour protéger des secrets
 > critiques (clés de production, fonds, données vitales) **avant cet audit**.
 
 ---
@@ -45,7 +45,7 @@ connues »).
 
 ## Modèle de menace
 
-### Ce que csend protège
+### Ce que communikey protège
 
 | Bien | Contre qui | Comment |
 |---|---|---|
@@ -58,7 +58,7 @@ connues »).
 ### Hypothèses de confiance
 
 - L'**endpoint local** est de confiance : si la machine qui détient le vault **et** la
-  passphrase est compromise, l'attaquant a l'identité. csend protège les messages **en
+  passphrase est compromise, l'attaquant a l'identité. communikey protège les messages **en
   transit** et les clés **au repos**, pas un poste déjà sous contrôle adverse.
 - La **passphrase de vault** a une entropie suffisante : PBKDF2 ralentit le bruteforce,
   il ne sauve pas un mot de passe trivial.
@@ -114,7 +114,7 @@ Ces points sont des **limites assumées de l'alpha**, documentés ici plutôt qu
   Argon2id (résistant au matériel dédié) est la cible, mais exige `golang.org/x/crypto`
   — donc une première dépendance, à arbitrer.
 - **Pas de passkey/WebAuthn.** Le déverrouillage du vault repose sur une passphrase
-  (fichier via `CSEND_VAULT_PASS_FILE`, recommandé, ou variable `CSEND_VAULT_PASS`). Le
+  (fichier via `COMKEY_VAULT_PASS_FILE`, recommandé, ou variable `COMKEY_VAULT_PASS`). Le
   MFA résistant au phishing (FIDO2/PRF) est planifié.
 - **Réseau : confiance loopback/LAN.** `serve`/`remote` chiffrent le transport en TLS
   1.3 hybride PQC avec épinglage d'empreinte, mais **sans authentification mutuelle des
@@ -135,20 +135,20 @@ Ces points sont des **limites assumées de l'alpha**, documentés ici plutôt qu
 
 ## Bonnes pratiques d'usage
 
-- Préférez **`CSEND_VAULT_PASS_FILE`** à `CSEND_VAULT_PASS` (un fichier évite de fuiter
+- Préférez **`COMKEY_VAULT_PASS_FILE`** à `COMKEY_VAULT_PASS` (un fichier évite de fuiter
   le secret dans `ps`/dumps d'environnement).
 - **Sauvegardez** la phrase BIP-39 **hors ligne** (papier, coffre) : quiconque la
   possède possède l'identité.
 - **Répartissez** les parts Shamir sur des supports distincts (téléphone, clé matérielle,
   proche, papier) — la perte d'un support n'est pas la perte de l'identité.
-- N'exposez **jamais** `csend serve` hors d'un réseau de confiance tant que la phase 3
+- N'exposez **jamais** `communikey serve` hors d'un réseau de confiance tant que la phase 3
   (auth mutuelle) n'est pas livrée.
 
 ---
 
 ## Versions supportées
 
-csend est en alpha : seule la **branche `main`** (dernier commit) reçoit des correctifs
+communikey est en alpha : seule la **branche `main`** (dernier commit) reçoit des correctifs
 de sécurité. Le support par version stable commencera avec la première série taguée
 stable.
 
