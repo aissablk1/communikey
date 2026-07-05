@@ -32,6 +32,7 @@ Usage:
   communikey key <cible> <touche>       envoie une touche brute (enter|escape|ctrl+c|ctrl+u…)
   communikey register [--id X --provider P]  inscrit CETTE session sur le bus (tout OS/terminal)
   communikey agents                     flotte coopérative (tous terminaux/providers/OS)
+  communikey teams                      Agent Teams natives détectées (lecture seule)
   communikey whoami                     agent-id + identité + inbox de cette session
   communikey recv [--peek]              lit (et vide) l'inbox coopératif de CETTE session
   communikey inbox <cible> <message…>   dépose un message coopératif (hors cmux, tout OS)
@@ -91,6 +92,8 @@ func main() {
 		cmdRegister(os.Args[2:]) // join the bus from ANY terminal/provider/OS
 	case "agents":
 		cmdAgents(os.Args[2:])
+	case "teams":
+		cmdTeams(os.Args[2:]) // Agent Teams natives — découverte lecture seule
 	case "whoami":
 		cmdWhoami(os.Args[2:])
 	case "recv":
