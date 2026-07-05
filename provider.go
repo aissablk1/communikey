@@ -27,10 +27,19 @@ func (claudeProvider) Detect(s string) State { return DetectClaudeState(s) }
 // regexes are still provisional — calibrate on real screens (§2/§29) — but they're
 // safe to register: idle requires a dual distinctive signal, and busy/confirm only
 // widen the "do not submit" net (never a wrongful submit).
-var providers = []Provider{
-	claudeProvider{},
-	newCodexProvider(),  // provisoire — patterns à calibrer sur de vrais écrans (§2/§29)
-	newGeminiProvider(), // provisoire — patterns à calibrer sur de vrais écrans (§2/§29)
+var providers = buildProviderRegistry()
+
+// buildProviderRegistry compose le socle compilé en dur (inchangé, zéro risque de
+// régression) avec les providers optionnels déclarés par l'utilisateur
+// (providerconfig.go) — ajoutés en fin de liste, jamais avant, pour ne jamais
+// pouvoir masquer claude/codex/gemini.
+func buildProviderRegistry() []Provider {
+	list := []Provider{
+		claudeProvider{},
+		newCodexProvider(),  // provisoire — patterns à calibrer sur de vrais écrans (§2/§29)
+		newGeminiProvider(), // provisoire — patterns à calibrer sur de vrais écrans (§2/§29)
+	}
+	return append(list, loadUserProviders()...)
 }
 
 // DetectAnyState tries each registered provider; the first non-Unknown match wins.

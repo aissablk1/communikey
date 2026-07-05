@@ -49,6 +49,8 @@ Usage:
   communikey remote [--tls --pin <fp>] <h:p> <agent> <msg>  envoie à une autre machine
   communikey link <enfant> <parent>     déclare <parent> comme parent de <enfant>
   communikey unlink <enfant>            détache <enfant> de son parent
+  communikey provider list              providers enregistrés + connus-absents, avec statut
+  communikey provider test <name>       teste un provider sur un écran lu depuis stdin
   communikey version                    affiche la version
   communikey help
 
@@ -74,6 +76,8 @@ func main() {
 	case "unlink":
 		mustBackend()
 		cmdUnlink(os.Args[2:])
+	case "provider":
+		cmdProvider(os.Args[2:]) // registre + calibrage — indépendant du backend terminal
 	case "send":
 		mustBackend()
 		cmdSend(os.Args[2:])
