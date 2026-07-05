@@ -23,6 +23,11 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
 - `docs/THREAT-MODEL.md` (modèle de menace honnête, crypto **non auditée**), `docs/cross-vendor-setup.md`
   (câbler Claude+Codex+Gemini), `docs/CLA.md`, `NOTICE`.
 - Démo `scripts/demo-cross-vendor.sh` (« Green Build Relay » : 3 éditeurs, 1 bus).
+- **Providers externalisables sans recompilation** : `~/.claude/communikey/providers.json`
+  optionnel (purement additif — claude/codex/gemini restent compilés en dur, inchangés).
+  `communikey provider list` (statut calibré/provisoire/personnalisé/absent de chaque
+  provider connu) et `communikey provider test <name>` (teste un écran lu depuis stdin —
+  la boucle de calibrage communautaire).
 
 ### Changé
 - **Licence** : MIT → **Apache-2.0** (grant de brevet, vital vu la crypto PQC).
@@ -49,6 +54,9 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
 - Commentaire de tête de `net.go` corrigé : il annonçait le TLS hybride PQC comme « phase
   suivante » alors qu'il est **déjà livré** (`tlsbus.go`) ; ce qui manque réellement est
   l'authentification mutuelle au niveau TLS (certificat client).
+- **`hookInstallFor`** : un provider inconnu (ex. `communikey hook --install opencode`)
+  retombait silencieusement sur le snippet de câblage **Claude**, sans le signaler. Avertit
+  désormais explicitement et renvoie vers `communikey provider list`.
 
 ### Tests
 - `relations_test.go` : le graphe familial (`link`/`unlink`/`childrenOf`/`parentOf`/`wouldCycle`,

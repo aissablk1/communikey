@@ -70,8 +70,8 @@ et le message trouve toujours un chemin.
 |---|---|
 | Invocable par chaque session, dans les deux sens | **Fait** — `register`/`inbox`/`recv` (coopératif) + `send`/`hook`/`watch` (live), skill Claude Code `~/.claude/skills/communikey` |
 | Relations familiales, « ou non » | **Fait** — `relations.go` : arêtes déclarées, optionnelles, anti-cycle |
-| Autres providers (Codex, Gemini, « et autre ») | **Partiel** — 3 sur 9+ providers connus, mécanisme d’extension prêt |
-| Agents locaux, teams, sous-agents, « armées » | **Partiel** — flotte visible, sous-agents modélisés ; le pont Agent Teams reste bloqué |
+| Autres providers (Codex, Gemini, « et autre ») | **Partiel** — 3 calibrés sur 9+ providers connus, mais l’extension est désormais **sans recompilation** (`providers.json` + `provider list`/`test`, livré le 07-05) |
+| Agents locaux, teams, sous-agents, « armées » | **Partiel** — flotte visible, sous-agents modélisés ; le pont Agent Teams reste bloqué faute d’un vrai fichier à inspecter (raison précisée plus bas, sourcée officiellement) |
 | Cross-CLI, cross-terminal, cross-OS, cross-workspace | **Fait pour l’essentiel** — Windows et Chromebook ont des nuances réelles, détaillées plus bas |
 | CLI dédiée, richement configurable, variantes d’aide | **Fait** — ~20 sous-commandes, 7 variantes d’aide identiques au byte près |
 
@@ -174,17 +174,23 @@ notifications — mais son calibrage suivrait la même règle que Codex/Gemini :
 sa [documentation CLI réelle](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/reference/cli-commands.md),
 jamais inventés, puis validation sur écran live.
 
-**Le vrai levier n’est pas d’ajouter Kiro à la main.** Aujourd’hui, un provider est un
-`patternProvider{...}` codé en dur dans `adapters.go` : ajouter un CLI exige de recompiler.
-Avec six providers restants — et une liste qui s’allonge côté cmux — coder chaque adaptateur
-un par un ne tient pas à l’échelle. Externaliser les patterns dans un fichier de configuration
-(`providers.yaml`, chargé au démarrage avec un jeu par défaut embarqué pour ne rien casser)
-changerait la nature du problème : ajouter un provider deviendrait éditer un fichier, pas
-recompiler. Une commande `communikey provider test <name>` deviendrait alors possible —
-coller un écran réel de son propre CLI, voir l’état détecté — ce qui transforme le calibrage
-d’un goulot d’étranglement que toi seul peux lever en une boucle que la communauté peut
-alimenter. `communikey provider list` afficherait l’état de calibrage de chacun (calibré,
-provisoire, absent) directement dans la CLI, sans avoir à ouvrir `docs/NEXT.md`.
+**Le vrai levier n’était pas d’ajouter Kiro à la main — c’est fait, livré le 07-05.** Un
+provider était un `patternProvider{...}` codé en dur dans `adapters.go` : ajouter un CLI
+exigeait de recompiler. Avec six providers restants — et une liste qui s’allonge côté cmux —
+coder chaque adaptateur un par un ne tenait pas à l’échelle. `~/.claude/communikey/providers.json`
+(purement additif : claude/codex/gemini restent compilés en dur, inchangés, zéro régression)
+change maintenant la nature du problème : ajouter un provider est éditer un fichier JSON — pas
+YAML, le projet reste zéro-dépendance — plutôt que recompiler. `communikey provider test <name>`
+colle un écran réel sur stdin et affiche l’état détecté ; `communikey provider list` affiche le
+calibrage de chacun (calibré/provisoire/personnalisé/absent) directement dans la CLI, sans
+ouvrir `docs/NEXT.md`. Le calibrage devient une boucle que la communauté peut alimenter, pas un
+goulot d’étranglement que toi seul peux lever.
+
+Le test de bout en bout (pas seulement les tests unitaires) a immédiatement révélé un vrai
+piège à documenter : un `idle_prompt`/`idle_footer` sans le flag `(?m)` ne matche jamais un
+écran multi-lignes (`^`/`$` bornent alors toute la chaîne, pas chaque ligne) — exactement le
+genre d’erreur qu’un futur contributeur ferait. `provider list` le rappelle maintenant
+explicitement.
 
 Un détail que la lecture du code fait apparaître et que personne n’a demandé : l’ajout d’un
 provider a en réalité **deux** coûts, pas un seul. `provider.go`/`adapters.go` couvrent la
@@ -203,11 +209,32 @@ distinction entre une session cmux, une session tmux ou une session qui n’a re
 par `register`. Combinée au graphe familial de la section précédente, elle donne une vue
 complète : qui existe, qui est enfant de qui, et qui n’a pas de lien du tout.
 
-Le seul point réellement bloqué de cette section est le pont vers **Agent Teams**, la
-fonctionnalité native de Claude Code qui dépose ses messages dans une *mailbox* propriétaire
-(`~/.claude/teams/…`). Le format exact de cette mailbox n’est pas documenté publiquement — et
-plutôt que de le deviner, la bonne marche à suivre est d’inspecter une vraie session Agent
-Teams avant d’écrire le moindre code d’écriture dans ce dossier.
+Le seul point réellement bloqué de cette section est le pont vers **Agent Teams**, précisé le
+07-05 sur la [doc officielle](https://code.claude.com/docs/en/agent-teams). Fait établi, pas
+supposé : c'est une fonctionnalité **expérimentale, désactivée par défaut**
+(`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` dans `settings.json` pour l'activer). Un lead spawn
+des teammates (chacun une session Claude Code séparée) qui se coordonnent via une **liste de
+tâches partagée** et une **mailbox** de peer-to-peer (outil interne `SendMessage`). Deux
+répertoires, un nom dérivé de la session (`session-` + 8 premiers caractères du session-id) :
+`~/.claude/teams/{team-name}/config.json` (config d'équipe — supprimé à la fin de la session)
+et `~/.claude/tasks/{team-name}/` (liste de tâches — persiste, jamais uploadée). Le config
+contient un tableau `members` avec le nom, l'agent-id et le type de chaque teammate — **« lisible
+pour découvrir les autres membres », mais explicitement « ne pas éditer à la main »** (regénéré
+à chaque mise à jour d'état). Il existe aussi trois hooks dédiés (`TeammateIdle`, `TaskCreated`,
+`TaskCompleted`) — mais ce sont des hooks de **garde** (sortie code 2 = bloquer + feedback), pas
+des hooks d'injection de contexte comme `UserPromptSubmit` : un mécanisme différent de celui
+que `hook.go` sait déjà câbler.
+
+**Pourquoi le pont n'est toujours pas construit, malgré cette bien meilleure information** :
+la doc décrit le contenu de `members` en prose (nom/agent-id/agent-type) mais ne donne **aucun
+exemple JSON littéral** avec la casse exacte des clés — et `~/.claude/teams/` n'existe sur
+aucune machine d'Aïssa (vérifié par `ls`, 2026-07-05 : Agent Teams n'a jamais été activé/utilisé
+ici). Écrire un parseur contre un schéma deviné, sans le vérifier sur un vrai fichier, serait
+exactement le « faux travail » à proscrire — le code semblerait marcher et resterait non
+prouvé. **Le déblocage concret et peu coûteux** : activer `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
+et faire tourner UNE équipe jetable (n'importe quel projet, un teammate suffit) produit un vrai
+`config.json` — dès lors, un parseur `communikey` peut être écrit et testé contre les VRAIES
+clés, en lecture seule (jamais d'écriture dans ce dossier, la doc l'interdit explicitement).
 
 ## Cross-CLI, cross-terminal, cross-OS, cross-workspace
 
@@ -354,17 +381,16 @@ soumettrait un message dans une session qui n’est pas prête à le recevoir.
 
 ## Ce à quoi tu n’as pas pensé
 
-- **Boucle de calibration communautaire** (`provider test`/`provider list`, détaillée plus
-  haut) — transforme le vrai goulot d’étranglement, calibrer six providers restants, en
-  quelque chose que d’autres peuvent alimenter plutôt qu’un travail que toi seul peux faire.
+- ~~Boucle de calibration communautaire (`provider test`/`provider list`)~~ — **livré le 07-05**.
 - **Mode démon** pour `serve`, en service `systemd` ou `launchd`, pour le réseau multi-machine,
-  plutôt qu’un process lancé à la main à chaque fois.
+  plutôt qu’un process lancé à la main à chaque fois. *(reste à faire)*
 - **Export d’audit signé et horodaté** du journal — celui-ci existe déjà en hash seul ; une
   version signée prolongerait la posture « auditable » déjà revendiquée, sans jamais exposer
-  le clair.
-- **Le coût double de chaque nouveau provider** (détection d’état *et* snippet de hook), noté
-  plus haut à partir de la lecture de `hook.go` — un angle mort concret que seule la lecture du
-  code, pas la documentation, fait apparaître.
+  le clair. *(reste à faire)*
+- ~~Le coût double de chaque nouveau provider (détection d’état *et* snippet de hook,
+  `hookInstallFor`)~~ — **corrigé le 07-05** : un provider inconnu affichait silencieusement le
+  snippet Claude ; il affiche désormais un avertissement explicite et renvoie vers
+  `communikey provider list`.
 
 ## Repères
 
