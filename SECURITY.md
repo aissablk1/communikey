@@ -81,7 +81,7 @@ externe, aucune crypto maison.
 | Dérivation de clé | **HKDF-SHA256** | `crypto/hkdf` | dérive la clé AEAD de `X25519_shared ‖ ML-KEM_shared`, et l'identité de la graine maître (séparation de domaine) |
 | Dérivation de vault | **PBKDF2-SHA256** | `crypto/pbkdf2` | 600 000 itérations, sel 128 bits |
 | Aléa | **CSPRNG** | `crypto/rand` | graines, nonces, sels, polynômes Shamir |
-| Recovery (seuil) | **Shamir N-sur-M** sur GF(2⁸) | `shamir.go` (from-scratch, testé) | corps AES (0x11b), interpolation de Lagrange en 0 |
+| Recovery (seuil) | **Shamir N-sur-M** sur GF(2⁸) | `shamir.go` (from-scratch, testé) | corps AES (0x11b), interpolation de Lagrange en 0 ; secret enveloppé d'un checksum SHA-256 tronqué (`recovery.go`) avant découpage — sous le seuil K, l'interpolation renvoie une valeur bien formée mais fausse (propriété du schéma), le checksum le détecte avant toute dérivation ou écrasement du vault |
 | Recovery (phrase) | **BIP-39** (24 mots) | `bip39.go` (from-scratch, testé) | wordlist anglaise officielle, checksum SHA-256 |
 | Transport réseau | **TLS 1.3 hybride PQC** | `crypto/tls` (`X25519MLKEM768`) | cert self-signed Ed25519 + épinglage d'empreinte SHA-256 |
 

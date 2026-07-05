@@ -27,6 +27,19 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
 ### Changé
 - **Licence** : MIT → **Apache-2.0** (grant de brevet, vital vu la crypto PQC).
 
+### Sécurité
+- **`recovery combine`** : le secret Shamir reconstitué est désormais protégé par un checksum
+  SHA-256 tronqué (4 octets, embarqué par `recovery split` avant découpage). Trouvé par audit
+  (2026-07-03) : sous le seuil K, l'interpolation de Lagrange renvoie une valeur bien formée mais
+  **fausse** (propriété documentée du schéma Shamir) — et comme n'importe quelle graine de 32
+  octets dérive une identité « valide » en apparence (`deriveIdentity`), `combine` acceptait
+  silencieusement une reconstruction invalide et **écrasait le vault sans confirmation**. Le
+  checksum rejette maintenant toute reconstruction incorrecte avant dérivation.
+- **`recovery combine` / `recovery from-phrase`** : écraser un `identity.vault` **déjà existant**
+  exige désormais `--force` (le fingerprint reconstruit est affiché avant le refus, pour
+  vérification manuelle). `recovery from-phrase` s'appuyait déjà sur le checksum BIP-39 natif pour
+  la validité de la phrase, mais n'avait pas non plus de garde-fou contre l'écrasement silencieux.
+
 Voir [`docs/NEXT.md`](docs/NEXT.md) pour le reste (provenance SLSA/cosign — en attente de la
 facturation GitHub —, passkey WebAuthn, surface MCP, audit cryptographique externe).
 
