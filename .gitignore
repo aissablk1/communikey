@@ -10,3 +10,6 @@
 
 # Sorties de build goreleaser
 /dist/
+
+# Métadonnées macOS Finder (jamais utiles, jamais versionnées)
+.DS_Store
