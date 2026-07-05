@@ -28,6 +28,9 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   `communikey provider list` (statut calibré/provisoire/personnalisé/absent de chaque
   provider connu) et `communikey provider test <name>` (teste un écran lu depuis stdin —
   la boucle de calibrage communautaire).
+- **`communikey teams`** : découverte **lecture seule** des Agent Teams natives de Claude Code
+  (`~/.claude/teams/*/config.json`). Schéma confirmé sur un vrai fichier capturé le 2026-07-05
+  (pas deviné) ; pas encore de livraison dans la mailbox (format non observé).
 
 ### Changé
 - **Licence** : MIT → **Apache-2.0** (grant de brevet, vital vu la crypto PQC).

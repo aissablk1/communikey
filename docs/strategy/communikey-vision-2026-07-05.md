@@ -71,7 +71,7 @@ et le message trouve toujours un chemin.
 | Invocable par chaque session, dans les deux sens | **Fait** — `register`/`inbox`/`recv` (coopératif) + `send`/`hook`/`watch` (live), skill Claude Code `~/.claude/skills/communikey` |
 | Relations familiales, « ou non » | **Fait** — `relations.go` : arêtes déclarées, optionnelles, anti-cycle |
 | Autres providers (Codex, Gemini, « et autre ») | **Partiel** — 3 calibrés sur 9+ providers connus, mais l’extension est désormais **sans recompilation** (`providers.json` + `provider list`/`test`, livré le 07-05) |
-| Agents locaux, teams, sous-agents, « armées » | **Partiel** — flotte visible, sous-agents modélisés ; le pont Agent Teams reste bloqué faute d’un vrai fichier à inspecter (raison précisée plus bas, sourcée officiellement) |
+| Agents locaux, teams, sous-agents, « armées » | **Partiel** — flotte visible, sous-agents modélisés ; **découverte** Agent Teams livrée le 07-05 (`communikey teams`, schéma réel capturé) ; la **livraison** dans la mailbox reste à construire (format non observé) |
 | Cross-CLI, cross-terminal, cross-OS, cross-workspace | **Fait pour l’essentiel** — Windows et Chromebook ont des nuances réelles, détaillées plus bas |
 | CLI dédiée, richement configurable, variantes d’aide | **Fait** — ~20 sous-commandes, 7 variantes d’aide identiques au byte près |
 
@@ -225,16 +225,35 @@ pour découvrir les autres membres », mais explicitement « ne pas éditer à l
 des hooks d'injection de contexte comme `UserPromptSubmit` : un mécanisme différent de celui
 que `hook.go` sait déjà câbler.
 
-**Pourquoi le pont n'est toujours pas construit, malgré cette bien meilleure information** :
-la doc décrit le contenu de `members` en prose (nom/agent-id/agent-type) mais ne donne **aucun
-exemple JSON littéral** avec la casse exacte des clés — et `~/.claude/teams/` n'existe sur
-aucune machine d'Aïssa (vérifié par `ls`, 2026-07-05 : Agent Teams n'a jamais été activé/utilisé
-ici). Écrire un parseur contre un schéma deviné, sans le vérifier sur un vrai fichier, serait
-exactement le « faux travail » à proscrire — le code semblerait marcher et resterait non
-prouvé. **Le déblocage concret et peu coûteux** : activer `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
-et faire tourner UNE équipe jetable (n'importe quel projet, un teammate suffit) produit un vrai
-`config.json` — dès lors, un parseur `communikey` peut être écrit et testé contre les VRAIES
-clés, en lecture seule (jamais d'écriture dans ce dossier, la doc l'interdit explicitement).
+**Débloqué en partie le 07-05** : le flag a été activé dans `~/.claude/settings.json`, et un
+vrai `config.json` a été capturé en forçant un pseudo-tty (le mode `-p` headless ne spawne pas
+de vraies teammates — il les *simule* dans sa réponse texte, sans jamais toucher
+`~/.claude/teams/`). Schéma confirmé, camelCase, epoch millis :
+
+```json
+{
+  "name": "session-2a1598bb", "createdAt": 1783258279972,
+  "leadAgentId": "team-lead@session-2a1598bb",
+  "leadSessionId": "2a1598bb-c89b-4929-a3b9-ce8b85b4a482",
+  "members": [{
+    "agentId": "team-lead@session-2a1598bb", "name": "team-lead",
+    "agentType": "team-lead", "joinedAt": 1783258279972,
+    "tmuxPaneId": "leader", "cwd": "…", "subscriptions": [], "backendType": "in-process"
+  }]
+}
+```
+
+`agentteams.go` lit ce fichier (jamais ne l'écrit) et `communikey teams` liste les équipes et
+membres détectés — la **découverte**, exactement comme `communikey agents` pour la flotte
+coopérative. Ce qui reste honnêtement incomplet : la session de capture s'est bloquée sur le
+dialogue « fais-tu confiance à ce dossier ? » avant qu'un vrai *teammate* (pas seulement le
+lead) ne rejoigne — le tableau `members` n'a donc été vu qu'avec une seule entrée. La forme est
+la même quel que soit le nombre de membres, donc le parseur reste correct, mais un
+**deuxième membre réel n'a jamais été observé**. Plus important : le format de la **mailbox**
+(l'outil interne `SendMessage`) reste totalement non observé — router.go réserve la voie
+(`ChannelBridge`, `TargetInfo.Bridge`) mais rien n'écrit encore dedans, faute d'un vrai message
+à inspecter. La **livraison** dans une Agent Team reste donc à construire ; seule la
+**découverte** est faite.
 
 ## Cross-CLI, cross-terminal, cross-OS, cross-workspace
 
