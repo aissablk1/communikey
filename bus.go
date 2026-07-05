@@ -174,13 +174,13 @@ func cmdInbox(args []string) {
 	body := strings.Join(args[1:], " ")
 	s := mustStore()
 	m := InboxMessage{ID: newID(), TS: nowRFC3339(), From: selfAgentID(), To: to, Provider: selfProvider(s), Kind: "msg"}
-	enc := ""
-	if sealed, ok := maybeSeal(s, to, body); ok {
+	sealed, ok := maybeSeal(s, to, body)
+	if ok {
 		m.Sealed = sealed
-		enc = " · chiffré E2E"
 	} else {
 		m.Body = body
 	}
+	enc := encryptionLabel(ok)
 	if err := s.Inbox().Deliver(m); err != nil {
 		fail(err.Error())
 	}

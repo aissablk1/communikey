@@ -100,6 +100,17 @@ func maybeSeal(s *Store, toAgent, body string) (*SealedMessage, bool) {
 	return sealed, true
 }
 
+// encryptionLabel renders the CLI suffix indicating whether a message left sealed
+// E2E or fell back to local plaintext trust. Le repli en clair doit rester aussi
+// VISIBLE que le scellement réussi — jamais une simple absence de mention (audit du
+// 2026-07-03 : "bascule silencieusement en clair sans contact enregistré", CONCERN).
+func encryptionLabel(sealed bool) string {
+	if sealed {
+		return " · chiffré E2E"
+	}
+	return " · EN CLAIR (aucun contact chiffré connu — communikey contact add …)"
+}
+
 // openBody returns a message's readable body, decrypting if it is sealed.
 func openBody(s *Store, m InboxMessage) string {
 	if m.Sealed == nil {

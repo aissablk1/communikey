@@ -100,6 +100,26 @@ func TestNetworkRejectsBadFrame(t *testing.T) {
 	}
 }
 
+// --pin vide accepte n'importe quel certificat serveur (tlsClientConfig) — c'est un
+// choix assumé sur loopback, un vrai risque ailleurs. shouldWarnUnpinnedTLS doit donc
+// s'allumer précisément quand pin=="" ET que la cible n'est PAS loopback.
+func TestShouldWarnUnpinnedTLS(t *testing.T) {
+	cases := []struct {
+		pin, addr string
+		want      bool
+	}{
+		{"", "127.0.0.1:9777", false},     // loopback, pin vide : assumé, pas d'alerte
+		{"", "192.168.1.10:9777", true},   // LAN, pin vide : à signaler
+		{"abcd1234", "192.168.1.10:9777", false}, // pin fourni : rien à signaler
+		{"", "localhost:9777", false},
+	}
+	for _, c := range cases {
+		if got := shouldWarnUnpinnedTLS(c.pin, c.addr); got != c.want {
+			t.Fatalf("shouldWarnUnpinnedTLS(%q, %q) = %v, want %v", c.pin, c.addr, got, c.want)
+		}
+	}
+}
+
 func TestIsLoopbackAddr(t *testing.T) {
 	cases := map[string]bool{
 		"127.0.0.1:9777": true, "localhost:80": true, "[::1]:9777": true,

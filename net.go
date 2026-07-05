@@ -5,8 +5,12 @@ package main
 // `communikey serve` ouvre un listener TCP qui reçoit des messages (JSON ligne par
 // ligne) et les dépose dans l'inbox local ; `communikey remote` envoie vers une autre
 // machine. Le payload PEUT être chiffré E2E (SealedMessage), donc même un relais
-// ne voit que du chiffré. v1 = loopback/LAN de confiance ; TLS hybride PQC + auth
-// mutuelle = phase suivante (§38 : ne pas exposer hors loopback sans durcir).
+// ne voit que du chiffré. Le transport est DÉJÀ TLS 1.3 hybride post-quantique
+// (tlsbus.go, `--tls`) avec épinglage d'empreinte côté client ; l'authentification
+// des EXPÉDITEURS de messages existe aussi (`--authz`, authz.go : signature Ed25519
+// vérifiée + allowlist de fingerprints). Ce qui manque encore : l'authentification
+// mutuelle au niveau TLS (certificat client) et le durcissement au-delà du
+// loopback/LAN de confiance (§38 : ne pas exposer hors loopback sans durcir).
 
 import (
 	"bufio"
@@ -119,6 +123,14 @@ func sendRemote(addr string, m InboxMessage, cfg *tls.Config) error {
 	return nil
 }
 
+// shouldWarnUnpinnedTLS reports whether a --tls connection is dangerously unpinned:
+// tlsClientConfig("") accepts ANY server certificate (assumed-safe shortcut on
+// loopback, cf. tlsbus.go), but that same shortcut on a non-loopback target defeats
+// the point of TLS — the caller should see a warning, not a silent connection.
+func shouldWarnUnpinnedTLS(pin, addr string) bool {
+	return pin == "" && !isLoopbackAddr(addr)
+}
+
 func isLoopbackAddr(addr string) bool {
 	host := addr
 	if h, _, err := net.SplitHostPort(addr); err == nil {
@@ -204,18 +216,21 @@ func cmdRemote(args []string) {
 	addr, to := pos[0], pos[1]
 	body := strings.Join(pos[2:], " ")
 	m := InboxMessage{ID: newID(), TS: nowRFC3339(), From: selfAgentID(), To: to}
-	enc := ""
-	if sealed, ok := maybeSeal(mustStore(), to, body); ok {
+	sealed, ok := maybeSeal(mustStore(), to, body)
+	if ok {
 		m.Sealed = sealed
-		enc = " · chiffré E2E"
 	} else {
 		m.Body = body
 	}
+	enc := encryptionLabel(ok)
 	var cfg *tls.Config
 	tlsNote := ""
 	if useTLS {
 		cfg = tlsClientConfig(pin)
 		tlsNote = " · TLS PQC"
+		if shouldWarnUnpinnedTLS(pin, addr) {
+			fmt.Printf("⚠ --tls sans --pin vers %s (hors loopback) : n'importe quel certificat serveur est accepté (§38).\n", addr)
+		}
 	}
 	s := mustStore()
 	if n := flushOutbox(s, addr, cfg); n > 0 {
