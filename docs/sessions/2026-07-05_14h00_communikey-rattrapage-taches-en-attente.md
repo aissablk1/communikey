@@ -137,20 +137,53 @@ tags: [communikey, audit, securite, tests, hygiene, autonomie]
 - [x] Épingler les GitHub Actions par SHA complet — **fait**.
 - [x] Clarifier « Hermes » (recherche web) — **fait, hypothèse forte mais non
   confirmée visuellement**.
-- [ ] **Externaliser les patterns provider** (`providers.yaml` + fallback
-  embarqué + `communikey provider test`/`list`) — **délibérément NON tenté en
-  autonomie**. C'est une proposition que j'ai moi-même formulée dans le
-  document de vision (le vrai levier d'échelle sur les 6 providers absents),
-  pas une tâche déjà actée dans un `.md` de session antérieur. Contrairement
-  aux corrections/tests ci-dessus (bornés, réversibles, déjà spécifiés),
-  c'est un vrai changement d'architecture (~200-400 lignes, nouveau format de
-  config, nouvelles sous-commandes) : je le laisse comme proposition prête à
-  exécuter sur décision explicite d'Aïssa plutôt que de l'imposer sous un
-  mandat d'autonomie qui visait le rattrapage, pas l'extension de périmètre
-  (§27/§30 : le travail de feature significatif se cadre, il ne se glisse pas
-  silencieusement dans un « finis tout »).
+- [x] Externaliser les patterns provider — **fait au round 2** (voir ci-dessous),
+  après qu'Aïssa a explicitement demandé « propose-moi des résolutions en
+  autonomie » sur le récap du round 1.
 - [x] Vérification finale (build/vet/test -race vert) + mise à jour
   CHANGELOG.md + finalisation de ce journal + récap — **fait, voir ci-dessous**.
+
+## Round 2 — résolutions autonomes (sur demande explicite d'Aïssa)
+
+Après le récap du round 1, Aïssa a demandé : « Propose-moi des résolutions en
+autonomie » sur les points bloqués/en attente de décision. Recherche factuelle
+d'abord (jamais d'hypothèse non vérifiée), puis action sur tout ce qui
+devenait réellement possible :
+
+- **Go 1.24** : aucune version alternative trouvée en local (pas de
+  `/opt/homebrew/Cellar/go`, pas d'asdf/mise). Confirmé : le bump reste
+  bloqué pour la même raison (réseau go.dev/dl.google.com hors sandbox,
+  autorisation §5 requise pour `brew upgrade go`). Pas de résolution
+  autonome possible — communiqué tel quel.
+- **Calibrage Codex/Gemini live** : Codex absent du PATH (nécessiterait un
+  install global non autorisé). **Gemini CLI 0.40.1 est installé** — testé
+  réellement (`gemini -p "..."`) : échoue immédiatement, `GEMINI_API_KEY`
+  absente et aucune session OAuth dans `~/.gemini/`. Blocage confirmé
+  empiriquement (authentification manquante), pas supposé.
+- **Pont Agent Teams** : recherche web ciblée (WebSearch + WebFetch sur
+  `code.claude.com/docs/en/agent-teams`) — bien meilleure info obtenue
+  (chemins exacts, mécanisme d'activation, architecture des hooks), mais
+  **toujours pas construit** : le format JSON exact de `config.json` n'est
+  décrit qu'en prose (pas d'exemple littéral avec la casse des clés), et
+  `~/.claude/teams/` n'existe sur aucune machine d'Aïssa pour vérifier contre
+  un vrai fichier. Écrire un parseur sur un schéma deviné aurait été
+  exactement le « faux travail » proscrit — documenté comme blocage précis
+  avec un chemin de déblocage concret (activer le flag expérimental, faire
+  tourner une équipe jetable, revenir avec le vrai fichier).
+- **Externalisation des patterns provider** : **construite et livrée**
+  (`providerconfig.go` + tests + `communikey provider list`/`test`,
+  purement additive — claude/codex/gemini inchangés). Testée de bout en
+  bout sur le vrai binaire (pas seulement en tests unitaires), ce qui a
+  révélé deux vrais défauts corrigés avant commit : un pattern sans `(?m)`
+  qui ne matche jamais un écran multi-lignes, et un doublon d'affichage
+  entre provider personnalisé et liste des « absents ».
+- **Correctif `hookInstallFor`** (trouvé au round 1, documenté comme
+  observation) : construit et testé (TDD) — un provider inconnu avertit
+  désormais explicitement au lieu de faire passer le snippet Claude en
+  silence.
+
+Commits de ce round : `7170c0f` (provider externalisé), `41b0f98` (fix
+hookInstallFor), `37b99c5` (vision + CHANGELOG à jour).
 
 ## Notes / Décisions / Blocages
 
@@ -167,9 +200,12 @@ tags: [communikey, audit, securite, tests, hygiene, autonomie]
   `docs/strategy/communikey-plan-lancement-haute-assurance.md` qui conclut
   lui-même « ne pas lancer maintenant ».
 - **Blocages confirmés factuellement, pas supposés** : pont Agent Teams
-  (`~/.claude/teams` absent, vérifié par `ls`), calibrage Codex/Gemini sur
-  écrans live (aucun moyen de capturer un vrai écran de CLI tiers depuis cette
-  session), clients mobiles et injection clavier Windows (limites physiques
-  déjà documentées), passkey WebAuthn (authentificateur physique requis).
+  (schéma JSON exact non publié + `~/.claude/teams` absent sur cette machine,
+  vérifié par `ls` — chemin de déblocage documenté), calibrage Codex/Gemini
+  sur écrans live (Codex absent du PATH ; Gemini installé mais non authentifié
+  — testé réellement, pas supposé), clients mobiles et injection clavier
+  Windows (limites physiques déjà documentées), passkey WebAuthn
+  (authentificateur physique requis), bump Go 1.24 (réseau go.dev hors
+  sandbox + autorisation §5 requise pour un install global).
 
 **Auteur** : Aïssa BELKOUSSA
