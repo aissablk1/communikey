@@ -39,9 +39,34 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   exige désormais `--force` (le fingerprint reconstruit est affiché avant le refus, pour
   vérification manuelle). `recovery from-phrase` s'appuyait déjà sur le checksum BIP-39 natif pour
   la validité de la phrase, mais n'avait pas non plus de garde-fou contre l'écrasement silencieux.
+- **`cmdInbox` / `cmdRemote`** : le repli en clair (`maybeSeal` échoue faute de contact ou de
+  vault déverrouillable) ne se signalait qu'en **creux** — l'absence de la mention « chiffré E2E »
+  était le seul indice d'un envoi non scellé. `encryptionLabel()` rend maintenant le repli
+  **explicite** : « EN CLAIR (aucun contact chiffré connu) ».
+- **`remote --tls`** sans `--pin` vers une cible **non-loopback** acceptait silencieusement
+  n'importe quel certificat serveur. Avertissement visible désormais (`shouldWarnUnpinnedTLS`),
+  symétrique de celui déjà émis côté `serve` sans `--authz`.
+- Commentaire de tête de `net.go` corrigé : il annonçait le TLS hybride PQC comme « phase
+  suivante » alors qu'il est **déjà livré** (`tlsbus.go`) ; ce qui manque réellement est
+  l'authentification mutuelle au niveau TLS (certificat client).
+
+### Tests
+- `relations_test.go` : le graphe familial (`link`/`unlink`/`childrenOf`/`parentOf`/`wouldCycle`,
+  roundtrip JSON) n'avait aucun test automatisé — angle mort confirmé et comblé (9 tests, aucun
+  bug latent trouvé).
+
+### CI / supply-chain
+- GitHub Actions épinglées par **SHA complet** (`actions/checkout`, `actions/setup-go`,
+  `anchore/sbom-action`, `sigstore/cosign-installer`, `goreleaser/goreleaser-action`,
+  `actions/attest-build-provenance`) au lieu d'un tag majeur mutable, avec commentaire `# vX`
+  pour la lisibilité.
 
 Voir [`docs/NEXT.md`](docs/NEXT.md) pour le reste (provenance SLSA/cosign — en attente de la
-facturation GitHub —, passkey WebAuthn, surface MCP, audit cryptographique externe).
+facturation GitHub —, passkey WebAuthn, surface MCP, audit cryptographique externe). **Go 1.24
+est officiellement en fin de vie depuis le 2026-02-10** (politique 2-releases de go.dev, vérifié
+2026-07-05) : un bump vers 1.25/1.26 est recommandé mais non fait ici — nécessite un accès réseau
+à go.dev/dl.google.com absent du bac à sable de développement, et une mise à jour du toolchain
+global hors autorisation explicite.
 
 ## [0.2.0] — 2026-06-27
 

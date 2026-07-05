@@ -4,11 +4,13 @@ session_id: N/A (hook §23 non déclenché — le workspace de CETTE session Cla
   journal tenu manuellement en cours de session, à la demande explicite d'Aïssa)
 date_debut: 2026-07-05 ~12:49 (déduit des premiers timestamps observés cette
   session — développement du prompt communikey puis rattrapage des tâches)
-date_fin: EN COURS
+date_fin: 2026-07-05 ~14:30 (approximatif — déduit des derniers timestamps
+  d'outils observés cette session)
 workspace: /Volumes/Professionnel/Projets/Développement/Outils/communikey (lieu
   de travail réel ; le cwd de la session Claude Code elle-même est /Users/aissabelkoussa)
 auteur: Aïssa BELKOUSSA
-statut: en cours
+statut: terminé (1 proposition volontairement non exécutée, cf. Actions à
+  mener à l'avenir ; blocages réels documentés ci-dessous)
 tags: [communikey, audit, securite, tests, hygiene, autonomie]
 ---
 
@@ -104,21 +106,51 @@ tags: [communikey, audit, securite, tests, hygiene, autonomie]
    auto-lien/cycle direct/cycle indirect/ré-attachement légitime, roundtrip
    JSON avec `HOME` temporaire isolé — ne touche jamais le vrai fichier
    d'Aïssa). Aucun bug latent trouvé, la logique était déjà correcte.
-
-*(mis à jour au fil des tâches suivantes — voir la suite du journal plus bas
-si la session se poursuit)*
+6. **[commit `fd01abd`]** point d'étape du journal lui-même (auto-committé par
+   le hook de session — pas une action manuelle de ma part).
+7. **[commit `1578144`]** `ci(supply-chain): epingler les GitHub Actions par
+   SHA complet` — `actions/checkout`, `actions/setup-go`, `anchore/sbom-action`,
+   `sigstore/cosign-installer`, `goreleaser/goreleaser-action`,
+   `actions/attest-build-provenance` résolus par `git ls-remote` (SHA réels,
+   2026-07-05) au lieu du tag majeur mutable ; YAML validé (`python3 -c
+   "import yaml"`). **Vérification factuelle associée (WebSearch + WebFetch
+   go.dev)** : Go 1.24 est officiellement EOL depuis le 2026-02-10 (politique
+   2 releases de go.dev, recoupé source primaire + endoflife.date) — le bump
+   du toolchain n'a **volontairement pas été fait** : réseau go.dev/dl.google.com
+   hors de l'allowlist de ce bac à sable, et une mise à jour Homebrew globale
+   sortirait de mon autorité sans feu vert explicite d'Aïssa (§5). Documenté
+   dans CHANGELOG.md, pas contourné.
+8. **[commit `b24bebe`]** `docs(strategy): clarifie Hermes (Nous Research) —
+   meme produit que le MCP hermes` — recherche web (source primaire
+   github.com/NousResearch/hermes-agent) : Hermes Agent (Nous Research,
+   février 2026) a sa propre CLI/TUI **et** une passerelle multi-plateforme
+   qui recoupe presque exactement la description du MCP `hermes` déjà
+   installé. Très vraisemblablement le même produit — un vrai 7ᵉ candidat
+   provider, pas une simple passerelle de notifications. Hypothèse non
+   confirmée visuellement (capture cmux inchangée, cf. réponse d'Aïssa au
+   tour précédent), mais étayée par une source primaire réelle, pas inventée.
 
 ## Actions à mener à l'avenir (TODO / follow-up)
 
-Voir la liste de tâches vivante (`TaskList` de cette session) pour l'état
-exact ; résumé à date :
-
-- [ ] Vérifier factuellement le support Go 1.24 avant tout bump toolchain.
-- [ ] Épingler les GitHub Actions par SHA complet.
-- [ ] Clarifier « Hermes » (recherche web).
-- [ ] Externaliser les patterns provider (stretch, si budget de session le
-  permet sans dégrader la qualité du reste).
-- [ ] Vérification finale + récap explicite des blocages réels.
+- [x] Vérifier factuellement le support Go 1.24 avant tout bump toolchain —
+  **fait, bump lui-même bloqué (voir Notes/Blocages)**.
+- [x] Épingler les GitHub Actions par SHA complet — **fait**.
+- [x] Clarifier « Hermes » (recherche web) — **fait, hypothèse forte mais non
+  confirmée visuellement**.
+- [ ] **Externaliser les patterns provider** (`providers.yaml` + fallback
+  embarqué + `communikey provider test`/`list`) — **délibérément NON tenté en
+  autonomie**. C'est une proposition que j'ai moi-même formulée dans le
+  document de vision (le vrai levier d'échelle sur les 6 providers absents),
+  pas une tâche déjà actée dans un `.md` de session antérieur. Contrairement
+  aux corrections/tests ci-dessus (bornés, réversibles, déjà spécifiés),
+  c'est un vrai changement d'architecture (~200-400 lignes, nouveau format de
+  config, nouvelles sous-commandes) : je le laisse comme proposition prête à
+  exécuter sur décision explicite d'Aïssa plutôt que de l'imposer sous un
+  mandat d'autonomie qui visait le rattrapage, pas l'extension de périmètre
+  (§27/§30 : le travail de feature significatif se cadre, il ne se glisse pas
+  silencieusement dans un « finis tout »).
+- [x] Vérification finale (build/vet/test -race vert) + mise à jour
+  CHANGELOG.md + finalisation de ce journal + récap — **fait, voir ci-dessous**.
 
 ## Notes / Décisions / Blocages
 
