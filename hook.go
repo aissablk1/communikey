@@ -33,6 +33,8 @@ const hookInstall = `Câble communikey comme hook de réception. Dans ~/.claude/
 // de hook évoluent : on renvoie vers la doc de chaque CLI plutôt que d'affirmer (§29).
 func hookInstallFor(provider string) string {
 	switch provider {
+	case "", "claude":
+		return hookInstall
 	case "codex":
 		return `Câble communikey dans Codex CLI (~/.codex/ — vérifie la doc Codex, le format évolue) :
   hook UserPromptSubmit (et Stop pour l'async) → commande « communikey hook ».
@@ -44,7 +46,13 @@ func hookInstallFor(provider string) string {
   event BeforeAgent → commande « communikey hook »
   (Gemini reçoit le contexte additionnel via le stdout brut de communikey).`
 	default:
-		return hookInstall // Claude (UserPromptSubmit, hookSpecificOutput)
+		// Trouvé en lisant le code (§29, 2026-07-05) : ce cas retombait silencieusement
+		// sur le snippet Claude, qui ne correspond à rien pour un provider inconnu.
+		return fmt.Sprintf(
+			"Aucun câblage connu pour %q — providers calibrés : claude, codex, gemini.\n"+
+				"Voir « communikey provider list » pour le statut des autres, et docs/cross-vendor-setup.md.\n"+
+				"Le snippet ci-dessous est celui de Claude, probablement INCORRECT pour %q :\n\n%s",
+			provider, provider, hookInstall)
 	}
 }
 
