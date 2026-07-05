@@ -4,14 +4,15 @@ session_id: N/A (hook §23 non déclenché — le workspace de CETTE session Cla
   journal tenu manuellement en cours de session, à la demande explicite d'Aïssa)
 date_debut: 2026-07-05 ~12:49 (déduit des premiers timestamps observés cette
   session — développement du prompt communikey puis rattrapage des tâches)
-date_fin: 2026-07-05 ~14:30 (approximatif — déduit des derniers timestamps
+date_fin: 2026-07-05 ~15:35 (approximatif — déduit des derniers timestamps
   d'outils observés cette session)
 workspace: /Volumes/Professionnel/Projets/Développement/Outils/communikey (lieu
   de travail réel ; le cwd de la session Claude Code elle-même est /Users/aissabelkoussa)
 auteur: Aïssa BELKOUSSA
-statut: terminé (1 proposition volontairement non exécutée, cf. Actions à
-  mener à l'avenir ; blocages réels documentés ci-dessous)
-tags: [communikey, audit, securite, tests, hygiene, autonomie]
+statut: terminé (découverte Agent Teams livrée au round 3 ; livraison mailbox
+  et 2 items externes — Go 1.24, calibrage Codex/Gemini live — restent
+  ouverts, cf. Notes/Blocages)
+tags: [communikey, audit, securite, tests, hygiene, autonomie, agent-teams]
 ---
 
 # Session — communikey : développement du prompt de vision + rattrapage autonome de toutes les tâches en attente
@@ -184,6 +185,34 @@ devenait réellement possible :
 
 Commits de ce round : `7170c0f` (provider externalisé), `41b0f98` (fix
 hookInstallFor), `37b99c5` (vision + CHANGELOG à jour).
+
+## Round 3 — déblocage réel d'Agent Teams (sur demande explicite)
+
+Aïssa : « Active le flag Agent Teams et fais tourner une équipe jetable ».
+
+- Ajouté `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` dans `~/.claude/settings.json`
+  (backup pris avant édition, JSON revalidé après).
+- Premier essai en `claude -p` (headless) : **négatif mais instructif** — le
+  modèle a *narré* avoir spawné 2 teammates et rendu 2 haïkus, sans qu'aucun
+  vrai spawn n'ait lieu (aucune trace `TaskCreate`/`SendMessage` dans le log,
+  `~/.claude/teams/` jamais créé). Le mode print ne supporte pas les vraies
+  Agent Teams.
+- Deuxième essai via un pseudo-tty (`script -q /dev/null claude …`) :
+  **succès** — capture d'un vrai `~/.claude/teams/session-2a1598bb/config.json`
+  avec le schéma exact (camelCase, epoch millis). Un troisième essai, plus
+  long, visait à laisser 2 vrais teammates rejoindre, mais le process est
+  resté bloqué sur le dialogue « fais-tu confiance à ce dossier ? » (jamais
+  résolu par les entrées scriptées) — un seul membre (team-lead) a donc été
+  observé, mais la forme du tableau `members` est confirmée.
+- Implémenté `agentteams.go` (`discoverAgentTeams`, lecture seule stricte) et
+  `communikey teams` (TDD avec le vrai fixture capturé). Commits `aeba784`
+  (code), `3768f5e` (docs). Cleanup des dossiers temporaires de test refusé
+  par le système de permission — laissés tels quels dans `/tmp` (purge
+  automatique par l'OS, sans conséquence).
+- **Ce qui reste ouvert, honnêtement** : la **livraison** dans la mailbox
+  d'équipe (outil interne `SendMessage`) n'a jamais été observée — seule la
+  **découverte** (roster) est construite. Router.go réservait déjà la voie
+  (`ChannelBridge`) ; elle reste non câblée à une vraie livraison.
 
 ## Notes / Décisions / Blocages
 
