@@ -141,7 +141,7 @@ func cmdID(args []string) {
 		if err := saveIdentity(s, id, pass); err != nil {
 			fail(err.Error())
 		}
-		fmt.Printf("✓ identité créée (hybride Ed25519 + X25519 + ML-KEM-768)\n  fingerprint: %s\n  vault: %s\n",
+		fmt.Printf("✓ identité créée (hybride Ed25519+ML-DSA-65 · X25519 · ML-KEM-768)\n  fingerprint: %s\n  vault: %s\n",
 			fingerprint(id.Public()), identityVaultPath(s))
 		return
 	}

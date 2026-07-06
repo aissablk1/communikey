@@ -2,7 +2,10 @@ package main
 
 import (
 	"bytes"
+	"crypto/ed25519"
 	"testing"
+
+	"filippo.io/mldsa"
 )
 
 func TestSealOpenRoundtrip(t *testing.T) {
@@ -120,5 +123,83 @@ func TestIdentitySerializationRoundtrip(t *testing.T) {
 	}
 	if string(pt) != "persistence check" {
 		t.Fatalf("got %q", pt)
+	}
+}
+
+// --- Signature hybride Ed25519 ⊕ ML-DSA-65 (durcissement post-quantique) ---
+
+func TestPublicBundleIncludesMLDSAKey(t *testing.T) {
+	id, err := NewIdentity()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pub := id.Public()
+	if len(pub.MLDSAPub) != mldsa.MLDSA65().PublicKeySize() {
+		t.Fatalf("MLDSAPub: got %d octets, want %d (ML-DSA-65)", len(pub.MLDSAPub), mldsa.MLDSA65().PublicKeySize())
+	}
+}
+
+func TestSealedMessageIncludesBothSignatures(t *testing.T) {
+	alice, _ := NewIdentity()
+	bob, _ := NewIdentity()
+	sealed, err := Seal(bob.Public(), alice, []byte("double signature"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(sealed.Sig) != ed25519.SignatureSize {
+		t.Fatalf("Sig (Ed25519): got %d octets, want %d", len(sealed.Sig), ed25519.SignatureSize)
+	}
+	if len(sealed.MLDSASig) != mldsa.MLDSA65().SignatureSize() {
+		t.Fatalf("MLDSASig: got %d octets, want %d (ML-DSA-65)", len(sealed.MLDSASig), mldsa.MLDSA65().SignatureSize())
+	}
+	if len(sealed.SenderMLDSAPub) != mldsa.MLDSA65().PublicKeySize() {
+		t.Fatalf("SenderMLDSAPub: got %d octets, want %d", len(sealed.SenderMLDSAPub), mldsa.MLDSA65().PublicKeySize())
+	}
+}
+
+// §65/durcissement : falsifier la signature ML-DSA SEULE (Ed25519 intacte) doit
+// suffire à faire échouer Open — c'est tout l'intérêt de l'hybride (« il faut casser
+// les DEUX pour usurper »), pas seulement Ed25519.
+func TestOpenRejectsTamperedMLDSASignatureAlone(t *testing.T) {
+	alice, _ := NewIdentity()
+	bob, _ := NewIdentity()
+	sealed, err := Seal(bob.Public(), alice, []byte("ordre signé hybride"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sealed.MLDSASig[0] ^= 0xFF // Ed25519 (Sig) reste valide, seul ML-DSA est corrompu
+	if _, _, err := Open(bob, sealed); err == nil {
+		t.Fatal("Open a accepté une signature ML-DSA falsifiée alors qu'Ed25519 seule était valide")
+	}
+}
+
+// Symétriquement : falsifier Ed25519 SEULE (ML-DSA intacte) doit aussi échouer.
+func TestOpenRejectsTamperedEd25519SignatureAlone(t *testing.T) {
+	alice, _ := NewIdentity()
+	bob, _ := NewIdentity()
+	sealed, err := Seal(bob.Public(), alice, []byte("ordre signé hybride"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sealed.Sig[0] ^= 0xFF // ML-DSA reste valide, seul Ed25519 est corrompu
+	if _, _, err := Open(bob, sealed); err == nil {
+		t.Fatal("Open a accepté une signature Ed25519 falsifiée alors que ML-DSA seule était valide")
+	}
+}
+
+// Un expéditeur qui substitue sa propre clé ML-DSA (sans en posséder la clé privée
+// assortie) est rejeté : la clé publique ML-DSA est liée dans le transcript ET la
+// signature Ed25519 s'engage dessus — un ré-emballage de bundle ne vérifie plus.
+func TestOpenRejectsSubstitutedMLDSAPublicKey(t *testing.T) {
+	alice, _ := NewIdentity()
+	mallory, _ := NewIdentity()
+	bob, _ := NewIdentity()
+	sealed, err := Seal(bob.Public(), alice, []byte("usurpation de clé ML-DSA"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sealed.SenderMLDSAPub = mallory.Public().MLDSAPub
+	if _, _, err := Open(bob, sealed); err == nil {
+		t.Fatal("Open a accepté une clé publique ML-DSA substituée")
 	}
 }

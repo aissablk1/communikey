@@ -12,6 +12,11 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   l'expéditeur ET une AAD applicative `from→to`. Un message scellé par 0.2.0 ne se vérifie
   plus sous 0.3.0 (durcissement anti-replay / anti-ré-emballage). `Seal`/`Open` acceptent une
   AAD variadique optionnelle (appels sans contexte inchangés).
+- **Signature hybride Ed25519 ⊕ ML-DSA-65** : `PublicBundle` gagne `MLDSAPub` et
+  `SealedMessage` gagne `SenderMLDSAPub`/`MLDSASig` ; `Open` exige désormais que les
+  **DEUX** signatures soient valides. Un message scellé sous une version antérieure de
+  0.3.0-dev (sans ces champs) ne se vérifie plus. `go.mod` passe de `go 1.24` à
+  `go 1.25` (requis par la dépendance ci-dessous).
 
 ### Ajouté
 - `communikey journal [--json]` : trace du bus (de→à, **hash uniquement**, jamais le clair).
@@ -34,8 +39,18 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
 
 ### Changé
 - **Licence** : MIT → **Apache-2.0** (grant de brevet, vital vu la crypto PQC).
+- **Dépendance externe (la seule du projet)** : `filippo.io/mldsa` (FIPS 204, ML-DSA-65),
+  en attendant `crypto/mldsa` dans la stdlib Go (interne depuis 1.26, public proposé
+  pour 1.27 — golang/go#77626). Toutes les autres primitives restent stdlib Go pure.
 
 ### Sécurité
+- **Signatures post-quantiques (durcissement Shor)** : les messages sont désormais signés
+  par **Ed25519 ET ML-DSA-65** sur le même transcript (`crypto.go`) — usurper un
+  expéditeur exige de casser les deux schémas, symétriquement au KEM hybride existant
+  (X25519 ⊕ ML-KEM-768). L'allowlist réseau (`serve --authz`, `authz.go`) vérifie
+  désormais aussi les deux signatures avant d'autoriser un expéditeur. Le certificat
+  TLS auto-signé du transport (`tlsbus.go`) reste Ed25519 classique — `crypto/tls`/`x509`
+  n'acceptent pas de certificat feuille ML-DSA en Go 1.25 (voir `SECURITY.md`).
 - **`recovery combine`** : le secret Shamir reconstitué est désormais protégé par un checksum
   SHA-256 tronqué (4 octets, embarqué par `recovery split` avant découpage). Trouvé par audit
   (2026-07-03) : sous le seuil K, l'interpolation de Lagrange renvoie une valeur bien formée mais

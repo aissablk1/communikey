@@ -337,9 +337,10 @@ la mémoire du process de toute façon. L’agent qui **reçoit** un message res
 d’injection de prompt à part entière — communikey transporte le message, il ne garantit pas
 que l’agent destinataire ne sera pas détourné par son contenu ; cette défense relève du
 harnais, pas du bus. Le journal expose les métadonnées (qui parle à qui, quand), jamais le
-contenu — ce n’est pas de l’anonymat. Et la couche post-quantique ne couvre aujourd’hui que
-l’échange de clés : les signatures restent Ed25519, classiques ; migrer vers ML-DSA reste à
-faire si le modèle de menace l’exige un jour.
+contenu — ce n’est pas de l’anonymat. La couche post-quantique couvre désormais l’échange de
+clés (X25519 ⊕ ML-KEM-768) **et** les signatures (Ed25519 ⊕ ML-DSA-65, hybride, les deux
+doivent être valides) — reste classique le certificat TLS auto-signé du transport
+(`crypto/tls`/`x509` en Go n’acceptent pas encore de certificat feuille ML-DSA).
 
 Le correctif le plus significatif de la branche non publiée mérite d’être cité précisément,
 parce qu’il illustre bien le sérieux du projet sur ce terrain : un audit du 03/07 a trouvé que
@@ -366,8 +367,8 @@ asymétrique par destinataire, KEM post-quantique, recovery souveraine par Shami
 | Cross-provider | ◐ (Claude fait, Codex/Gemini calibrés) | ✅ ~10 CLIs | ❌ Claude only |
 | Cross-machine | ✅ TLS hybride PQC | ✅ MQTT | ❌ |
 | Chiffrement | ✅ par destinataire | ✅ clé partagée | ❌ |
-| Authentification de l’expéditeur | ✅ Ed25519 signé | ❌ | ❌ |
-| Post-quantique | ✅ ML-KEM-768 | ❌ | ❌ |
+| Authentification de l’expéditeur | ✅ hybride Ed25519 ⊕ ML-DSA-65 | ❌ | ❌ |
+| Post-quantique | ✅ ML-KEM-768 (échange) + ML-DSA-65 (signature) | ❌ | ❌ |
 | Recovery souveraine | ✅ Shamir + BIP-39 | ❌ | ❌ |
 | Largeur / maturité | alpha, un jour d’adoption | établi, plus large | natif, expérimental |
 
@@ -389,7 +390,7 @@ levé.
 | Terminaux et providers | injection cmux + tmux state-aware, graphe familial, détection Claude, adaptateurs Codex + Gemini (calibrés sur source, confirmation live en attente) | backend `screen`, passkey WebAuthn |
 | Identité et réseau | recovery Shamir, phrase BIP-39, réseau loopback/LAN en TLS hybride PQC | authentification mutuelle réseau, durcissement hors-LAN |
 | Portée | — | clients mobiles, Windows coopératif, pont Agent Teams, surface MCP |
-| Durcissement | — | signatures ML-DSA, audit crypto externe, autres OS |
+| Durcissement | signatures hybrides Ed25519 ⊕ ML-DSA-65 | audit crypto externe, autres OS |
 
 Trois blocages ne relèvent pas d’un manque de temps mais d’une contrainte réelle : le passkey
 WebAuthn exige un authentificateur (navigateur, clé matérielle, API OS) qu’une session CLI

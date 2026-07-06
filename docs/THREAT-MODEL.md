@@ -21,7 +21,7 @@ par fichiers) ou entre machines (`serve`/`remote`).
 
 | Menace (STRIDE) | Mitigation dans communikey |
 |---|---|
-| **Spoofing** (usurper un expéditeur) | Signature **Ed25519** sur le transcript ; identité dérivée d'une graine maître. Allowlist cryptographique (`serve --authz`) : seuls les expéditeurs signés et autorisés passent. |
+| **Spoofing** (usurper un expéditeur) | Signature **hybride Ed25519 ⊕ ML-DSA-65** sur le transcript (les DEUX doivent être valides) ; identité dérivée d'une graine maître. Allowlist cryptographique (`serve --authz`) : seuls les expéditeurs signés et autorisés passent. |
 | **Tampering** (altérer le message) | AEAD **AES-256-GCM** + signature sur le transcript (eph keys, nonce, ciphertext, **SenderPub**, **AAD from→to**). Toute altération invalide la signature/AEAD. |
 | **Repudiation** | Journal append-only (hash + longueur, jamais le clair) ; `communikey journal` trace de→à sans révéler le corps. |
 | **Information disclosure** | Chiffrement **E2E hybride post-quantique** : KEM X25519 ⊕ ML-KEM-768 → HKDF → AES-GCM (confidentialité tient sauf si **les deux** KEM sont cassés). Vault PBKDF2→AES-GCM. |
@@ -43,8 +43,12 @@ par fichiers) ou entre machines (`serve`/`remote`).
 - **Le bus ne voit pas tout le trafic.** Les agents communiquent aussi par fichiers partagés, par le
   canal natif de l'orchestrateur, par MCP, par stdout. communikey n'est pas un moniteur de référence.
 - **Métadonnées.** Le journal/registre expose qui parle à qui et quand (pas le contenu). Pas d'anonymat.
-- **Quantique.** La couche KEM est hybride PQC (bon contre « Harvest Now, Decrypt Later »), mais les
-  **signatures** restent Ed25519 (classique) ; migrer en ML-DSA si le modèle de menace l'exige.
+- **Quantique.** La couche KEM (X25519 ⊕ ML-KEM-768) ET les **signatures** (Ed25519 ⊕
+  ML-DSA-65) sont désormais hybrides PQC — bon contre « Harvest Now, Decrypt Later »
+  côté confidentialité **et** contre un futur bris de Shor côté authenticité. Reste
+  classique : le **certificat TLS** auto-signé du transport (`tlsbus.go`, Ed25519 seul —
+  `crypto/tls`/`x509` en Go n'acceptent pas de certificat feuille ML-DSA) ; impact
+  limité car ce n'est pas l'ancre de confiance (épinglage manuel d'empreinte).
 
 ## Recommandations d'usage
 

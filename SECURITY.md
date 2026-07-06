@@ -50,8 +50,8 @@ connues »).
 | Bien | Contre qui | Comment |
 |---|---|---|
 | **Confidentialité des messages** | un relais/bus curieux ou malveillant, un sniffer réseau | chiffrement E2E hybride (X25519 ⊕ ML-KEM-768) → AES-256-GCM ; le relais ne voit que du chiffré |
-| **Intégrité & authenticité** | un relais qui altère ou rejoue un message falsifié | signature Ed25519 sur l'intégralité de l'enveloppe, **vérifiée avant déchiffrement** |
-| **Résistance « Harvest Now, Decrypt Later »** | un adversaire qui capture aujourd'hui pour déchiffrer avec un futur ordinateur quantique | KEM **hybride** : casser le secret exige de casser **X25519 ET ML-KEM-768** |
+| **Intégrité & authenticité** | un relais qui altère ou rejoue un message falsifié | signature **hybride Ed25519 ⊕ ML-DSA-65** sur l'intégralité de l'enveloppe — les DEUX doivent être valides —, **vérifiée avant déchiffrement** |
+| **Résistance « Harvest Now, Decrypt Later »** | un adversaire qui capture aujourd'hui pour déchiffrer/usurper avec un futur ordinateur quantique | KEM **hybride** (X25519 ⊕ ML-KEM-768) pour le secret, signature **hybride** (Ed25519 ⊕ ML-DSA-65) pour l'authenticité — casser Shor exige de casser aussi la moitié post-quantique |
 | **Clés privées au repos** | accès au disque / sauvegarde volée | vault scellé AES-256-GCM, clé dérivée par PBKDF2-SHA256 (600 000 itérations) |
 | **Perte d'un appareil** | un seul device perdu/volé | recovery Shamir K-sur-N : K-1 parts ne révèlent rien (sûreté de seuil) |
 
@@ -69,12 +69,19 @@ connues »).
 
 ## Primitives cryptographiques (réellement employées)
 
-Toutes proviennent de la **bibliothèque standard de Go 1.24** — aucune dépendance
-externe, aucune crypto maison.
+Toutes proviennent de la **bibliothèque standard de Go 1.25**, à une exception près :
+la signature post-quantique **ML-DSA-65** utilise `filippo.io/mldsa`, car la stdlib Go
+n'expose pas encore de `crypto/mldsa` public (implémentation interne depuis Go 1.26 ;
+paquet public **proposé pour Go 1.27**, [golang/go#77626](https://github.com/golang/go/issues/77626)).
+Ce paquet est maintenu par un membre de l'équipe crypto de Go et explicitement conçu
+comme un pont vers l'API stdlib finale (migration future = simple changement d'import
+path). C'est la **seule** dépendance externe du projet — épinglée dans `go.sum` —
+aucune autre crypto maison ni tierce.
 
-| Rôle | Primitive | Paquet stdlib | Notes |
+| Rôle | Primitive | Paquet | Notes |
 |---|---|---|---|
-| Signature | **Ed25519** | `crypto/ed25519` | signe l'enveloppe `(eph‖mlkem_ct‖nonce‖ct)`, vérifiée avant déchiffrement |
+| Signature (classique) | **Ed25519** | `crypto/ed25519` | signe l'enveloppe `(eph‖mlkem_ct‖nonce‖ct‖sender_pub‖sender_mldsa_pub)`, vérifiée avant déchiffrement |
+| Signature (post-quantique) | **ML-DSA-65** | `filippo.io/mldsa` | FIPS 204 ; signe la **même** enveloppe qu'Ed25519 — hybride : usurper un expéditeur exige de casser les **DEUX** schémas |
 | KEM classique | **X25519** | `crypto/ecdh` | clé **éphémère par message** (confidentialité persistante côté classique) |
 | KEM post-quantique | **ML-KEM-768** | `crypto/mlkem` | FIPS 203 ; encapsulation vers la clé statique du destinataire |
 | Chiffrement | **AES-256-GCM** | `crypto/aes` + `crypto/cipher` | nonce 96 bits aléatoire ; clé **fraîche par message** (pas de réutilisation de nonce) |
@@ -89,15 +96,18 @@ externe, aucune crypto maison.
 
 1. Le secret de session = `HKDF-SHA256(X25519_shared ‖ ML-KEM_shared)` → clé AES-256.
 2. `AES-256-GCM(plaintext)` avec nonce aléatoire.
-3. **Signature Ed25519** de l'expéditeur sur `(eph_pub ‖ mlkem_ct ‖ nonce ‖ ct)`.
-4. À l'ouverture : la signature est **vérifiée d'abord** (sinon rejet), puis double
-   décapsulation X25519 + ML-KEM, puis déchiffrement GCM. Une enveloppe falsifiée est
-   rejetée avant tout déchiffrement.
+3. **Double signature** de l'expéditeur sur `(eph_pub ‖ mlkem_ct ‖ nonce ‖ ct ‖
+   sender_ed25519_pub ‖ sender_mldsa_pub)` : une signature **Ed25519** et une
+   signature **ML-DSA-65** sur le même transcript.
+4. À l'ouverture : les **DEUX signatures sont vérifiées d'abord** (la moindre des deux
+   invalide rejette le message), puis double décapsulation X25519 + ML-KEM, puis
+   déchiffrement GCM. Une enveloppe falsifiée — ou signée avec un seul des deux
+   schémas — est rejetée avant tout déchiffrement.
 
 ### Identité et vault
 
-Toute l'identité (Ed25519 + X25519 + ML-KEM) **dérive d'une seule graine maître de 32
-octets** par HKDF à domaines séparés. Cette graine est l'unique secret : elle est
+Toute l'identité (Ed25519 + ML-DSA-65 + X25519 + ML-KEM) **dérive d'une seule graine
+maître de 32 octets** par HKDF à domaines séparés. Cette graine est l'unique secret : elle est
 scellée dans le vault, découpable en parts Shamir, ou encodable en phrase BIP-39. Le
 vault sur disque a les permissions `0600`.
 
@@ -112,7 +122,13 @@ Ces points sont des **limites assumées de l'alpha**, documentés ici plutôt qu
   roundtrip et propriété de seuil) **doivent être audités** avant tout usage critique.
 - **PBKDF2, pas encore Argon2id.** Le vault utilise PBKDF2-SHA256 (600 000 itérations).
   Argon2id (résistant au matériel dédié) est la cible, mais exige `golang.org/x/crypto`
-  — donc une première dépendance, à arbitrer.
+  — une **deuxième** dépendance externe (après `filippo.io/mldsa`), à arbitrer.
+- **Certificat TLS encore Ed25519 seul (classique).** La signature **applicative**
+  (messages E2E) est hybride Ed25519 ⊕ ML-DSA-65 depuis v0.3.0-dev, mais le certificat
+  auto-signé du transport (`tlsbus.go`) reste Ed25519 : `crypto/tls`/`x509` en Go
+  n'acceptent pas de certificat feuille ML-DSA. Impact limité : ce certificat n'est de
+  toute façon **pas** l'ancre de confiance (voir « épinglage manuel » ci-dessous) — mais
+  ce n'est pas encore un durcissement post-quantique complet du transport.
 - **Pas de passkey/WebAuthn.** Le déverrouillage du vault repose sur une passphrase
   (fichier via `COMKEY_VAULT_PASS_FILE`, recommandé, ou variable `COMKEY_VAULT_PASS`). Le
   MFA résistant au phishing (FIDO2/PRF) est planifié.

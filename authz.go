@@ -3,11 +3,12 @@ package main
 // authz.go — autorisation réseau CRYPTOGRAPHIQUE.
 //
 // `serve --authz` n'accepte un message que s'il est E2E **signé** par un expéditeur
-// dont le fingerprint figure dans l'allowlist. La signature Ed25519 (sur le
-// transcript) est vérifiable SANS déchiffrer — donc le serveur authentifie
-// l'expéditeur sans jamais lire le clair. Les messages en clair (non signés) sont
-// refusés sous --authz. Un id `From` ne suffit jamais (il est falsifiable) : seule
-// la clé qui signe compte.
+// dont le fingerprint figure dans l'allowlist. Les signatures Ed25519 ⊕ ML-DSA-65
+// (sur le transcript) sont vérifiables SANS déchiffrer — donc le serveur authentifie
+// l'expéditeur sans jamais lire le clair. Hybride : les DEUX signatures doivent être
+// valides, sinon le message est refusé (même garde que Open(), crypto.go). Les
+// messages en clair (non signés) sont refusés sous --authz. Un id `From` ne suffit
+// jamais (il est falsifiable) : seule la clé qui signe compte.
 
 import (
 	"crypto/ed25519"
@@ -17,6 +18,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"filippo.io/mldsa"
 )
 
 func allowlistPath(s *Store) string { return filepath.Join(s.Dir, "allowed.json") }
@@ -48,14 +51,23 @@ func loadAllowlist(s *Store, extra []string) (allow map[string]bool, configured 
 	return allow, configured
 }
 
-// senderAllowed verifies the message is E2E-signed by an allowed sender. Returns
-// false for plaintext, bad signatures, or unknown senders.
+// senderAllowed verifies the message is E2E-signed (Ed25519 AND ML-DSA-65, BOTH
+// required) by an allowed sender. Returns false for plaintext, bad/partial
+// signatures, or unknown senders.
 func senderAllowed(m InboxMessage, allow map[string]bool) bool {
 	sm := m.Sealed
 	if sm == nil || len(sm.SenderPub) != ed25519.PublicKeySize {
 		return false
 	}
-	if !ed25519.Verify(sm.SenderPub, transcript(sm.EphX25519, sm.MLKEMCt, sm.Nonce, sm.Ct, sm.SenderPub, sealAAD(m.From, m.To)), sm.Sig) {
+	mldsaPub, err := mldsa.NewPublicKey(mldsa.MLDSA65(), sm.SenderMLDSAPub)
+	if err != nil {
+		return false
+	}
+	tr := transcript(sm.EphX25519, sm.MLKEMCt, sm.Nonce, sm.Ct, sm.SenderPub, sm.SenderMLDSAPub, sealAAD(m.From, m.To))
+	if !ed25519.Verify(sm.SenderPub, tr, sm.Sig) {
+		return false
+	}
+	if mldsa.Verify(mldsaPub, tr, sm.MLDSASig, &mldsa.Options{}) != nil {
 		return false
 	}
 	return allow[pubFingerprint(sm.SenderPub)]

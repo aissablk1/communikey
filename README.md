@@ -192,7 +192,7 @@ les intentions.
 | **2 · Terminaux & providers** | ✅ injection **cmux + tmux** state-aware + graphe familial · détection **Claude** · adaptateurs **Codex + Gemini** (calibrés sur source, confirmation live en attente) | ❌ backend `screen` · passkey WebAuthn |
 | **3 · Identité & réseau** | ✅ recovery **Shamir** · phrase **BIP-39** · réseau loopback/LAN + **TLS hybride PQC** | ❌ auth mutuelle réseau · durcissement hors-LAN |
 | **4 · Portée** | — | ❌ clients **mobiles** · **Windows** (coop) · bridge **Agent Teams** · surface **MCP** |
-| **5 · Durcissement** | — | ❌ signatures **ML-DSA** · **audit crypto externe** · autres OS |
+| **5 · Durcissement** | ✅ signatures hybrides **Ed25519 ⊕ ML-DSA-65** | ❌ **audit crypto externe** · autres OS |
 
 ## Développement
 
