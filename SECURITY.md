@@ -52,7 +52,7 @@ connues »).
 | **Confidentialité des messages** | un relais/bus curieux ou malveillant, un sniffer réseau | chiffrement E2E hybride (X25519 ⊕ ML-KEM-768) → AES-256-GCM ; le relais ne voit que du chiffré |
 | **Intégrité & authenticité** | un relais qui altère ou rejoue un message falsifié | signature **hybride Ed25519 ⊕ ML-DSA-65** sur l'intégralité de l'enveloppe — les DEUX doivent être valides —, **vérifiée avant déchiffrement** |
 | **Résistance « Harvest Now, Decrypt Later »** | un adversaire qui capture aujourd'hui pour déchiffrer/usurper avec un futur ordinateur quantique | KEM **hybride** (X25519 ⊕ ML-KEM-768) pour le secret, signature **hybride** (Ed25519 ⊕ ML-DSA-65) pour l'authenticité — casser Shor exige de casser aussi la moitié post-quantique |
-| **Clés privées au repos** | accès au disque / sauvegarde volée | vault scellé AES-256-GCM, clé dérivée par PBKDF2-SHA256 (600 000 itérations) |
+| **Clés privées au repos** | accès au disque / sauvegarde volée | vault scellé AES-256-GCM, clé dérivée par Argon2id (RFC 9106, résistant GPU/ASIC) |
 | **Perte d'un appareil** | un seul device perdu/volé | recovery Shamir K-sur-N : K-1 parts ne révèlent rien (sûreté de seuil) |
 
 ### Hypothèses de confiance
@@ -60,8 +60,8 @@ connues »).
 - L'**endpoint local** est de confiance : si la machine qui détient le vault **et** la
   passphrase est compromise, l'attaquant a l'identité. communikey protège les messages **en
   transit** et les clés **au repos**, pas un poste déjà sous contrôle adverse.
-- La **passphrase de vault** a une entropie suffisante : PBKDF2 ralentit le bruteforce,
-  il ne sauve pas un mot de passe trivial.
+- La **passphrase de vault** a une entropie suffisante : Argon2id ralentit le bruteforce
+  (coût mémoire **et** CPU, résistant GPU/ASIC), il ne sauve pas un mot de passe trivial.
 - Sur le **réseau**, la version actuelle vise le **loopback / LAN de confiance**
   (voir « Limites »).
 
@@ -69,13 +69,15 @@ connues »).
 
 ## Primitives cryptographiques (réellement employées)
 
-Toutes proviennent de la **bibliothèque standard de Go 1.25**, à une exception près :
-la signature post-quantique **ML-DSA-65** utilise `filippo.io/mldsa`, car la stdlib Go
-n'expose pas encore de `crypto/mldsa` public (implémentation interne depuis Go 1.26 ;
-paquet public **proposé pour Go 1.27**, [golang/go#77626](https://github.com/golang/go/issues/77626)).
-Ce paquet est maintenu par un membre de l'équipe crypto de Go et explicitement conçu
+Toutes proviennent de la **bibliothèque standard de Go 1.25**, à deux exceptions
+près : la signature post-quantique **ML-DSA-65** utilise `filippo.io/mldsa`, car la
+stdlib Go n'expose pas encore de `crypto/mldsa` public (implémentation interne depuis
+Go 1.26 ; paquet public **proposé pour Go 1.27**, [golang/go#77626](https://github.com/golang/go/issues/77626)) —
+ce paquet est maintenu par un membre de l'équipe crypto de Go et explicitement conçu
 comme un pont vers l'API stdlib finale (migration future = simple changement d'import
-path). C'est la **seule** dépendance externe du projet — épinglée dans `go.sum` —
+path) — et la dérivation de clé du vault en **Argon2id** (`golang.org/x/crypto/argon2`,
+package `x/crypto` officiel de l'écosystème Go, pas de `crypto/argon2` stdlib à ce jour).
+Ce sont les **deux seules** dépendances externes du projet — épinglées dans `go.sum` —
 aucune autre crypto maison ni tierce.
 
 | Rôle | Primitive | Paquet | Notes |
@@ -86,7 +88,7 @@ aucune autre crypto maison ni tierce.
 | KEM post-quantique | **ML-KEM-768** | `crypto/mlkem` | FIPS 203 ; encapsulation vers la clé statique du destinataire |
 | Chiffrement | **AES-256-GCM** | `crypto/aes` + `crypto/cipher` | nonce 96 bits aléatoire ; clé **fraîche par message** (pas de réutilisation de nonce) |
 | Dérivation de clé | **HKDF-SHA256** | `crypto/hkdf` | dérive la clé AEAD de `X25519_shared ‖ ML-KEM_shared`, et l'identité de la graine maître (séparation de domaine) |
-| Dérivation de vault | **PBKDF2-SHA256** | `crypto/pbkdf2` | 600 000 itérations, sel 128 bits |
+| Dérivation de vault | **Argon2id** | `golang.org/x/crypto/argon2` | RFC 9106 §7.3 (recommandation non-interactive) : time=1, mémoire=64 Mio, 4 threads, sel 128 bits — résistant GPU/ASIC (coût mémoire, pas seulement CPU) |
 | Aléa | **CSPRNG** | `crypto/rand` | graines, nonces, sels, polynômes Shamir |
 | Recovery (seuil) | **Shamir N-sur-M** sur GF(2⁸) | `shamir.go` (from-scratch, testé) | corps AES (0x11b), interpolation de Lagrange en 0 ; secret enveloppé d'un checksum SHA-256 tronqué (`recovery.go`) avant découpage — sous le seuil K, l'interpolation renvoie une valeur bien formée mais fausse (propriété du schéma), le checksum le détecte avant toute dérivation ou écrasement du vault |
 | Recovery (phrase) | **BIP-39** (24 mots) | `bip39.go` (from-scratch, testé) | wordlist anglaise officielle, checksum SHA-256 |
@@ -120,9 +122,6 @@ Ces points sont des **limites assumées de l'alpha**, documentés ici plutôt qu
 - **Pas d'audit cryptographique externe.** Les primitives sont standard, mais leur
   assemblage (et les implémentations Shamir / BIP-39 from-scratch, quoique testées par
   roundtrip et propriété de seuil) **doivent être audités** avant tout usage critique.
-- **PBKDF2, pas encore Argon2id.** Le vault utilise PBKDF2-SHA256 (600 000 itérations).
-  Argon2id (résistant au matériel dédié) est la cible, mais exige `golang.org/x/crypto`
-  — une **deuxième** dépendance externe (après `filippo.io/mldsa`), à arbitrer.
 - **Certificat TLS encore Ed25519 seul (classique).** La signature **applicative**
   (messages E2E) est hybride Ed25519 ⊕ ML-DSA-65 depuis v0.3.0-dev, mais le certificat
   auto-signé du transport (`tlsbus.go`) reste Ed25519 : `crypto/tls`/`x509` en Go

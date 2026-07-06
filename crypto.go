@@ -7,14 +7,16 @@ package main
 //   · KEM classique   X25519                  (crypto/ecdh)
 //   · KEM post-quant. ML-KEM-768              (crypto/mlkem)        ← hybride PQC
 //   · AEAD            AES-256-GCM             (crypto/aes+cipher)
-//   · KDF             HKDF-SHA256 / PBKDF2    (crypto/hkdf, pbkdf2)
+//   · KDF (transcript) HKDF-SHA256            (crypto/hkdf)
+//   · KDF (vault)      Argon2id               (golang.org/x/crypto/argon2, RFC 9106)
 //
-// Toutes ces primitives sont dans la stdlib Go 1.25, SAUF la signature post-quantique
-// ML-DSA-65 : la stdlib Go n'expose pas encore crypto/mldsa publiquement (implémentation
-// interne depuis Go 1.26 ; paquet public proposé pour Go 1.27 — golang/go#77626). En
-// attendant, on utilise filippo.io/mldsa (mainteneur crypto de l'équipe Go ; le paquet
-// est explicitement conçu comme un pont vers l'API stdlib finale — migration = simple
-// changement d'import path). C'est la SEULE dépendance externe du projet, épinglée dans
+// Toutes ces primitives sont dans la stdlib Go 1.25, SAUF DEUX : la signature
+// post-quantique ML-DSA-65 (filippo.io/mldsa — la stdlib Go n'expose pas encore
+// crypto/mldsa publiquement : implémentation interne depuis Go 1.26, paquet public
+// proposé pour Go 1.27, golang/go#77626 ; le paquet est un pont explicite vers l'API
+// stdlib finale, migration = simple changement d'import path) et la dérivation de
+// clé du vault en Argon2id (golang.org/x/crypto/argon2 — pas encore de crypto/argon2
+// stdlib). Ce sont les DEUX SEULES dépendances externes du projet, épinglées dans
 // go.sum — aucune autre crypto maison ou tierce.
 //
 // Un message est chiffré DE BOUT EN BOUT : le bus/relais ne voit que du chiffré
@@ -30,13 +32,13 @@ import (
 	"crypto/ed25519"
 	"crypto/hkdf"
 	"crypto/mlkem"
-	"crypto/pbkdf2"
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
 	"fmt"
 
 	"filippo.io/mldsa"
+	"golang.org/x/crypto/argon2"
 )
 
 const hkdfInfo = "communikey/v1 hybrid-seal"
@@ -284,9 +286,17 @@ func newGCM(key []byte) (cipher.AEAD, error) {
 
 // --- Vault: identity private keys at rest, sealed by a passphrase ---
 
-// pbkdf2Iters is deliberately high (OWASP-grade for PBKDF2-SHA256). Argon2id is the
-// preferred upgrade (needs golang.org/x/crypto) — tracked in the design (§38).
-const pbkdf2Iters = 600_000
+// Paramètres Argon2id du vault — RFC 9106 §7.3 (recommandation pour usage non-
+// interactif, citée telle quelle par la doc de golang.org/x/crypto/argon2) :
+// time=1, memory=64 Mio. threads=4 exploite le parallélisme d'un CPU moderne ;
+// le déverrouillage du vault est rare (pas un endpoint de login à haut débit),
+// donc pas de compromis à faire sur le coût mémoire.
+const (
+	argon2Time      = 1
+	argon2MemoryKiB = 64 * 1024 // 64 Mio
+	argon2Threads   = 4
+	argon2KeyLen    = 32 // clé AES-256
+)
 
 // VaultBlob is the encrypted-at-rest serialization of secret material.
 type VaultBlob struct {
@@ -295,16 +305,13 @@ type VaultBlob struct {
 	Ct    []byte `json:"ct"`
 }
 
-// SealVault encrypts plaintext under a passphrase (PBKDF2-SHA256 → AES-256-GCM).
+// SealVault encrypts plaintext under a passphrase (Argon2id → AES-256-GCM).
 func SealVault(plaintext, passphrase []byte) (*VaultBlob, error) {
 	salt := make([]byte, 16)
 	if _, err := rand.Read(salt); err != nil {
 		return nil, err
 	}
-	key, err := pbkdf2.Key(sha256.New, string(passphrase), salt, pbkdf2Iters, 32)
-	if err != nil {
-		return nil, err
-	}
+	key := argon2.IDKey(passphrase, salt, argon2Time, argon2MemoryKiB, argon2Threads, argon2KeyLen)
 	gcm, err := newGCM(key)
 	if err != nil {
 		return nil, err
@@ -318,10 +325,7 @@ func SealVault(plaintext, passphrase []byte) (*VaultBlob, error) {
 
 // OpenVault reverses SealVault.
 func OpenVault(b *VaultBlob, passphrase []byte) ([]byte, error) {
-	key, err := pbkdf2.Key(sha256.New, string(passphrase), b.Salt, pbkdf2Iters, 32)
-	if err != nil {
-		return nil, err
-	}
+	key := argon2.IDKey(passphrase, b.Salt, argon2Time, argon2MemoryKiB, argon2Threads, argon2KeyLen)
 	gcm, err := newGCM(key)
 	if err != nil {
 		return nil, err

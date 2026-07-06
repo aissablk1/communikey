@@ -17,6 +17,10 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   **DEUX** signatures soient valides. Un message scellé sous une version antérieure de
   0.3.0-dev (sans ces champs) ne se vérifie plus. `go.mod` passe de `go 1.24` à
   `go 1.25` (requis par la dépendance ci-dessous).
+- **Vault en Argon2id (plus PBKDF2)** : `SealVault`/`OpenVault` dérivent désormais la
+  clé AES-256 via Argon2id (RFC 9106) au lieu de PBKDF2-SHA256. Un vault scellé par une
+  version antérieure de 0.3.0-dev **ne se déverrouille plus** (échoue comme une mauvaise
+  passphrase — aucune migration automatique, alpha assumée).
 
 ### Ajouté
 - `communikey journal [--json]` : trace du bus (de→à, **hash uniquement**, jamais le clair).
@@ -39,9 +43,10 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
 
 ### Changé
 - **Licence** : MIT → **Apache-2.0** (grant de brevet, vital vu la crypto PQC).
-- **Dépendance externe (la seule du projet)** : `filippo.io/mldsa` (FIPS 204, ML-DSA-65),
-  en attendant `crypto/mldsa` dans la stdlib Go (interne depuis 1.26, public proposé
-  pour 1.27 — golang/go#77626). Toutes les autres primitives restent stdlib Go pure.
+- **Dépendances externes (les deux seules du projet)** : `filippo.io/mldsa` (FIPS 204,
+  ML-DSA-65), en attendant `crypto/mldsa` dans la stdlib Go (interne depuis 1.26, public
+  proposé pour 1.27 — golang/go#77626) ; et `golang.org/x/crypto/argon2` (KDF du vault).
+  Toutes les autres primitives restent stdlib Go pure.
 
 ### Sécurité
 - **Signatures post-quantiques (durcissement Shor)** : les messages sont désormais signés
@@ -51,6 +56,9 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   désormais aussi les deux signatures avant d'autoriser un expéditeur. Le certificat
   TLS auto-signé du transport (`tlsbus.go`) reste Ed25519 classique — `crypto/tls`/`x509`
   n'acceptent pas de certificat feuille ML-DSA en Go 1.25 (voir `SECURITY.md`).
+- **Vault durci en Argon2id** : PBKDF2-SHA256 (600 000 itérations, coût CPU seul) remplacé
+  par Argon2id (RFC 9106 §7.3 : time=1, mémoire=64 Mio, 4 threads) — résistant aux
+  attaques par matériel dédié (GPU/ASIC), pas seulement au brute-force CPU.
 - **`recovery combine`** : le secret Shamir reconstitué est désormais protégé par un checksum
   SHA-256 tronqué (4 octets, embarqué par `recovery split` avant découpage). Trouvé par audit
   (2026-07-03) : sous le seuil K, l'interpolation de Lagrange renvoie une valeur bien formée mais

@@ -19,7 +19,7 @@ fini.
   **authentificateur** (navigateur, clé matérielle, ou API OS CTAP) et un *relying party* —
   impossible à exécuter/tester dans un CLI sans interface. *Plan* : intégrer `libfido2` /
   les API OS ; dériver la clé du vault depuis l'extension **PRF** de WebAuthn. En attendant,
-  le vault est chiffré AES-256-GCM, clé via PBKDF2 (passphrase fichier/env, §38).
+  le vault est chiffré AES-256-GCM, clé via Argon2id (RFC 9106, passphrase fichier/env, §38).
 
 - **Réseau multi-machine durci (TLS hybride PQC + auth mutuelle).** Le réseau livré
   (`serve`/`remote`) est **loopback/LAN**, frame JSON ; le **payload est chiffrable E2E**

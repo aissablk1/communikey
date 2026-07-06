@@ -132,12 +132,13 @@ tmux-orchestrator envoie à l'aveugle.
 Primitives **auditées, jamais maison** — toutes dans la stdlib Go 1.24 (zéro
 dépendance) :
 
-- **Messages E2E hybrides PQC** : signés **Ed25519**, chiffrés **AES-256-GCM** sous une
-  clé dérivée de **X25519 ⊕ ML-KEM-768**. Il faut casser **les deux** échanges de clés
-  pour lire — résistance « Harvest Now, Decrypt Later ». Le bus/relais ne voit que du
-  chiffré signé (zero-trust).
+- **Messages E2E hybrides PQC** : signés **Ed25519 ⊕ ML-DSA-65** (les deux doivent être
+  valides), chiffrés **AES-256-GCM** sous une clé dérivée de **X25519 ⊕ ML-KEM-768**. Il
+  faut casser **les deux** échanges de clés pour lire, et **les deux** schémas de
+  signature pour usurper — résistance « Harvest Now, Decrypt Later » côté confidentialité
+  et authenticité. Le bus/relais ne voit que du chiffré signé (zero-trust).
 - **Vault au repos** : la graine maître (32 octets, dont **tout** dérive) est scellée en
-  **AES-256-GCM**, clé via **PBKDF2-SHA256** (600 000 itérations). Aucune clé privée
+  **AES-256-GCM**, clé via **Argon2id** (RFC 9106, résistant GPU/ASIC). Aucune clé privée
   n'est jamais écrite en clair. Déverrouillage par passkey WebAuthn = à venir.
 - **Recovery par seuil** : **Shamir N-sur-M** sur GF(2⁸) — K-1 parts ne révèlent *rien*
   — et **phrase BIP-39** (24 mots) pour une sauvegarde papier.
@@ -146,7 +147,7 @@ dépendance) :
   durcir.
 
 Détails complets, menaces couvertes et **limites honnêtes** (audit externe en attente,
-PBKDF2 vs Argon2id, auth réseau) : **[SECURITY.md](SECURITY.md)**.
+auth réseau) : **[SECURITY.md](SECURITY.md)**.
 
 ## Matrice OS — la vérité
 

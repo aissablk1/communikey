@@ -319,14 +319,16 @@ aucune crypto maison, à l’exception assumée des implémentations Shamir et B
 La construction d’un message scellé, dans l’ordre : le secret de session est dérivé par
 HKDF-SHA256 de l’échange X25519 combiné à l’encapsulation ML-KEM-768 vers la clé statique du
 destinataire ; le texte est chiffré en AES-256-GCM avec un nonce aléatoire ; l’expéditeur
-signe l’ensemble en Ed25519. À l’ouverture, la signature est **vérifiée avant tout
-déchiffrement** — une enveloppe falsifiée est rejetée sans jamais atteindre la couche AEAD.
-Casser ce secret exige de casser **les deux** échanges de clés, classique et post-quantique :
-c’est la résistance visée contre un adversaire qui capture aujourd’hui pour déchiffrer avec un
+signe l’ensemble en **Ed25519 ⊕ ML-DSA-65** (les deux doivent être valides). À l’ouverture, les
+DEUX signatures sont **vérifiées avant tout déchiffrement** — une enveloppe falsifiée, ou signée
+avec un seul des deux schémas, est rejetée sans jamais atteindre la couche AEAD. Casser ce
+secret exige de casser **les deux** échanges de clés, classique et post-quantique ; casser
+l’authenticité exige de casser les **deux** schémas de signature : c’est la résistance visée
+contre un adversaire qui capture aujourd’hui pour déchiffrer, ou qui usurpe demain, avec un
 futur ordinateur quantique (« Harvest Now, Decrypt Later »). Le vault au repos est scellé en
-AES-256-GCM, clé dérivée par PBKDF2-SHA256 à 600 000 itérations, fichier en permissions
-`0600`. Le réseau (`serve`/`remote`) chiffre le transport en TLS 1.3 hybride post-quantique
-(`X25519MLKEM768`) avec certificat auto-signé Ed25519 et épinglage d’empreinte.
+AES-256-GCM, clé dérivée par **Argon2id** (RFC 9106, résistant GPU/ASIC), fichier en
+permissions `0600`. Le réseau (`serve`/`remote`) chiffre le transport en TLS 1.3 hybride
+post-quantique (`X25519MLKEM768`) avec certificat auto-signé Ed25519 et épinglage d’empreinte.
 
 Le modèle de menace (`docs/THREAT-MODEL.md`) dit aussi, sans détour, ce que communikey **ne**
 protège pas : la crypto n’a **pas encore reçu d’audit externe** — le vendre comme « le Signal

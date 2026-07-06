@@ -24,7 +24,7 @@ par fichiers) ou entre machines (`serve`/`remote`).
 | **Spoofing** (usurper un expéditeur) | Signature **hybride Ed25519 ⊕ ML-DSA-65** sur le transcript (les DEUX doivent être valides) ; identité dérivée d'une graine maître. Allowlist cryptographique (`serve --authz`) : seuls les expéditeurs signés et autorisés passent. |
 | **Tampering** (altérer le message) | AEAD **AES-256-GCM** + signature sur le transcript (eph keys, nonce, ciphertext, **SenderPub**, **AAD from→to**). Toute altération invalide la signature/AEAD. |
 | **Repudiation** | Journal append-only (hash + longueur, jamais le clair) ; `communikey journal` trace de→à sans révéler le corps. |
-| **Information disclosure** | Chiffrement **E2E hybride post-quantique** : KEM X25519 ⊕ ML-KEM-768 → HKDF → AES-GCM (confidentialité tient sauf si **les deux** KEM sont cassés). Vault PBKDF2→AES-GCM. |
+| **Information disclosure** | Chiffrement **E2E hybride post-quantique** : KEM X25519 ⊕ ML-KEM-768 → HKDF → AES-GCM (confidentialité tient sauf si **les deux** KEM sont cassés). Vault Argon2id→AES-GCM (résistant GPU/ASIC). |
 | **Replay / ré-emballage** | Anti-replay (dédup sur le **nonce signé**). **AAD from→to** liée dans l'AEAD ET la signature (§41) : un payload ré-emballé sous un autre couple expéditeur→destinataire est rejeté. |
 | **Réseau** | TLS 1.3 **hybride PQC** (X25519MLKEM768) + pinning d'empreinte sur `serve`/`remote`. |
 
