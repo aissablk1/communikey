@@ -40,7 +40,7 @@ Deux points corrigés pendant le brainstorming, à ne pas réintroduire :
   UPX+AES) : **hors sujet ou contre-productive** — primitives cassées, algorithmes d'attaque
   (pas de défense), théorie sans application, ou mauvais modèle de menace (DRM). **Aucun élément
   de cette liste n'entre dans ce design.** Ce qui est réutilisé est déjà en place : Ed25519,
-  X25519+ML-KEM-768, AES-256-GCM, PBKDF2-SHA256 (cf. `crypto.go`, `THREAT-MODEL.md`).
+  X25519+ML-KEM-768, AES-256-GCM, Argon2id/RFC 9106 (cf. `crypto.go`, `THREAT-MODEL.md`).
 - **Portée initiale de la demande** (« tous les providers du marché ») : ramenée à un socle
   déclaratif extensible sans recompilation, validé de bout en bout sur **2 providers concrets**
   (un local, un cloud) plutôt que sur la liste complète d'un coup (§27 YAGNI).
@@ -104,11 +104,18 @@ que `provider`/`hook`/`journal`.
   rétrocompatibilité zéro-config que `providers.json`). Aucun appel cloud n'est possible sans
   une entrée explicite — c'est le garde-fou opt-in validé avec Aïssa.
 
-**Secrets (`modelsecret.go`)** — réutilise le vault existant (AES-256-GCM, PBKDF2-SHA256,
-`resolveVaultPass()`/`loadIdentity()` déjà câblés dans `keyring.go`) plutôt qu'une nouvelle
-crypto : une nouvelle sous-clé du vault stocke les secrets de providers modèle, déverrouillée par
-le même mot de passe de vault. `env:` reste supporté comme repli simple (moins sûr, signalé
-comme tel par `model list`, jamais interdit).
+**Secrets (`modelsecret.go`)** — réutilise le vault existant (`SealVault`/`OpenVault` de
+`crypto.go`, Argon2id → AES-256-GCM ; `resolveVaultPass()` de `bus.go`) plutôt qu'une nouvelle
+crypto : un nouveau fichier scellé (même mécanisme, JSON `VaultBlob` distinct de celui de
+l'identité) stocke les secrets de providers modèle, déverrouillé par le même mot de passe de
+vault. `env:` reste supporté comme repli simple (moins sûr, signalé comme tel par `model list`,
+jamais interdit).
+
+> Correction du 2026-07-06 (§29) : la version initiale de ce document mentionnait PBKDF2-SHA256
+> et `loadIdentity()`/`keyring.go` — le code a migré vers **Argon2id** (commit `eb73942`,
+> concurrent à ce spec) et les primitives de scellement génériques (`SealVault`/`OpenVault`)
+> vivent dans `crypto.go`, pas `keyring.go`. Corrigé pour refléter le code réel avant le plan
+> d'implémentation.
 
 **CLI (`model.go`)** :
 - `communikey model list` — nom, `kind`, URL, secret présent/absent (jamais la valeur), miroir
