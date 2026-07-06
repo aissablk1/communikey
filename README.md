@@ -102,18 +102,21 @@ absent ou hors-modèle.
 
 | Capacité | **communikey** | Agent Teams (natif) | ruflo (claude-flow) | tmux-orchestrator |
 |---|:---:|:---:|:---:|:---:|
-| Cross-provider (Claude / Codex / Gemini) | ✅ <sup>1</sup> | ❌ Claude only | ◐ | ❌ |
+| Cross-provider (Claude / Codex / Gemini / Antigravity) | ✅ <sup>1</sup> | ❌ Claude only | ◐ | ❌ |
 | Cross-OS + mobile | ✅ <sup>2</sup> | ❌ desktop | ❌ | ❌ Unix only |
 | Chiffrement E2E des messages | ✅ | ❌ sandbox/vault partagés | ❌ | ❌ clair |
-| Post-quantique (ML-KEM-768 hybride) | ✅ | ❌ | ❌ | ❌ |
+| Post-quantique (KEM ML-KEM-768 ⊕ signature ML-DSA-65, hybrides) | ✅ | ❌ | ❌ | ❌ |
 | Vault + recovery (Shamir, BIP-39) | ✅ | ❌ | ❌ | ❌ |
 | Injection dans une session **déjà lancée** | ✅ <sup>3</sup> | ◐ cadre Agent Teams | ◐ | ◐ panes, à l'aveugle |
-| Zéro dépendance externe | ✅ stdlib Go | — natif | ❌ npm | ◐ bash |
+| Dépendances externes minimales | ✅ 2 (mldsa, argon2) | — natif | ❌ npm | ◐ bash |
 
 <sup>1</sup> Détection d'état **Claude** calibrée sur de vrais écrans ; adaptateurs
 **Codex et Gemini livrés**, calibrés sur source officielle (bundle `@google/gemini-cli`
 0.40.1 et `openai/codex` `rust-v0.142.3`) — confirmation par capture d'écran live en
-attente. La voie coopérative, elle, est déjà provider-agnostique.
+attente. **Antigravity** (successeur officiel de Gemini CLI pour les comptes
+individuels, celui-ci retiré le 18/06/2026) ajouté par extraction statique sur le
+binaire installé, même statut provisoire. La voie coopérative, elle, est déjà
+provider-agnostique.
 <sup>2</sup> Voie coopérative livrée **sur tout OS** ; clients **mobiles = phase 4**
 (le mobile rejoint le bus comme client — voir, approuver, broadcaster —, il **n'injecte
 pas** au clavier : sandbox).
@@ -190,7 +193,7 @@ les intentions.
 | Phase | Livré | En route |
 |---|---|---|
 | **0–1 · Fondations** | ✅ inbox coopératif · registre + mémoire/journal · crypto E2E hybride PQC · vault AES-256-GCM | — |
-| **2 · Terminaux & providers** | ✅ injection **cmux + tmux** state-aware + graphe familial · détection **Claude** · adaptateurs **Codex + Gemini** (calibrés sur source, confirmation live en attente) | ❌ backend `screen` · passkey WebAuthn |
+| **2 · Terminaux & providers** | ✅ injection **cmux + tmux** state-aware + graphe familial · détection **Claude** · adaptateurs **Codex + Gemini + Antigravity** (calibrés sur source, confirmation live en attente) | ❌ backend `screen` · passkey WebAuthn |
 | **3 · Identité & réseau** | ✅ recovery **Shamir** · phrase **BIP-39** · réseau loopback/LAN + **TLS hybride PQC** | ❌ auth mutuelle réseau · durcissement hors-LAN |
 | **4 · Portée** | — | ❌ clients **mobiles** · **Windows** (coop) · bridge **Agent Teams** · surface **MCP** |
 | **5 · Durcissement** | ✅ signatures hybrides **Ed25519 ⊕ ML-DSA-65** | ❌ **audit crypto externe** · autres OS |

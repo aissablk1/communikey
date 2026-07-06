@@ -24,6 +24,13 @@ import "regexp"
 //     (tui/src/bottom_pane/footer.rs), "Would you like to run/make/grant …" et
 //     "{server} needs your approval." (tui/src/bottom_pane/approval_overlay.rs),
 //     composer caret "›" U+203A (tui/src/bottom_pane/chat_composer.rs).
+//   • Antigravity : successeur officiel de Gemini CLI pour les comptes individuels
+//     (Gemini CLI retiré le 18/06/2026 — developers.googleblog.com, vérifié
+//     2026-07-07). Binaire Homebrew cask `antigravity-cli` 1.0.16 (`agy`) installé
+//     localement ; tokens extraits via `strings` sur le binaire réel (aucune capture
+//     d'écran live disponible — OAuth Google requis) : "Press esc to interrupt
+//     generation.", "Generating... (Enter/Esc to cancel)", "Press ? to see keyboard
+//     shortcuts.", "Do you want to proceed?".
 //
 // CAVEATS honnêtes encore ouverts (une capture d'écran live les lèverait) :
 //   • "esc to interrupt" est PARTAGÉ entre Codex et Claude : un écran Codex *busy*
@@ -36,6 +43,18 @@ import "regexp"
 //   • Le caractère exact de la boîte de saisie Gemini n'a pas été capturé en live ;
 //     on accepte "›"/">" et on verrouille l'idle par le footer "gemini-\d". Si le
 //     caret réel diffère, l'idle échoue du côté SÛR (→ unknown, jamais d'auto-submit).
+//   • Antigravity : "Press ? to see keyboard shortcuts." est extraite ADJACENTE à
+//     "Press esc to interrupt generation." dans la table de chaînes du binaire — pas
+//     de preuve qu'elle est EXCLUSIVE à l'idle (pourrait aussi s'afficher en busy).
+//     Sans conséquence sur la sûreté : Detect() vérifie busy AVANT idle, donc un
+//     écran affichant les deux est classé busy, jamais mal lu comme idle. Le caractère
+//     de la boîte de saisie n'est pas confirmé → même hypothèse partagée "›"/">" que
+//     Codex/Gemini. "esc to interrupt" est aussi partagé avec Claude (premier dans le
+//     registre) : un écran Antigravity busy peut être attribué à "claude" — l'ÉTAT
+//     reste correct, seul le nom de provider peut différer (même caveat que Codex).
+//     "Allow access to this file?" (confirmée dans le binaire) n'est pas encore
+//     couverte par le motif partagé reAdptConfirmVerb — écran retombe en unknown
+//     (jamais en idle), pas de risque, juste sous-détecté tant que non élargi.
 
 // patternProvider is a table-driven Provider: it recognizes a CLI's on-screen
 // state from supplied regex signals, reusing the same ordered, safety-first
@@ -143,5 +162,30 @@ func newGeminiProvider() patternProvider {
 		},
 		idlePrompt: reAdptIdleBox,
 		idleFooter: regexp.MustCompile(`(?i)gemini-\d`),
+	}
+}
+
+// newAntigravityProvider builds the Google Antigravity CLI adapter — successeur
+// officiel de Gemini CLI pour les comptes individuels (retiré le 18/06/2026).
+//
+// Calibré par extraction statique (`strings`) sur le binaire réellement installé
+// (Homebrew cask antigravity-cli 1.0.16, `agy`) — pas de capture d'écran live
+// (OAuth Google requis, non automatisable ici) : busy "Press esc to interrupt
+// generation." / "Generating... (Enter/Esc to cancel)" ; confirm partagé (« Do you
+// want to proceed? » confirmée dans le binaire) ; footer idle "Press ? to see
+// keyboard shortcuts.". Voir les CAVEATS du header de ce fichier.
+func newAntigravityProvider() patternProvider {
+	return patternProvider{
+		name:    "antigravity",
+		confirm: []*regexp.Regexp{reAdptConfirmNum, reAdptConfirmYN, reAdptConfirmVerb},
+		busy: []*regexp.Regexp{
+			// Antigravity-specific templates (disambiguate from Claude's bare "esc to interrupt").
+			regexp.MustCompile(`(?i)esc to interrupt generation`),
+			regexp.MustCompile(`(?i)generating\.{3}.{0,20}esc to cancel`),
+			// Fallback: shared "esc to interrupt" (state still correct if attributed via order).
+			regexp.MustCompile(`(?i)esc to interrupt`),
+		},
+		idlePrompt: reAdptIdleBox,
+		idleFooter: regexp.MustCompile(`(?i)press \? to see keyboard shortcuts`),
 	}
 }

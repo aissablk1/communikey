@@ -12,6 +12,11 @@ import "testing"
 //   • Codex : openai/codex tag rust-v0.142.3 — "Working (Xs • esc to interrupt)",
 //     "? for shortcuts", "Would you like to run the following command?",
 //     "› 1. Yes, proceed (y)", composer caret "›".
+//   • Antigravity : extraction statique (`strings`) sur le binaire installé
+//     (Homebrew cask antigravity-cli 1.0.16) le 2026-07-07 — "Press esc to
+//     interrupt generation.", "Generating... (Enter/Esc to cancel)", "Press ? to
+//     see keyboard shortcuts.", "Do you want to proceed?". Pas de capture d'écran
+//     live (OAuth Google requis) — voir les CAVEATS dans adapters.go.
 // La DISPOSITION (cadres ╭╰│) est représentative d'un TUI ; ce sont les TOKENS qui
 // sont vérifiés. Une capture d'écran live reste recommandée pour figer la mise en
 // page exacte (cf. caveats dans adapters.go). Ces tests garantissent : (1) la logique
@@ -44,6 +49,36 @@ const geminiConfirmReal = `╭─ run_shell_command ─────────�
 │  ● 1. Yes, allow once                            │
 │    2. Yes, allow always                          │
 │    3. No, suggest changes (esc)                  │
+╰──────────────────────────────────────────────────╯`
+
+// --- Fixtures Antigravity CLI 1.0.16 (tokens réels, extraction statique) ---
+
+const antigravityIdleReal = `~/projet (main*)
+
+╭────────────────────────────────────────────────╮
+│ >                                              │
+╰────────────────────────────────────────────────╯
+
+  Press ? to see keyboard shortcuts.`
+
+const antigravityBusyReal = `Press esc to interrupt generation.
+
+╭────────────────────────────────────────────────╮
+│ >                                              │
+╰────────────────────────────────────────────────╯`
+
+const antigravityBusyRealGenerating = `Generating... (Enter/Esc to cancel)
+
+╭────────────────────────────────────────────────╮
+│ >                                              │
+╰────────────────────────────────────────────────╯`
+
+const antigravityConfirmReal = `╭─ Antigravity ─────────────────────────────────────╮
+│ rm -rf ./build                                   │
+│                                                  │
+│ Do you want to proceed?                          │
+│  ● 1. Yes                                        │
+│    2. No                                         │
 ╰──────────────────────────────────────────────────╯`
 
 // --- Fixtures Codex CLI rust-v0.142.3 (tokens réels) ---
@@ -120,6 +155,32 @@ func TestGeminiProviderDetect(t *testing.T) {
 	}
 }
 
+func TestAntigravityProviderDetect(t *testing.T) {
+	p := newAntigravityProvider()
+	if p.Name() != "antigravity" {
+		t.Fatalf("Name() = %q, want \"antigravity\"", p.Name())
+	}
+	cases := []struct {
+		name   string
+		screen string
+		want   State
+	}{
+		{"idle", antigravityIdleReal, StateIdle},
+		{"busy-interrupt", antigravityBusyReal, StateBusy},
+		{"busy-generating", antigravityBusyRealGenerating, StateBusy},
+		{"confirm", antigravityConfirmReal, StateAwaitConfirm},
+		{"shell", fixtureShell, StateUnknown},
+		{"empty", "", StateUnknown},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := p.Detect(c.screen); got != c.want {
+				t.Fatalf("antigravity.Detect(%s) = %s, want %s", c.name, got, c.want)
+			}
+		})
+	}
+}
+
 // TestAdapterConfirmBeatsBusy: a confirmation dialog that ALSO carries a busy
 // marker must still classify as AwaitConfirm — we must never auto-submit into a
 // confirmation (same safety-first guarantee as Claude's TestConfirmBeatsBusy).
@@ -130,6 +191,9 @@ func TestAdapterConfirmBeatsBusy(t *testing.T) {
 	if got := newGeminiProvider().Detect(geminiConfirmReal + "\n  (esc to cancel, 1s)"); got != StateAwaitConfirm {
 		t.Fatalf("gemini: got %s, want await-confirm (confirm must beat busy)", got)
 	}
+	if got := newAntigravityProvider().Detect(antigravityConfirmReal + "\n  Press esc to interrupt generation."); got != StateAwaitConfirm {
+		t.Fatalf("antigravity: got %s, want await-confirm (confirm must beat busy)", got)
+	}
 }
 
 // TestAdaptersAbstainOnShellAndClaude: the adapters must NOT claim a plain shell
@@ -137,7 +201,7 @@ func TestAdapterConfirmBeatsBusy(t *testing.T) {
 // (Claude uses `❯`, the adapters key on `›`/`>`), so adding them to the registry
 // can't pollute Claude detection or shell safety.
 func TestAdaptersAbstainOnShellAndClaude(t *testing.T) {
-	for _, p := range []patternProvider{newCodexProvider(), newGeminiProvider()} {
+	for _, p := range []patternProvider{newCodexProvider(), newGeminiProvider(), newAntigravityProvider()} {
 		if got := p.Detect(fixtureShell); got != StateUnknown {
 			t.Errorf("%s claimed a plain shell as %s, want unknown", p.Name(), got)
 		}
@@ -156,5 +220,23 @@ func TestDetectAnyStateCrossProvider(t *testing.T) {
 	}
 	if st, name := DetectAnyState(geminiIdleReal); st != StateIdle || name != "gemini" {
 		t.Fatalf("gemini idle → (%s, %q), want (idle, gemini)", st, name)
+	}
+	if st, name := DetectAnyState(antigravityIdleReal); st != StateIdle || name != "antigravity" {
+		t.Fatalf("antigravity idle → (%s, %q), want (idle, antigravity)", st, name)
+	}
+}
+
+// TestAntigravityBusyAttributedToClaudeFirst: documents the KNOWN, SAFE ambiguity
+// (adapters.go CAVEATS) — "esc to interrupt" is shared with Claude, which is first
+// in the registry, so a bare Antigravity busy screen (no confirm) is attributed to
+// "claude". The STATE is still correctly Busy; only the provider name differs. If
+// Claude's detector is ever narrowed, this test documents the change in behavior.
+func TestAntigravityBusyAttributedToClaudeFirst(t *testing.T) {
+	st, name := DetectAnyState(antigravityBusyReal)
+	if st != StateBusy {
+		t.Fatalf("antigravity busy → state %s, want busy", st)
+	}
+	if name != "claude" {
+		t.Fatalf("antigravity busy → attributed to %q, want \"claude\" (documented shared-token caveat)", name)
 	}
 }
