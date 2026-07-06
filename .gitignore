@@ -13,3 +13,6 @@
 
 # Métadonnées macOS Finder (jamais utiles, jamais versionnées)
 .DS_Store
+
+# Worktrees git isolés (superpowers:using-git-worktrees) — jamais versionnés
+/.worktrees/
