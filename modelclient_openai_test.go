@@ -68,3 +68,20 @@ func TestOpenAIModelProviderCompleteEmptyChoices(t *testing.T) {
 		t.Fatal("attendu une erreur sur réponse sans choices")
 	}
 }
+
+func TestOpenAIModelProviderCompleteJSONErrorField(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"error": {"message": "modèle introuvable"}}`))
+	}))
+	defer srv.Close()
+
+	p := newOpenAIModelProvider("test", srv.URL, "llama3.2", "")
+	_, err := p.Complete(context.Background(), "bonjour", ModelOptions{})
+	if err == nil {
+		t.Fatal("attendu une erreur quand le body JSON contient un champ error, même en HTTP 200")
+	}
+	if !strings.Contains(err.Error(), "modèle introuvable") {
+		t.Fatalf("erreur attendue mentionnant le message provider, got: %v", err)
+	}
+}
