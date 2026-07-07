@@ -41,8 +41,8 @@ tags: [communikey, feature, model-provider, sdd, tdd, go]
   ledger de progression `.superpowers/sdd/progress.md`). Modèles : implémenteurs
   en Haiku (code déjà entièrement écrit dans le plan = transcription+tests),
   reviewers en Sonnet.
-- **Combien** : 2 tâches terminées et approuvées à ce stade (sur 6) + 1 fix +
-  1 re-revue ; 6 commits sur la branche à ce stade.
+- **Combien** : 3 tâches terminées et approuvées à ce stade (sur 6) + 2 fix +
+  2 re-revues ; 9 commits sur la branche à ce stade.
 - **Pourquoi** : répondre à un vrai besoin (consommer des modèles multi-provider
   depuis communikey) tout en évitant la dérive constatée dans la demande
   initiale (liste crypto en partie erronée, portée « tout le marché d'un
@@ -108,12 +108,26 @@ tags: [communikey, feature, model-provider, sdd, tdd, go]
   - Fix : `2ffefb2 test(model): couvre le champ error JSON en reponse HTTP 200`
     — 1 test ajouté, aucune autre modification. Vérifié indépendamment
     (diff minimal, build/test verts).
-  - Re-revue en cours au moment de cette entrée de journal.
+  - Re-revue : ✅ Approved, 0 trouvaille.
+- [2026-07-07] **Task 3** — secrets de provider via le vault existant.
+  - Fichiers : `modelsecret.go` (+121), `modelsecret_test.go` (+83).
+  - Commit : `15481da feat(model): secrets de provider via le vault existant`.
+  - 3e incident opérationnel identique (crash Haiku sur le message final) —
+    cette fois le rapport avait aussi été écrit au mauvais chemin (racine du
+    worktree), déplacé par le contrôleur. Commit et code vérifiés
+    indépendamment (diff conforme au plan, build/vet/test verts) avant revue.
+  - Revue : ✅ Spec compliant (zéro nouvelle primitive crypto confirmée —
+    tout délègue à `SealVault`/`OpenVault`/`resolveVaultPass` existants), mais
+    1 trouvaille **Important, plan-mandated** : le comportement « fusionne
+    sans écraser » de `saveModelSecret` était correct mais totalement non
+    testé. **Décision Aïssa (QCM)** : corriger maintenant (cohérent avec la
+    Task 2).
+  - Fix : `1752a1d test(model): couvre la fusion des secrets sans ecrasement`
+    — 1 test ajouté, aucune autre modification.
+  - Re-revue : ✅ Approved, 0 trouvaille.
 
 ## Actions à mener à l'avenir (TODO / follow-up)
 
-- [ ] Task 3 — `modelsecret.go` (secrets via le vault existant, `SealVault`/
-  `OpenVault`).
 - [ ] Task 4 — `buildModelRegistry()` (registre déclaratif + gestion des
   entrées invalides).
 - [ ] Task 5 — sous-commandes CLI `model list|test|call|secret set` +
@@ -127,11 +141,18 @@ tags: [communikey, feature, model-provider, sdd, tdd, go]
 
 ## Notes / Décisions / Blocages
 
-- **Aucun blocage réel à ce stade.** Les deux « échecs » de subagents notés
-  ci-dessus (Task 1 et Task 2) sont des plantages du **message de statut
-  final** (erreur API « Prompt is too long »), jamais du travail lui-même —
-  systématiquement revérifiés par le contrôleur (diff + build + test) avant de
-  poursuivre, jamais pris pour argent comptant.
+- **Aucun blocage réel à ce stade.** Les trois « échecs » de subagents notés
+  ci-dessus (Tasks 1, 2, 3 — pattern désormais récurrent, 100 % des
+  implémenteurs Haiku dispatchés jusqu'ici) sont des plantages du **message de
+  statut final** (erreur API « Prompt is too long »), jamais du travail
+  lui-même — systématiquement revérifiés par le contrôleur (diff + build +
+  test) avant de poursuivre, jamais pris pour argent comptant. Les fix
+  subagents (Sonnet-scope, tâches plus petites) n'ont pas reproduit ce crash.
+- **Décision Aïssa répétée deux fois (QCM)** : toute trouvaille « Important,
+  plan-mandated » (trou de test sur un chemin d'erreur/comportement du plan
+  lui-même) est corrigée immédiatement plutôt que laissée en dette — cohérent
+  sur Tasks 2 et 3, à reproduire pour les tâches restantes si le cas se
+  représente.
 - **Décision actée** : liste crypto de la demande initiale d'Aïssa
   explicitement écartée du design (RSA-1024/SHA-1/MD5 cassés ; Shor/GNFS sont
   des attaques, pas des défenses ; le reste hors-sujet) — aucun de ces
