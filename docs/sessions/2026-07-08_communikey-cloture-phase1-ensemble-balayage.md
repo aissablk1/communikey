@@ -103,6 +103,21 @@ tags: [communikey, lmp, ensemble, model-provider, balayage-taches, sdd]
 - **§7 respecté** : tout sur `main` par chemin explicite ; worktree/branche de la session
   concurrente jamais touchés ; merge sans perte (CHANGELOG des deux sessions conservé).
 
+### Complément — round « journalisation continue » (demande d'Aïssa : logger tout, pour toujours, cross-provider)
+
+- **Découverte** : le système de journalisation continue cross-provider **existe déjà** et
+  tourne en direct — `AGENTS.md` (§4 « protocole de journalisation CONTINUE »),
+  `docs/HANDOFF.md` (état exhaustif, MAJ ~02h00 par la session concurrente qui **référence
+  déjà mon travail Ensemble**), `docs/NEXT.md` (backlog), `docs/sessions/*.md`. Deux sessions
+  se coordonnent via le repo, chacune préservant l'autre → thèse d'Ensemble validée en acte.
+- **Action** : je n'ai PAS réinventé ce mécanisme (§1) ni churné `HANDOFF.md` (maintenu en
+  direct par la session concurrente → risque de collision §7). J'ai ajouté le seul manquant
+  durable : le **contexte stratégique** (`docs/strategy/2026-07-08-lmp-ensemble-landscape.md`,
+  commit `75efe2c`) — recherche vérifiée sur l'état de l'art 2026, gaps, wedge, risques, sources.
+- **Mécanisme « pour toujours »** : la convention `AGENTS.md` §4 (committée, cross-provider,
+  voyage avec le repo) est plus robuste qu'un hook Claude (mono-machine, mono-provider, et qui
+  ici ne se déclenche pas car cwd = `$HOME`). Rien à construire — à honorer.
+
 ---
 
 **Auteur** : Aïssa BELKOUSSA
