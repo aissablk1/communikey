@@ -81,4 +81,38 @@ lui-même en parallèle, aucune collision réelle. Staging fait par chemin
 explicite dans les deux commits (jamais `git add -A`), ce fichier jamais
 touché.
 
+## Round 2 (2026-07-07) — auth mutuelle TLS + adaptateurs Antigravity/ClawCodex
+
+Sur autorisation explicite d'Aïssa (QCM), après re-tri honnête du backlog
+(rien de neuf à inventer, tout déjà fait ou réellement bloqué) :
+
+- **[commit `6c9e075`]** Authentification MUTUELLE au niveau TLS
+  (`serve --tls --authz`) : certificat client dérivé de l'identité Ed25519
+  (`clientTLSCert`, généré en mémoire, jamais écrit en clair), vérifié
+  contre la MÊME allowlist que `--authz` (`serverTLSConfigMutual`). Ferme la
+  limite « sans authentification mutuelle des pairs » documentée depuis
+  0.2.0. 3 tests ajoutés (accepté/rejeté-hors-allowlist/rejeté-sans-cert).
+- **Découverte** : Gemini CLI individuel officiellement retiré le
+  18/06/2026 (developers.googleblog.com, vérifié) → **Antigravity CLI**
+  est son successeur officiel.
+  **[commit `d26f30c`]** Adaptateur `antigravity` (`agy` 1.0.16, Homebrew
+  cask) calibré par extraction statique (`strings` sur le binaire —
+  aucune capture live possible, OAuth Google requis).
+- **[commit `70e9818`]** Adaptateur `clawcodex` (agentforce314/clawcodex,
+  MIT, dépôt officiel — demande d'Aïssa, clawcodex.app). Point notable :
+  son glyph composer par défaut est **confirmé "❯"**, identique à Claude
+  Code — testé empiriquement que Claude abstient correctement grâce à des
+  footers disjoints (`TestClawCodexAbstainedByClaude`).
+- **Non traité, délibérément** : la demande d'élargir « tous les
+  providers » à la liste de ~25 backends LLM (image envoyée par Aïssa —
+  DeepSeek/Anthropic/OpenAI/Gemini/GLM/MiniMax/OpenRouter/Ollama/vLLM/…)
+  correspond exactement à la liste native de ClawCodex, et surtout à la
+  feature **`communikey model`** déjà en cours de construction par l'autre
+  session, dans un **worktree isolé**
+  (`.worktrees/model-provider-phase1/` — `model.go`, `modelprovider.go`,
+  `modelprovider_test.go` déjà écrits, méthode SDD avec rapports de tâches).
+  Vérifié via le registre de sessions avant de décider de ne PAS dupliquer.
+  « claude.ai » de la demande d'Aïssa est déjà couvert (= Claude Code,
+  provider `claude` déjà calibré) — pas d'action nécessaire.
+
 **Auteur** : Aïssa BELKOUSSA
