@@ -29,3 +29,53 @@ type ModelProvider interface {
 	Name() string
 	Complete(ctx context.Context, prompt string, opts ModelOptions) (string, error)
 }
+
+// modelRegistryIssue records one models.json entry that failed to become a
+// live ModelProvider — reported by `model list`, never silent (§29).
+type modelRegistryIssue struct {
+	Name   string
+	Reason string
+}
+
+// buildModelRegistry loads models.json and constructs a ModelProvider per valid
+// entry. Une entrée invalide (kind inconnu, secret non résolu) est signalée dans
+// issues et SAUTÉE — elle n'empêche jamais les autres entrées de charger (même
+// résilience que loadUserProviders en provider.go).
+func buildModelRegistry() ([]ModelProvider, []modelRegistryIssue, error) {
+	specs, err := loadModelSpecs()
+	if err != nil {
+		return nil, nil, err
+	}
+	var providers []ModelProvider
+	var issues []modelRegistryIssue
+	for _, spec := range specs {
+		if spec.Name == "" {
+			issues = append(issues, modelRegistryIssue{Name: "(sans nom)", Reason: "name manquant"})
+			continue
+		}
+		if spec.Kind != "openai-compatible" {
+			issues = append(issues, modelRegistryIssue{
+				Name:   spec.Name,
+				Reason: "kind inconnu: " + spec.Kind + ` (seul "openai-compatible" est supporté)`,
+			})
+			continue
+		}
+		apiKey, err := resolveModelSecret(spec.Auth)
+		if err != nil {
+			issues = append(issues, modelRegistryIssue{Name: spec.Name, Reason: err.Error()})
+			continue
+		}
+		providers = append(providers, newOpenAIModelProvider(spec.Name, spec.BaseURL, spec.Model, apiKey))
+	}
+	return providers, issues, nil
+}
+
+// findModelProvider returns the named provider, or (nil,false).
+func findModelProvider(providers []ModelProvider, name string) (ModelProvider, bool) {
+	for _, p := range providers {
+		if p.Name() == name {
+			return p, true
+		}
+	}
+	return nil, false
+}
