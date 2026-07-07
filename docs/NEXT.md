@@ -37,10 +37,15 @@ fini.
 
 ## Bloqués par l'absence de vraies données (ne pas inventer, §2/§29)
 
-- **Adaptateurs d'état Codex / Gemini.** Le point d'extension `Provider` est prêt
-  (`provider.go`), mais calibrer la détection idle/busy/confirmation exige de **vrais écrans
-  capturés** de ces CLI — pas des fixtures inventées. *Plan* : capturer de vrais écrans, en
-  faire des fixtures de test (comme `testdata/claude_idle_real.txt`), puis ajouter le provider.
+- **Adaptateurs d'état Codex / Gemini / Antigravity — confirmation par capture live.**
+  Les trois adaptateurs sont livrés (`adapters.go`), calibrés sur source primaire
+  (bundle JS, dépôt officiel, ou extraction `strings` du binaire installé selon le
+  CLI), mais **aucun n'a encore été confirmé sur un vrai écran capturé en direct**
+  (comme `testdata/claude_idle_real.txt`) — Codex absent du PATH, Gemini CLI
+  individuel retiré (18/06/2026), Antigravity nécessite une session OAuth Google
+  complète pour lancer une conversation réelle. *Plan* : capturer un vrai écran de
+  chacun (pseudo-tty, comme `communikey teams` l'a fait pour Agent Teams), lever les
+  CAVEATS documentés dans `adapters.go`.
 
 - **Bridge Agent Teams.** La livraison dans la *mailbox* d'Agent Teams exige d'en connaître le
   **format exact** (`~/.claude/teams/…`), non documenté publiquement. *Plan* : inspecter une

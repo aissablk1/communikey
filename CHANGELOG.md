@@ -40,6 +40,12 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
 - **`communikey teams`** : découverte **lecture seule** des Agent Teams natives de Claude Code
   (`~/.claude/teams/*/config.json`). Schéma confirmé sur un vrai fichier capturé le 2026-07-05
   (pas deviné) ; pas encore de livraison dans la mailbox (format non observé).
+- **Adaptateur `antigravity`** (`adapters.go`) : successeur officiel de Gemini CLI pour les
+  comptes individuels (Gemini CLI retiré le 18/06/2026 — developers.googleblog.com, vérifié
+  2026-07-07). Calibré par extraction statique (`strings`) sur le binaire réellement installé
+  (Homebrew cask `antigravity-cli` 1.0.16, `agy`) — pas de capture d'écran live (session OAuth
+  Google complète requise). `provider list` le référence en `provisoire`, même statut que
+  codex/gemini.
 
 ### Changé
 - **Licence** : MIT → **Apache-2.0** (grant de brevet, vital vu la crypto PQC).

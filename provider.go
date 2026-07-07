@@ -36,8 +36,9 @@ var providers = buildProviderRegistry()
 func buildProviderRegistry() []Provider {
 	list := []Provider{
 		claudeProvider{},
-		newCodexProvider(),  // provisoire — patterns à calibrer sur de vrais écrans (§2/§29)
-		newGeminiProvider(), // provisoire — patterns à calibrer sur de vrais écrans (§2/§29)
+		newCodexProvider(),       // provisoire — patterns à calibrer sur de vrais écrans (§2/§29)
+		newGeminiProvider(),      // provisoire — Gemini CLI individuel retiré le 18/06/2026, garde la licence Enterprise
+		newAntigravityProvider(), // provisoire — successeur officiel de Gemini CLI, calibré par extraction statique (adapters.go)
 	}
 	return append(list, loadUserProviders()...)
 }
