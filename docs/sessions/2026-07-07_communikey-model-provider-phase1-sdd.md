@@ -136,6 +136,16 @@ tags: [communikey, feature, model-provider, sdd, tdd, go]
   - Revue : ✅ Spec compliant, Approved, 0 fix nécessaire. 3 trouvailles Minor
     (plan-mandated, prospectives) consignées au ledger.
 
+- [2026-07-07] **Task 5** — sous-commandes CLI + câblage `main.go`.
+  - Fichiers : `model.go` (+200, nouveau), `main.go` (+6, ajouts chirurgicaux :
+    1 case switch + 4 lignes usage).
+  - Commit : `f5e4ad6 feat(model): sous-commandes CLI model list|test|call|secret set`.
+  - Sonnet, aucun crash. Vérification manuelle réelle contre un Ollama local
+    (accessible mais sans modèle chargé — chemin d'erreur exercé, pas le
+    succès complet).
+  - Revue : ✅ Spec compliant, Approved, 0 fix nécessaire. 4 trouvailles Minor
+    (toutes plan-mandated) consignées au ledger.
+
 ## Actions à mener à l'avenir (TODO / follow-up)
 
 - [ ] Task 5 — sous-commandes CLI `model list|test|call|secret set` +
