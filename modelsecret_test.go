@@ -81,3 +81,31 @@ func TestResolveModelSecretVaultNoPassphrase(t *testing.T) {
 		t.Fatal("vault existant sans passphrase disponible doit échouer explicitement")
 	}
 }
+
+func TestSaveModelSecretMergesWithoutClobbering(t *testing.T) {
+	t.Setenv("COMKEY_STORE_DIR", t.TempDir())
+	t.Setenv("COMKEY_VAULT_PASS", "test-passphrase")
+
+	if err := saveModelSecret("huggingface", "sk-hf"); err != nil {
+		t.Fatalf("premier saveModelSecret a échoué: %v", err)
+	}
+	if err := saveModelSecret("gemini", "sk-gemini"); err != nil {
+		t.Fatalf("second saveModelSecret a échoué: %v", err)
+	}
+
+	hf, err := resolveModelSecret("vault:huggingface")
+	if err != nil {
+		t.Fatalf("résolution huggingface échouée après le second save: %v", err)
+	}
+	if hf != "sk-hf" {
+		t.Fatalf("attendu sk-hf pour huggingface, got %q (secret écrasé par le second save)", hf)
+	}
+
+	gemini, err := resolveModelSecret("vault:gemini")
+	if err != nil {
+		t.Fatalf("résolution gemini échouée: %v", err)
+	}
+	if gemini != "sk-gemini" {
+		t.Fatalf("attendu sk-gemini, got %q", gemini)
+	}
+}
