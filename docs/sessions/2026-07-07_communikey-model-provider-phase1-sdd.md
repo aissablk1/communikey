@@ -41,8 +41,9 @@ tags: [communikey, feature, model-provider, sdd, tdd, go]
   ledger de progression `.superpowers/sdd/progress.md`). Modèles : implémenteurs
   en Haiku (code déjà entièrement écrit dans le plan = transcription+tests),
   reviewers en Sonnet.
-- **Combien** : 3 tâches terminées et approuvées à ce stade (sur 6) + 2 fix +
-  2 re-revues ; 9 commits sur la branche à ce stade.
+- **Combien** : 6/6 tâches du plan terminées et approuvées + 2 fix + 2 re-revues
+  + 1 merge de `main` ; 15 commits sur la branche à ce stade. Reste : revue
+  finale de branche + clôture.
 - **Pourquoi** : répondre à un vrai besoin (consommer des modèles multi-provider
   depuis communikey) tout en évitant la dérive constatée dans la demande
   initiale (liste crypto en partie erronée, portée « tout le marché d'un
@@ -146,16 +147,32 @@ tags: [communikey, feature, model-provider, sdd, tdd, go]
   - Revue : ✅ Spec compliant, Approved, 0 fix nécessaire. 4 trouvailles Minor
     (toutes plan-mandated) consignées au ledger.
 
+- [2026-07-07] Merge de `main` dans la branche (`5925cd6`) — une autre session
+  avait ajouté entretemps un adaptateur "Antigravity CLI" (CHANGELOG.md,
+  README.md, docs/NEXT.md, adapters.go, provider.go, providerconfig.go).
+  Merge propre (`ort`), 0 conflit (aucun fichier en commun avec Tasks 1-5),
+  build/vet/test revérifiés verts après.
+- [2026-07-07] **Task 6** — vérification finale + documentation (dernière
+  tâche du plan).
+  - Fichier : `CHANGELOG.md` (+5, README.md délibérément non touché — aucun
+    pattern par-sous-commande n'existe dans ce fichier, vérifié par grep).
+  - Commit : `9624441 docs(model): changelog et documentation (Phase 1)`.
+  - `go vet`/`build`/`test` verts. Sonnet, aucun crash.
+  - Revue : ✅ Spec compliant, Approved, 0 fix nécessaire. 1 trouvaille Minor
+    (reformulation cosmétique) consignée au ledger.
+
+**LES 6 TÂCHES DU PLAN SONT TERMINÉES ET APPROUVÉES.**
+
 ## Actions à mener à l'avenir (TODO / follow-up)
 
-- [ ] Task 5 — sous-commandes CLI `model list|test|call|secret set` +
-  câblage `main.go`.
-- [ ] Task 6 — vérification finale (`go vet`/`build`/`test`) + CHANGELOG/README.
 - [ ] Revue finale de branche (modèle le plus capable) + `superpowers:
   finishing-a-development-branch`.
 - [ ] Phases 2 (hooks enrichis) et 3 (workers-comme-nœuds-du-bus) — hors
   scope de ce plan, chacune sa propre spec, une fois ce socle utilisé en
   conditions réelles.
+- [ ] Trouvailles Minor accumulées (voir ledger `.superpowers/sdd/progress.md`)
+  à trier lors de la revue finale : lesquelles corriger avant merge, lesquelles
+  documenter comme dette assumée.
 
 ## Notes / Décisions / Blocages
 
