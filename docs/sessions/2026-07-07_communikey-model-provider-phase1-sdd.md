@@ -126,10 +126,18 @@ tags: [communikey, feature, model-provider, sdd, tdd, go]
     — 1 test ajouté, aucune autre modification.
   - Re-revue : ✅ Approved, 0 trouvaille.
 
+- [2026-07-07] **Task 4** — `buildModelRegistry()` (registre déclaratif).
+  - Fichiers : `modelprovider.go` (+50, append pur), `modelprovider_test.go`
+    (+82, nouveau).
+  - Commit : `ac801ba feat(model): construction du registre de providers de
+    modele`.
+  - **Basculé sur Sonnet** (plutôt que Haiku, utilisé pour Tasks 1-3) vu le
+    pattern de crash récurrent — aucun crash cette fois, complétion propre.
+  - Revue : ✅ Spec compliant, Approved, 0 fix nécessaire. 3 trouvailles Minor
+    (plan-mandated, prospectives) consignées au ledger.
+
 ## Actions à mener à l'avenir (TODO / follow-up)
 
-- [ ] Task 4 — `buildModelRegistry()` (registre déclaratif + gestion des
-  entrées invalides).
 - [ ] Task 5 — sous-commandes CLI `model list|test|call|secret set` +
   câblage `main.go`.
 - [ ] Task 6 — vérification finale (`go vet`/`build`/`test`) + CHANGELOG/README.
