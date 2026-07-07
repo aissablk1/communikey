@@ -39,6 +39,7 @@ func buildProviderRegistry() []Provider {
 		newCodexProvider(),       // provisoire — patterns à calibrer sur de vrais écrans (§2/§29)
 		newGeminiProvider(),      // provisoire — Gemini CLI individuel retiré le 18/06/2026, garde la licence Enterprise
 		newAntigravityProvider(), // provisoire — successeur officiel de Gemini CLI, calibré par extraction statique (adapters.go)
+		newClawCodexProvider(),   // provisoire — MIT, calibré sur le dépôt officiel agentforce314/clawcodex (adapters.go)
 	}
 	return append(list, loadUserProviders()...)
 }

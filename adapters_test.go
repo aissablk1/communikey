@@ -81,6 +81,31 @@ const antigravityConfirmReal = `╭─ Antigravity ─────────�
 │    2. No                                         │
 ╰──────────────────────────────────────────────────╯`
 
+// --- Fixtures ClawCodex CLI (tokens réels, dépôt officiel agentforce314/clawcodex,
+// vérifiés le 2026-07-07) ---
+
+const clawcodexIdleReal = `~/projet (main*)
+
+╭────────────────────────────────────────────────╮
+│ ❯                                              │
+╰────────────────────────────────────────────────╯
+
+  /exit to quit clawcodex`
+
+const clawcodexBusyReal = `esc to interrupt · /exit to quit clawcodex
+
+╭────────────────────────────────────────────────╮
+│ ❯                                              │
+╰────────────────────────────────────────────────╯`
+
+const clawcodexConfirmReal = `╭─ clawcodex ───────────────────────────────────────╮
+│ rm -rf ./build                                   │
+│                                                  │
+│ Do you want to proceed?                          │
+│  ● 1. Yes                                        │
+│    2. No                                         │
+╰──────────────────────────────────────────────────╯`
+
 // --- Fixtures Codex CLI rust-v0.142.3 (tokens réels) ---
 
 const codexIdleReal = `╭────────────────────────────────────────────────╮
@@ -181,6 +206,47 @@ func TestAntigravityProviderDetect(t *testing.T) {
 	}
 }
 
+func TestClawCodexProviderDetect(t *testing.T) {
+	p := newClawCodexProvider()
+	if p.Name() != "clawcodex" {
+		t.Fatalf("Name() = %q, want \"clawcodex\"", p.Name())
+	}
+	cases := []struct {
+		name   string
+		screen string
+		want   State
+	}{
+		{"idle", clawcodexIdleReal, StateIdle},
+		{"busy", clawcodexBusyReal, StateBusy},
+		{"confirm", clawcodexConfirmReal, StateAwaitConfirm},
+		{"shell", fixtureShell, StateUnknown},
+		{"empty", "", StateUnknown},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := p.Detect(c.screen); got != c.want {
+				t.Fatalf("clawcodex.Detect(%s) = %s, want %s", c.name, got, c.want)
+			}
+		})
+	}
+}
+
+// TestClawCodexAbstainedByClaude: ClawCodex's composer glyph is CONFIRMED "❯" —
+// the exact same glyph Claude Code uses (state.go). This test proves Claude's
+// idle detector still correctly ABSTAINS on a real ClawCodex idle screen, because
+// Claude also requires ITS OWN footer ("shift+tab to cycle" / "? for shortcuts" /
+// …) which ClawCodex's real footer ("/exit to quit clawcodex") never satisfies —
+// so DetectAnyState falls through to the clawcodex adapter instead of
+// misattributing (or worse, silently failing) on the shared glyph.
+func TestClawCodexAbstainedByClaude(t *testing.T) {
+	if got := DetectClaudeState(clawcodexIdleReal); got != StateUnknown {
+		t.Fatalf("Claude claimed a ClawCodex idle screen (shared ❯ glyph) as %s, want unknown", got)
+	}
+	if st, name := DetectAnyState(clawcodexIdleReal); st != StateIdle || name != "clawcodex" {
+		t.Fatalf("clawcodex idle → (%s, %q), want (idle, clawcodex)", st, name)
+	}
+}
+
 // TestAdapterConfirmBeatsBusy: a confirmation dialog that ALSO carries a busy
 // marker must still classify as AwaitConfirm — we must never auto-submit into a
 // confirmation (same safety-first guarantee as Claude's TestConfirmBeatsBusy).
@@ -194,12 +260,18 @@ func TestAdapterConfirmBeatsBusy(t *testing.T) {
 	if got := newAntigravityProvider().Detect(antigravityConfirmReal + "\n  Press esc to interrupt generation."); got != StateAwaitConfirm {
 		t.Fatalf("antigravity: got %s, want await-confirm (confirm must beat busy)", got)
 	}
+	if got := newClawCodexProvider().Detect(clawcodexConfirmReal + "\n  esc to interrupt · /exit to quit clawcodex"); got != StateAwaitConfirm {
+		t.Fatalf("clawcodex: got %s, want await-confirm (confirm must beat busy)", got)
+	}
 }
 
 // TestAdaptersAbstainOnShellAndClaude: the adapters must NOT claim a plain shell
 // (so communikey never injects into a non-agent surface) nor a Claude idle screen
 // (Claude uses `❯`, the adapters key on `›`/`>`), so adding them to the registry
-// can't pollute Claude detection or shell safety.
+// can't pollute Claude detection or shell safety. ClawCodex is deliberately NOT in
+// this loop — it ALSO keys on `❯` (confirmed, same glyph as Claude); its abstention
+// on Claude's idle screen is proven separately, with the footer-disambiguation
+// reasoning spelled out, by TestClawCodexAbstainedByClaude.
 func TestAdaptersAbstainOnShellAndClaude(t *testing.T) {
 	for _, p := range []patternProvider{newCodexProvider(), newGeminiProvider(), newAntigravityProvider()} {
 		if got := p.Detect(fixtureShell); got != StateUnknown {
@@ -208,6 +280,9 @@ func TestAdaptersAbstainOnShellAndClaude(t *testing.T) {
 		if got := p.Detect(fixtureIdle); got != StateUnknown {
 			t.Errorf("%s claimed Claude's idle screen as %s, want unknown", p.Name(), got)
 		}
+	}
+	if got := newClawCodexProvider().Detect(fixtureShell); got != StateUnknown {
+		t.Errorf("clawcodex claimed a plain shell as %s, want unknown", got)
 	}
 }
 

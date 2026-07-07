@@ -129,13 +129,14 @@ type providerStatusEntry struct {
 	name, status, source string
 }
 
-// builtinProviderStatus : statut connu des 4 providers compilés en dur (fait établi
+// builtinProviderStatus : statut connu des 5 providers compilés en dur (fait établi
 // dans le code, pas une donnée de config).
 var builtinProviderStatus = map[string]providerStatusEntry{
 	"claude":      {"claude", "calibré", "détecteur éprouvé sur de vrais écrans capturés"},
 	"codex":       {"codex", "provisoire", "calibré sur openai/codex tag rust-v0.142.3 — jamais confirmé sur écran live"},
 	"gemini":      {"gemini", "provisoire", "individuel retiré 18/06/2026 (licence Enterprise seule) — calibré sur @google/gemini-cli 0.40.1"},
 	"antigravity": {"antigravity", "provisoire", "successeur officiel de Gemini CLI — calibré par extraction statique sur antigravity-cli 1.0.16, jamais confirmé sur écran live"},
+	"clawcodex":   {"clawcodex", "provisoire", "MIT, 25 backends LLM — calibré sur agentforce314/clawcodex (dépôt officiel), jamais confirmé sur écran live"},
 }
 
 // knownAbsentProviders : liste informative (aucun pattern, rien enregistré dans le

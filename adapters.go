@@ -31,6 +31,16 @@ import "regexp"
 //     d'écran live disponible — OAuth Google requis) : "Press esc to interrupt
 //     generation.", "Generating... (Enter/Esc to cancel)", "Press ? to see keyboard
 //     shortcuts.", "Do you want to proceed?".
+//   • ClawCodex : dépôt officiel agentforce314/clawcodex (MIT, 686★, actif —
+//     dernier push 2026-07-07), vérifié via `gh search code` + raw.githubusercontent.com
+//     le 2026-07-07 — "esc to interrupt · ${exitHint}" en busy vs juste `exitHint` en
+//     idle (ui-tui/src/app/useInputHandlers.ts), `exitHint` = "/exit to quit clawcodex"
+//     (ou "/new to start a fresh chat" en mode dashboard TUI), confirm "Do you want to
+//     proceed?"/"Would you like to proceed?" (ui-tui/src/components/prompts.tsx),
+//     glyph composer par défaut **"❯"** confirmé par test unitaire
+//     (`composerPromptText('❯')` → `'❯'`, ui-tui/src/__tests__/prompt.test.ts) — le
+//     MÊME glyph que Claude Code (state.go réutilise `reIdlePrompt`, pas le motif
+//     partagé `›`/`>` des autres adaptateurs).
 //
 // CAVEATS honnêtes encore ouverts (une capture d'écran live les lèverait) :
 //   • "esc to interrupt" est PARTAGÉ entre Codex et Claude : un écran Codex *busy*
@@ -55,6 +65,16 @@ import "regexp"
 //     "Allow access to this file?" (confirmée dans le binaire) n'est pas encore
 //     couverte par le motif partagé reAdptConfirmVerb — écran retombe en unknown
 //     (jamais en idle), pas de risque, juste sous-détecté tant que non élargi.
+//   • ClawCodex : glyph composer "❯" CONFIRMÉ (pas une hypothèse) — mais c'est le
+//     même glyph que Claude Code (state.go), donc un écran idle ClawCodex peut
+//     techniquement matcher le reIdlePrompt de Claude ; Claude reste néanmoins premier
+//     à abstenir grâce à SON footer disjoint ("shift+tab to cycle"/"? for
+//     shortcuts"/… vs "/exit to quit clawcodex") — testé (TestClawCodexAbstainedByClaude
+//     dans adapters_test.go). "esc to interrupt" et "do you want to proceed" restent
+//     partagés avec Claude comme pour Codex/Antigravity — même caveat d'attribution,
+//     état toujours correct. Pas de capture d'écran live (source = code TypeScript
+//     réel du dépôt, pas un rendu observé) — un live capture confirmerait la mise en
+//     page exacte.
 
 // patternProvider is a table-driven Provider: it recognizes a CLI's on-screen
 // state from supplied regex signals, reusing the same ordered, safety-first
@@ -187,5 +207,30 @@ func newAntigravityProvider() patternProvider {
 		},
 		idlePrompt: reAdptIdleBox,
 		idleFooter: regexp.MustCompile(`(?i)press \? to see keyboard shortcuts`),
+	}
+}
+
+// newClawCodexProvider builds the ClawCodex CLI adapter (agentforce314/clawcodex,
+// MIT, « Python rebuild of Claude Code » with 25 LLM backend integrations).
+//
+// Calibré sur le dépôt officiel (main, vérifié 2026-07-07) — busy "esc to
+// interrupt · <exitHint>" ; idle juste `<exitHint>` = "/exit to quit clawcodex" ou
+// "/new to start a fresh chat" (ui-tui/src/app/useInputHandlers.ts) ; confirm "Do
+// you want to proceed?"/"Would you like to proceed?" (ui-tui/src/components/
+// prompts.tsx) ; glyph composer par défaut CONFIRMÉ "❯" (ui-tui/src/__tests__/
+// prompt.test.ts) — réutilise reIdlePrompt de state.go (même glyph que Claude,
+// PAS le reAdptIdleBox partagé ›/>). Voir les CAVEATS du header de ce fichier.
+func newClawCodexProvider() patternProvider {
+	return patternProvider{
+		name:    "clawcodex",
+		confirm: []*regexp.Regexp{reAdptConfirmNum, reAdptConfirmYN, reAdptConfirmVerb},
+		busy: []*regexp.Regexp{
+			// Shared with Claude/Codex/Antigravity by design (real token, confirmed in
+			// useInputHandlers.ts) — state stays correct even if attribution goes to
+			// "claude" first (same documented caveat as Codex/Antigravity).
+			regexp.MustCompile(`(?i)esc to interrupt`),
+		},
+		idlePrompt: reIdlePrompt, // state.go — same "❯" glyph, CONFIRMED via prompt.test.ts
+		idleFooter: regexp.MustCompile(`(?i)to quit clawcodex|to start a fresh chat`),
 	}
 }

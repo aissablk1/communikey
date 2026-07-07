@@ -46,6 +46,13 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   (Homebrew cask `antigravity-cli` 1.0.16, `agy`) — pas de capture d'écran live (session OAuth
   Google complète requise). `provider list` le référence en `provisoire`, même statut que
   codex/gemini.
+- **Adaptateur `clawcodex`** (`adapters.go`) : agentforce314/clawcodex (MIT, 686★, actif),
+  « Python rebuild » de Claude Code avec 25 intégrations de backends LLM. Calibré sur le
+  dépôt officiel (`gh search code` + raw.githubusercontent.com, vérifié 2026-07-07) — busy
+  "esc to interrupt · &lt;exitHint&gt;", idle "/exit to quit clawcodex", confirm "Do you
+  want to proceed?"/"Would you like to proceed?", glyph composer **"❯" confirmé par test
+  unitaire amont** (même glyph que Claude Code — `TestClawCodexAbstainedByClaude` prouve
+  que Claude abstient correctement grâce à des footers disjoints).
 - **Authentification MUTUELLE au niveau TLS** (`serve --tls --authz`) : le serveur exige
   désormais un certificat client et vérifie son empreinte contre la MÊME allowlist que
   `--authz` — un pair non autorisé est rejeté au handshake TLS, avant la lecture du frame

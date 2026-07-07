@@ -2,16 +2,16 @@
 
 [![CI](https://github.com/aissablk1/communikey/actions/workflows/ci.yml/badge.svg)](https://github.com/aissablk1/communikey/actions/workflows/ci.yml)
 [![Licence : Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue.svg)](LICENSE)
-[![Go 1.24](https://img.shields.io/badge/Go-1.24-00ADD8?logo=go&logoColor=white)](https://go.dev/dl/)
+[![Go 1.25](https://img.shields.io/badge/Go-1.25-00ADD8?logo=go&logoColor=white)](https://go.dev/dl/)
 [![Go Report Card](https://goreportcard.com/badge/github.com/aissablk1/communikey)](https://goreportcard.com/report/github.com/aissablk1/communikey)
-[![Zéro dépendance](https://img.shields.io/badge/dépendances-0%20(stdlib)-success)](go.mod)
+[![2 dépendances](https://img.shields.io/badge/dépendances-2%20(mldsa%2C%20argon2)-success)](go.mod)
 [![Release](https://img.shields.io/github/v/release/aissablk1/communikey?sort=semver&color=success)](https://github.com/aissablk1/communikey/releases/latest)
 
 **Le bus de messages qui fait parler tes agents de code entre eux.** Une session
-d'agent CLI (Claude Code, Codex, Gemini…) écrit à une **autre session en cours** — en
-lisant son état (idle / busy / confirmation) **avant** d'agir, à travers terminaux,
-providers et machines, **chiffré de bout en bout** et résistant au quantique. Go,
-**zéro dépendance**, Apache-2.0.
+d'agent CLI (Claude Code, Codex, Gemini, Antigravity, ClawCodex…) écrit à une **autre
+session en cours** — en lisant son état (idle / busy / confirmation) **avant** d'agir, à
+travers terminaux, providers et machines, **chiffré de bout en bout** et résistant au
+quantique. Go, dépendances minimales, Apache-2.0.
 
 > **Ce que communikey a et que les autres bus d'agents n'ont pas.** Chaque message est **signé**
 > (identité **Ed25519**) — tu sais *qui* parle, pas seulement que « quelqu'un avec le bon mot de
@@ -51,7 +51,7 @@ dépendance.
 # Homebrew (macOS · Linux)
 brew install aissablk1/tap/communikey
 
-# Go (toute plateforme avec une toolchain Go 1.24+)
+# Go (toute plateforme avec une toolchain Go 1.25+)
 go install github.com/aissablk1/communikey@latest
 
 # Script (audite-le d'abord ; tire le binaire des GitHub Releases — une fois communikey.dev en ligne)
@@ -102,7 +102,7 @@ absent ou hors-modèle.
 
 | Capacité | **communikey** | Agent Teams (natif) | ruflo (claude-flow) | tmux-orchestrator |
 |---|:---:|:---:|:---:|:---:|
-| Cross-provider (Claude / Codex / Gemini / Antigravity) | ✅ <sup>1</sup> | ❌ Claude only | ◐ | ❌ |
+| Cross-provider (Claude / Codex / Gemini / Antigravity / ClawCodex) | ✅ <sup>1</sup> | ❌ Claude only | ◐ | ❌ |
 | Cross-OS + mobile | ✅ <sup>2</sup> | ❌ desktop | ❌ | ❌ Unix only |
 | Chiffrement E2E des messages | ✅ | ❌ sandbox/vault partagés | ❌ | ❌ clair |
 | Post-quantique (KEM ML-KEM-768 ⊕ signature ML-DSA-65, hybrides) | ✅ | ❌ | ❌ | ❌ |
@@ -132,8 +132,8 @@ tmux-orchestrator envoie à l'aveugle.
 
 ## Modèle de sécurité (résumé)
 
-Primitives **auditées, jamais maison** — toutes dans la stdlib Go 1.24 (zéro
-dépendance) :
+Primitives **auditées, jamais maison** — stdlib Go 1.25, à deux exceptions près
+(`filippo.io/mldsa`, `golang.org/x/crypto/argon2` — voir [SECURITY.md](SECURITY.md)) :
 
 - **Messages E2E hybrides PQC** : signés **Ed25519 ⊕ ML-DSA-65** (les deux doivent être
   valides), chiffrés **AES-256-GCM** sous une clé dérivée de **X25519 ⊕ ML-KEM-768**. Il
@@ -193,7 +193,7 @@ les intentions.
 | Phase | Livré | En route |
 |---|---|---|
 | **0–1 · Fondations** | ✅ inbox coopératif · registre + mémoire/journal · crypto E2E hybride PQC · vault AES-256-GCM | — |
-| **2 · Terminaux & providers** | ✅ injection **cmux + tmux** state-aware + graphe familial · détection **Claude** · adaptateurs **Codex + Gemini + Antigravity** (calibrés sur source, confirmation live en attente) | ❌ backend `screen` · passkey WebAuthn |
+| **2 · Terminaux & providers** | ✅ injection **cmux + tmux** state-aware + graphe familial · détection **Claude** · adaptateurs **Codex + Gemini + Antigravity + ClawCodex** (calibrés sur source, confirmation live en attente) | ❌ backend `screen` · passkey WebAuthn |
 | **3 · Identité & réseau** | ✅ recovery **Shamir** · phrase **BIP-39** · réseau loopback/LAN + **TLS hybride PQC** + **auth mutuelle** (`serve --tls --authz`) | ❌ durcissement hors-LAN au-delà de l'auth mutuelle |
 | **4 · Portée** | — | ❌ clients **mobiles** · **Windows** (coop) · bridge **Agent Teams** · surface **MCP** |
 | **5 · Durcissement** | ✅ signatures hybrides **Ed25519 ⊕ ML-DSA-65** | ❌ **audit crypto externe** · autres OS |
