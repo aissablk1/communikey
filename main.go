@@ -52,6 +52,10 @@ Usage:
   communikey unlink <enfant>            détache <enfant> de son parent
   communikey provider list              providers enregistrés + connus-absents, avec statut
   communikey provider test <name>       teste un provider sur un écran lu depuis stdin
+  communikey model list                 providers de modèle configurés (models.json)
+  communikey model test <name>          vérifie qu'un provider de modèle répond
+  communikey model call <name> "<p>"    appelle un provider de modèle (prompt en argument ou stdin)
+  communikey model secret set <n> [<v>] enregistre un secret de provider (valeur sur stdin si <v> omis)
   communikey version                    affiche la version
   communikey help
 
@@ -79,6 +83,8 @@ func main() {
 		cmdUnlink(os.Args[2:])
 	case "provider":
 		cmdProvider(os.Args[2:]) // registre + calibrage — indépendant du backend terminal
+	case "model":
+		cmdModel(os.Args[2:]) // consomme un backend de modèle (Ollama, LocalAI, HuggingFace…) — indépendant du backend terminal
 	case "send":
 		mustBackend()
 		cmdSend(os.Args[2:])

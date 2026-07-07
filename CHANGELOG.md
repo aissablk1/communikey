@@ -63,6 +63,13 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   connexion sans certificat (le serveur distant refuse alors clairement, jamais de
   dégradation silencieuse). Ferme la limite « sans authentification mutuelle des pairs »
   documentée depuis 0.2.0.
+- `communikey model list|test|call` : client multi-provider de modèles via un adaptateur
+  générique compatible OpenAI, déclaratif via `~/.claude/communikey/models.json`, secrets
+  scellés dans le vault existant (`communikey model secret set`, valeur lue sur stdin).
+  Vérifié de bout en bout contre **Ollama** ; LocalAI, HuggingFace Inference API et tout autre
+  endpoint compatible OpenAI sont supportés par conception mais pas encore vérifiés en
+  conditions réelles. Phase 1 seulement — voir
+  `docs/superpowers/specs/2026-07-06-communikey-model-provider-design.md` pour le design complet.
 
 ### Changé
 - **Licence** : MIT → **Apache-2.0** (grant de brevet, vital vu la crypto PQC).
