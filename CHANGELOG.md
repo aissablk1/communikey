@@ -70,6 +70,12 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   endpoint compatible OpenAI sont supportés par conception mais pas encore vérifiés en
   conditions réelles. Phase 1 seulement — voir
   `docs/superpowers/specs/2026-07-06-communikey-model-provider-design.md` pour le design complet.
+- `communikey model presets` / `communikey model add <provider>` : **catalogue de ~45 providers
+  d'inférence** prêts à l'emploi, avec routing « smart » (communikey choisit le protocole `kind`
+  par provider). 25 backends portés verbatim du dépôt officiel `agentforce314/clawcodex`
+  (base_urls vérifiées à la source), + ~20 mainstream openai-compatibles (Groq, Mistral, xAI,
+  Cerebras, Perplexity…, marqués `[à valider]`). Ajoute l'**adaptateur natif Anthropic** (API
+  Messages) qui sert `anthropic` **et** `minimax`. `docs/examples/models.json` : fichier prêt à copier.
 
 ### Changé
 - **Licence** : MIT → **Apache-2.0** (grant de brevet, vital vu la crypto PQC).

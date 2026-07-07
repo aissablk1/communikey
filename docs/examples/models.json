@@ -1,0 +1,319 @@
+{
+  "models": [
+    {
+      "name": "anthropic",
+      "kind": "anthropic",
+      "base_url": "https://api.anthropic.com",
+      "model": "claude-sonnet-4-6",
+      "auth": "env:ANTHROPIC_API_KEY"
+    },
+    {
+      "name": "arcee",
+      "kind": "openai-compatible",
+      "base_url": "https://api.arcee.ai/api/v1",
+      "model": "trinity-large-thinking",
+      "auth": "env:ARCEE_API_KEY"
+    },
+    {
+      "name": "atlascloud",
+      "kind": "openai-compatible",
+      "base_url": "https://api.atlascloud.ai/v1",
+      "model": "deepseek-ai/deepseek-v4-flash",
+      "auth": "env:ATLASCLOUD_API_KEY"
+    },
+    {
+      "name": "baseten",
+      "kind": "openai-compatible",
+      "base_url": "https://inference.baseten.co/v1",
+      "model": "deepseek-ai/DeepSeek-V3-0324",
+      "auth": "env:BASETEN_API_KEY"
+    },
+    {
+      "name": "cerebras",
+      "kind": "openai-compatible",
+      "base_url": "https://api.cerebras.ai/v1",
+      "model": "llama-3.3-70b",
+      "auth": "env:CEREBRAS_API_KEY"
+    },
+    {
+      "name": "cohere",
+      "kind": "openai-compatible",
+      "base_url": "https://api.cohere.ai/compatibility/v1",
+      "model": "command-r-plus",
+      "auth": "env:COHERE_API_KEY"
+    },
+    {
+      "name": "deepinfra",
+      "kind": "openai-compatible",
+      "base_url": "https://api.deepinfra.com/v1/openai",
+      "model": "deepseek-ai/DeepSeek-V4-Pro",
+      "auth": "env:DEEPINFRA_API_KEY"
+    },
+    {
+      "name": "deepseek",
+      "kind": "openai-compatible",
+      "base_url": "https://api.deepseek.com",
+      "model": "deepseek-chat",
+      "auth": "env:DEEPSEEK_API_KEY"
+    },
+    {
+      "name": "featherless",
+      "kind": "openai-compatible",
+      "base_url": "https://api.featherless.ai/v1",
+      "model": "deepseek-ai/DeepSeek-V3",
+      "auth": "env:FEATHERLESS_API_KEY"
+    },
+    {
+      "name": "fireworks",
+      "kind": "openai-compatible",
+      "base_url": "https://api.fireworks.ai/inference/v1",
+      "model": "accounts/fireworks/models/deepseek-v4-pro",
+      "auth": "env:FIREWORKS_API_KEY"
+    },
+    {
+      "name": "gemini",
+      "kind": "openai-compatible",
+      "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "model": "gemini-2.5-pro",
+      "auth": "env:GEMINI_API_KEY"
+    },
+    {
+      "name": "github-models",
+      "kind": "openai-compatible",
+      "base_url": "https://models.github.ai/inference",
+      "model": "openai/gpt-4o",
+      "auth": "env:GITHUB_TOKEN"
+    },
+    {
+      "name": "groq",
+      "kind": "openai-compatible",
+      "base_url": "https://api.groq.com/openai/v1",
+      "model": "llama-3.3-70b-versatile",
+      "auth": "env:GROQ_API_KEY"
+    },
+    {
+      "name": "huggingface",
+      "kind": "openai-compatible",
+      "base_url": "https://router.huggingface.co/v1",
+      "model": "deepseek-ai/DeepSeek-V4-Pro",
+      "auth": "env:HUGGINGFACE_API_KEY"
+    },
+    {
+      "name": "hyperbolic",
+      "kind": "openai-compatible",
+      "base_url": "https://api.hyperbolic.xyz/v1",
+      "model": "deepseek-ai/DeepSeek-V3",
+      "auth": "env:HYPERBOLIC_API_KEY"
+    },
+    {
+      "name": "jan",
+      "kind": "openai-compatible",
+      "base_url": "http://localhost:1337/v1",
+      "model": "local-model",
+      "auth": ""
+    },
+    {
+      "name": "kluster",
+      "kind": "openai-compatible",
+      "base_url": "https://api.kluster.ai/v1",
+      "model": "deepseek-ai/DeepSeek-V3",
+      "auth": "env:KLUSTER_API_KEY"
+    },
+    {
+      "name": "lambda",
+      "kind": "openai-compatible",
+      "base_url": "https://api.lambda.ai/v1",
+      "model": "deepseek-v3-0324",
+      "auth": "env:LAMBDA_API_KEY"
+    },
+    {
+      "name": "llamacpp",
+      "kind": "openai-compatible",
+      "base_url": "http://localhost:8080/v1",
+      "model": "local-model",
+      "auth": ""
+    },
+    {
+      "name": "lmstudio",
+      "kind": "openai-compatible",
+      "base_url": "http://localhost:1234/v1",
+      "model": "local-model",
+      "auth": ""
+    },
+    {
+      "name": "localai",
+      "kind": "openai-compatible",
+      "base_url": "http://localhost:8080/v1",
+      "model": "local-model",
+      "auth": ""
+    },
+    {
+      "name": "minimax",
+      "kind": "anthropic",
+      "base_url": "https://api.minimaxi.com/anthropic",
+      "model": "MiniMax-M2",
+      "auth": "env:MINIMAX_API_KEY"
+    },
+    {
+      "name": "mistral",
+      "kind": "openai-compatible",
+      "base_url": "https://api.mistral.ai/v1",
+      "model": "mistral-large-latest",
+      "auth": "env:MISTRAL_API_KEY"
+    },
+    {
+      "name": "moonshot",
+      "kind": "openai-compatible",
+      "base_url": "https://api.moonshot.ai/v1",
+      "model": "kimi-k2.7-code",
+      "auth": "env:MOONSHOT_API_KEY"
+    },
+    {
+      "name": "nebius",
+      "kind": "openai-compatible",
+      "base_url": "https://api.studio.nebius.com/v1",
+      "model": "deepseek-ai/DeepSeek-V3",
+      "auth": "env:NEBIUS_API_KEY"
+    },
+    {
+      "name": "novita",
+      "kind": "openai-compatible",
+      "base_url": "https://api.novita.ai/openai/v1",
+      "model": "deepseek/deepseek-v4-pro",
+      "auth": "env:NOVITA_API_KEY"
+    },
+    {
+      "name": "nvidia-nim",
+      "kind": "openai-compatible",
+      "base_url": "https://integrate.api.nvidia.com/v1",
+      "model": "deepseek-ai/deepseek-v4-pro",
+      "auth": "env:NVIDIA_API_KEY"
+    },
+    {
+      "name": "ollama",
+      "kind": "openai-compatible",
+      "base_url": "http://localhost:11434/v1",
+      "model": "deepseek-coder:1.3b",
+      "auth": ""
+    },
+    {
+      "name": "openai",
+      "kind": "openai-compatible",
+      "base_url": "https://api.openai.com/v1",
+      "model": "gpt-4o",
+      "auth": "env:OPENAI_API_KEY"
+    },
+    {
+      "name": "openrouter",
+      "kind": "openai-compatible",
+      "base_url": "https://openrouter.ai/api/v1",
+      "model": "openrouter/auto",
+      "auth": "env:OPENROUTER_API_KEY"
+    },
+    {
+      "name": "perplexity",
+      "kind": "openai-compatible",
+      "base_url": "https://api.perplexity.ai",
+      "model": "sonar",
+      "auth": "env:PERPLEXITY_API_KEY"
+    },
+    {
+      "name": "sambanova",
+      "kind": "openai-compatible",
+      "base_url": "https://api.sambanova.ai/v1",
+      "model": "Meta-Llama-3.3-70B-Instruct",
+      "auth": "env:SAMBANOVA_API_KEY"
+    },
+    {
+      "name": "sglang",
+      "kind": "openai-compatible",
+      "base_url": "http://localhost:30000/v1",
+      "model": "deepseek-ai/DeepSeek-V4-Pro",
+      "auth": ""
+    },
+    {
+      "name": "siliconflow",
+      "kind": "openai-compatible",
+      "base_url": "https://api.siliconflow.com/v1",
+      "model": "deepseek-ai/DeepSeek-V4-Pro",
+      "auth": "env:SILICONFLOW_API_KEY"
+    },
+    {
+      "name": "siliconflow-cn",
+      "kind": "openai-compatible",
+      "base_url": "https://api.siliconflow.cn/v1",
+      "model": "deepseek-ai/DeepSeek-V4-Pro",
+      "auth": "env:SILICONFLOW_API_KEY"
+    },
+    {
+      "name": "stepfun",
+      "kind": "openai-compatible",
+      "base_url": "https://api.stepfun.ai/v1",
+      "model": "step-3.7-flash",
+      "auth": "env:STEPFUN_API_KEY"
+    },
+    {
+      "name": "together",
+      "kind": "openai-compatible",
+      "base_url": "https://api.together.xyz/v1",
+      "model": "deepseek-ai/DeepSeek-V4-Pro",
+      "auth": "env:TOGETHER_API_KEY"
+    },
+    {
+      "name": "upstage",
+      "kind": "openai-compatible",
+      "base_url": "https://api.upstage.ai/v1",
+      "model": "solar-pro2",
+      "auth": "env:UPSTAGE_API_KEY"
+    },
+    {
+      "name": "vercel",
+      "kind": "openai-compatible",
+      "base_url": "https://ai-gateway.vercel.sh/v1",
+      "model": "openai/gpt-4o",
+      "auth": "env:AI_GATEWAY_API_KEY"
+    },
+    {
+      "name": "vllm",
+      "kind": "openai-compatible",
+      "base_url": "http://localhost:8000/v1",
+      "model": "deepseek-ai/DeepSeek-V4-Pro",
+      "auth": ""
+    },
+    {
+      "name": "volcengine",
+      "kind": "openai-compatible",
+      "base_url": "https://ark.cn-beijing.volces.com/api/coding/v3",
+      "model": "DeepSeek-V4-Pro",
+      "auth": "env:VOLCENGINE_API_KEY"
+    },
+    {
+      "name": "wanjie-ark",
+      "kind": "openai-compatible",
+      "base_url": "https://maas-openapi.wanjiedata.com/api/v1",
+      "model": "deepseek-reasoner",
+      "auth": "env:WANJIE_ARK_API_KEY"
+    },
+    {
+      "name": "xai",
+      "kind": "openai-compatible",
+      "base_url": "https://api.x.ai/v1",
+      "model": "grok-4",
+      "auth": "env:XAI_API_KEY"
+    },
+    {
+      "name": "xiaomi-mimo",
+      "kind": "openai-compatible",
+      "base_url": "https://token-plan-sgp.xiaomimimo.com/v1",
+      "model": "mimo-v2.5-pro",
+      "auth": "env:XIAOMI_MIMO_TOKEN_PLAN_API_KEY"
+    },
+    {
+      "name": "zai",
+      "kind": "openai-compatible",
+      "base_url": "https://api.z.ai/api/coding/paas/v4",
+      "model": "glm-4.6",
+      "auth": "env:ZAI_API_KEY"
+    }
+  ]
+}

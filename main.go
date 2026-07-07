@@ -52,6 +52,8 @@ Usage:
   communikey unlink <enfant>            détache <enfant> de son parent
   communikey provider list              providers enregistrés + connus-absents, avec statut
   communikey provider test <name>       teste un provider sur un écran lu depuis stdin
+  communikey model presets              catalogue de ~50 providers prêts à l'emploi
+  communikey model add <provider>       active un provider du catalogue dans models.json
   communikey model list                 providers de modèle configurés (models.json)
   communikey model test <name>          vérifie qu'un provider de modèle répond
   communikey model call <name> "<p>"    appelle un provider de modèle (prompt en argument ou stdin)

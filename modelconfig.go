@@ -43,3 +43,38 @@ func loadModelSpecs() ([]modelSpec, error) {
 	}
 	return doc.Models, nil
 }
+
+// saveModelSpecs écrit la liste complète dans models.json (indenté, lisible et
+// éditable à la main). Crée le dossier de store si besoin. Le fichier ne contient
+// AUCUN secret (les clés vivent dans le vault / l'environnement) — 0o644 suffit.
+func saveModelSpecs(specs []modelSpec) error {
+	doc := struct {
+		Models []modelSpec `json:"models"`
+	}{Models: specs}
+	data, err := json.MarshalIndent(doc, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(DefaultStoreDir(), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(modelsConfigPath(), append(data, '\n'), 0o644)
+}
+
+// upsertModelSpec ajoute une entrée à models.json, ou la REMPLACE si une entrée
+// du même nom existe déjà (idempotent — `model add groq` deux fois ne duplique
+// pas). Renvoie added=true si c'était un ajout, false si un remplacement.
+func upsertModelSpec(spec modelSpec) (added bool, err error) {
+	specs, err := loadModelSpecs()
+	if err != nil {
+		return false, err
+	}
+	for i := range specs {
+		if specs[i].Name == spec.Name {
+			specs[i] = spec
+			return false, saveModelSpecs(specs)
+		}
+	}
+	specs = append(specs, spec)
+	return true, saveModelSpecs(specs)
+}
