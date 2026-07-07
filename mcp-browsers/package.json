@@ -1,0 +1,22 @@
+{
+  "name": "communikey-browsers",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP de contrôle des navigateurs IA (Dia, Comet, Atlas, Brave Leo…) via CDP — sous-projet de communikey.",
+  "type": "module",
+  "bin": {
+    "communikey-browsers": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "SEE LICENSE IN ../LICENSE",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "chrome-remote-interface": "^0.34.0"
+  }
+}
