@@ -14,11 +14,20 @@ import (
 	"time"
 )
 
+const modelUsage = `usage: communikey model presets | add <provider> [--model <m>] [--auth env:VAR|vault:NAME] | list | test <name> | call <name> "<prompt>" | secret set <name> [<valeur>]`
+
 func cmdModel(args []string) {
 	if len(args) == 0 {
-		fail(`usage: communikey model list | test <name> | call <name> "<prompt>" | secret set <name> [<valeur>]`)
+		fail(modelUsage)
 	}
 	switch args[0] {
+	case "presets":
+		cmdModelPresets(args[1:])
+	case "add":
+		if len(args) < 2 {
+			fail(`usage: communikey model add <provider> [--model <m>] [--auth env:VAR|vault:NAME]  (catalogue : « communikey model presets »)`)
+		}
+		cmdModelAdd(args[1], args[2:])
 	case "list":
 		cmdModelList(args[1:])
 	case "test":
@@ -37,7 +46,7 @@ func cmdModel(args []string) {
 		}
 		cmdModelSecretSet(args[2:])
 	default:
-		fail(`usage: communikey model list | test <name> | call <name> "<prompt>" | secret set <name> [<valeur>]`)
+		fail(modelUsage)
 	}
 }
 
@@ -115,6 +124,96 @@ func cmdModelList(args []string) {
 		}
 		fmt.Println(line)
 	}
+}
+
+type modelPresetEntry struct {
+	ID      string `json:"id"`
+	Label   string `json:"label"`
+	Kind    string `json:"kind"`
+	BaseURL string `json:"base_url"`
+	Model   string `json:"model"`
+	AuthEnv string `json:"auth_env,omitempty"`
+	Source  string `json:"source"` // "clawcodex" (base_url vérifiée) | "known" (à valider)
+}
+
+// cmdModelPresets liste le catalogue vérifié (modelpresets.go). Lecture seule :
+// il n'écrit rien dans models.json — c'est `model add` qui active un provider.
+func cmdModelPresets(args []string) {
+	ids := sortedPresetIDs()
+	entries := make([]modelPresetEntry, 0, len(ids))
+	for _, id := range ids {
+		p := modelPresets[id]
+		entries = append(entries, modelPresetEntry{
+			ID: id, Label: p.Label, Kind: p.Kind, BaseURL: p.BaseURL,
+			Model: p.Model, AuthEnv: p.AuthEnv, Source: p.Src,
+		})
+	}
+	if wantJSON(args) {
+		emitJSON(entries)
+		return
+	}
+	fmt.Printf("Catalogue de providers de modèle (%d) — activer : « communikey model add <id> »\n", len(entries))
+	for _, e := range entries {
+		auth := e.AuthEnv
+		if auth == "" {
+			auth = "(local, sans clé)"
+		}
+		flag := ""
+		if e.Source == "known" {
+			flag = "  [à valider]"
+		}
+		fmt.Printf("  • %-15s %-18s %-30s %s%s\n", e.ID, e.Kind, e.Model, auth, flag)
+	}
+}
+
+// cmdModelAdd active un provider du catalogue en écrivant son entrée (avec le bon
+// `kind` — routing "smart") dans models.json. Idempotent (remplace si déjà présent).
+func cmdModelAdd(provider string, rest []string) {
+	modelOverride, authOverride := "", ""
+	for i := 0; i < len(rest); i++ {
+		switch rest[i] {
+		case "--model":
+			if i+1 >= len(rest) {
+				fail("--model attend une valeur")
+			}
+			modelOverride = rest[i+1]
+			i++
+		case "--auth":
+			if i+1 >= len(rest) {
+				fail("--auth attend une valeur (env:VAR ou vault:NAME)")
+			}
+			authOverride = rest[i+1]
+			i++
+		default:
+			fail("argument inconnu: " + rest[i])
+		}
+	}
+
+	spec, ok := presetToSpec(provider, modelOverride, authOverride)
+	if !ok {
+		fail(fmt.Sprintf("provider %q absent du catalogue (voir « communikey model presets »)", provider))
+	}
+	added, err := upsertModelSpec(spec)
+	if err != nil {
+		fail(err.Error())
+	}
+	verb := "ajouté"
+	if !added {
+		verb = "mis à jour"
+	}
+	fmt.Printf("✓ provider %q %s dans %s (kind=%s, model=%s)\n", spec.Name, verb, modelsConfigPath(), spec.Kind, spec.Model)
+	switch {
+	case strings.HasPrefix(spec.Auth, "env:"):
+		env := strings.TrimPrefix(spec.Auth, "env:")
+		fmt.Printf("  → clé via l'environnement : export %s=<clé>\n", env)
+		fmt.Printf("    (ou dans le vault : communikey model add %s --auth vault:%s && communikey model secret set %s <clé>)\n", provider, provider, provider)
+	case strings.HasPrefix(spec.Auth, "vault:"):
+		name := strings.TrimPrefix(spec.Auth, "vault:")
+		fmt.Printf("  → clé dans le vault : communikey model secret set %s <clé>\n", name)
+	default:
+		fmt.Println("  → serveur local sans clé — assure-toi qu'il tourne.")
+	}
+	fmt.Printf("  → teste : communikey model test %s\n", provider)
 }
 
 // resolveModelProviderOrFail renvoie le provider vivant nommé `name`, ou termine

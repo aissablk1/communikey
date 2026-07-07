@@ -58,10 +58,13 @@ func buildModelRegistry() ([]ModelProvider, []modelRegistryIssue, error) {
 			issues = append(issues, modelRegistryIssue{Name: modelUnnamedLabel, Reason: "name manquant"})
 			continue
 		}
-		if spec.Kind != "openai-compatible" {
+		switch spec.Kind {
+		case "openai-compatible", "anthropic":
+			// protocole supporté — le provider est construit plus bas
+		default:
 			issues = append(issues, modelRegistryIssue{
 				Name:   spec.Name,
-				Reason: "kind inconnu: " + spec.Kind + ` (seul "openai-compatible" est supporté)`,
+				Reason: "kind inconnu: " + spec.Kind + ` (supportés : "openai-compatible", "anthropic")`,
 			})
 			continue
 		}
@@ -70,7 +73,14 @@ func buildModelRegistry() ([]ModelProvider, []modelRegistryIssue, error) {
 			issues = append(issues, modelRegistryIssue{Name: spec.Name, Reason: err.Error()})
 			continue
 		}
-		providers = append(providers, newOpenAIModelProvider(spec.Name, spec.BaseURL, spec.Model, apiKey))
+		// Routing "smart" par protocole : Anthropic (et MiniMax) parlent l'API
+		// Messages native ; tout le reste réutilise l'adaptateur openai-compatible.
+		switch spec.Kind {
+		case "anthropic":
+			providers = append(providers, newAnthropicModelProvider(spec.Name, spec.BaseURL, spec.Model, apiKey))
+		default: // "openai-compatible"
+			providers = append(providers, newOpenAIModelProvider(spec.Name, spec.BaseURL, spec.Model, apiKey))
+		}
 	}
 	return providers, issues, nil
 }
