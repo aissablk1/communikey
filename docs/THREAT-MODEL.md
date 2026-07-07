@@ -26,7 +26,7 @@ par fichiers) ou entre machines (`serve`/`remote`).
 | **Repudiation** | Journal append-only (hash + longueur, jamais le clair) ; `communikey journal` trace de→à sans révéler le corps. |
 | **Information disclosure** | Chiffrement **E2E hybride post-quantique** : KEM X25519 ⊕ ML-KEM-768 → HKDF → AES-GCM (confidentialité tient sauf si **les deux** KEM sont cassés). Vault Argon2id→AES-GCM (résistant GPU/ASIC). |
 | **Replay / ré-emballage** | Anti-replay (dédup sur le **nonce signé**). **AAD from→to** liée dans l'AEAD ET la signature (§41) : un payload ré-emballé sous un autre couple expéditeur→destinataire est rejeté. |
-| **Réseau** | TLS 1.3 **hybride PQC** (X25519MLKEM768) + pinning d'empreinte sur `serve`/`remote`. |
+| **Réseau** | TLS 1.3 **hybride PQC** (X25519MLKEM768) + pinning d'empreinte sur `serve`/`remote`. `serve --tls --authz` ajoute l'auth **MUTUELLE** : certificat client requis + vérifié contre l'allowlist, rejeté au handshake — un pair non autorisé n'atteint jamais la lecture du frame. |
 
 ## Limites HONNÊTES (ce que communikey NE protège PAS)
 
@@ -52,7 +52,8 @@ par fichiers) ou entre machines (`serve`/`remote`).
 
 ## Recommandations d'usage
 
-- Garder `serve` en **loopback** sauf besoin ; hors loopback, **`--authz` + allowlist** obligatoires.
+- Garder `serve` en **loopback** sauf besoin ; hors loopback, **`--tls --authz` + allowlist**
+  obligatoires (chiffrement du transport ET authentification mutuelle des pairs).
 - Ne **jamais** mettre de secret durable dans un message (le bus chiffre le transit, pas le stockage de l'agent).
 - Avant tout usage « production / sensible » : **faire auditer la crypto** et ne pas survendre la garantie.
 

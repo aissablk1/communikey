@@ -21,10 +21,11 @@ fini.
   les API OS ; dériver la clé du vault depuis l'extension **PRF** de WebAuthn. En attendant,
   le vault est chiffré AES-256-GCM, clé via Argon2id (RFC 9106, passphrase fichier/env, §38).
 
-- **Réseau multi-machine durci (TLS hybride PQC + auth mutuelle).** Le réseau livré
-  (`serve`/`remote`) est **loopback/LAN**, frame JSON ; le **payload est chiffrable E2E**
-  (le relais ne voit que du chiffré). *Plan* : envelopper dans **TLS `X25519MLKEM768`** +
-  auth par identité (clé publique connue), avant toute exposition hors loopback (§38).
+- ~~Réseau multi-machine durci (TLS hybride PQC + auth mutuelle).~~ **Livré 2026-07-07** :
+  `serve --tls` (TLS 1.3 hybride `X25519MLKEM768`) + `serve --tls --authz` (auth MUTUELLE —
+  certificat client dérivé de l'identité, vérifié contre l'allowlist au handshake,
+  `serverTLSConfigMutual` dans `tlsbus.go`). Reste ouvert : le durcissement au-delà de
+  cette auth mutuelle pour une exposition Internet large (rate-limiting réseau, etc.).
 
 - **Clients mobiles (iOS / iPadOS / Android).** Runtime distinct (app/PWA). Rappel honnête :
   le mobile ne peut **pas** injecter au clavier (sandbox) → il rejoint le bus comme **client**

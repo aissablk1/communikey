@@ -54,6 +54,7 @@ connues »).
 | **Résistance « Harvest Now, Decrypt Later »** | un adversaire qui capture aujourd'hui pour déchiffrer/usurper avec un futur ordinateur quantique | KEM **hybride** (X25519 ⊕ ML-KEM-768) pour le secret, signature **hybride** (Ed25519 ⊕ ML-DSA-65) pour l'authenticité — casser Shor exige de casser aussi la moitié post-quantique |
 | **Clés privées au repos** | accès au disque / sauvegarde volée | vault scellé AES-256-GCM, clé dérivée par Argon2id (RFC 9106, résistant GPU/ASIC) |
 | **Perte d'un appareil** | un seul device perdu/volé | recovery Shamir K-sur-N : K-1 parts ne révèlent rien (sûreté de seuil) |
+| **Accès réseau par un pair non autorisé** | un TCP arbitraire qui atteint `serve --tls --authz` | authentification MUTUELLE TLS : certificat client requis, vérifié contre l'allowlist AVANT toute lecture de frame (`serverTLSConfigMutual`) |
 
 ### Hypothèses de confiance
 
@@ -131,11 +132,17 @@ Ces points sont des **limites assumées de l'alpha**, documentés ici plutôt qu
 - **Pas de passkey/WebAuthn.** Le déverrouillage du vault repose sur une passphrase
   (fichier via `COMKEY_VAULT_PASS_FILE`, recommandé, ou variable `COMKEY_VAULT_PASS`). Le
   MFA résistant au phishing (FIDO2/PRF) est planifié.
-- **Réseau : confiance loopback/LAN.** `serve`/`remote` chiffrent le transport en TLS
-  1.3 hybride PQC avec épinglage d'empreinte, mais **sans authentification mutuelle des
-  pairs** et avec `InsecureSkipVerify` (la vérification se fait par épinglage manuel ;
-  un pin **vide** sur loopback accepte n'importe quel certificat). **Ne pas exposer hors
-  loopback/LAN de confiance** sans le durcissement de la phase 3.
+- **Réseau : confiance loopback/LAN par défaut ; auth mutuelle disponible en opt-in.**
+  `serve --tls` seul reste comme avant : `InsecureSkipVerify` + épinglage manuel côté
+  client (un pin **vide** sur loopback accepte n'importe quel certificat serveur).
+  **`serve --tls --authz`** active en plus l'**authentification MUTUELLE** au niveau
+  TLS (`serverTLSConfigMutual`, tlsbus.go) : le serveur exige un certificat client et
+  vérifie son empreinte contre la MÊME allowlist que `--authz` — un pair non autorisé
+  est rejeté au handshake, avant même la lecture du frame. `remote --tls` présente
+  automatiquement ce certificat s'il peut déverrouiller le vault local (sinon connexion
+  sans certificat — le serveur distant refuse alors clairement si l'auth mutuelle est
+  active, jamais de dégradation silencieuse). **Ne pas exposer hors loopback/LAN de
+  confiance** sans `--authz` activé.
 - **Pas d'anti-rejeu au niveau crypto.** L'enveloppe scellée ne lie ni horodatage ni
   compteur ; la déduplication se fait au niveau de l'inbox (par identifiant de message),
   pas par la signature. Un anti-rejeu explicite est à ajouter.

@@ -194,7 +194,7 @@ les intentions.
 |---|---|---|
 | **0–1 · Fondations** | ✅ inbox coopératif · registre + mémoire/journal · crypto E2E hybride PQC · vault AES-256-GCM | — |
 | **2 · Terminaux & providers** | ✅ injection **cmux + tmux** state-aware + graphe familial · détection **Claude** · adaptateurs **Codex + Gemini + Antigravity** (calibrés sur source, confirmation live en attente) | ❌ backend `screen` · passkey WebAuthn |
-| **3 · Identité & réseau** | ✅ recovery **Shamir** · phrase **BIP-39** · réseau loopback/LAN + **TLS hybride PQC** | ❌ auth mutuelle réseau · durcissement hors-LAN |
+| **3 · Identité & réseau** | ✅ recovery **Shamir** · phrase **BIP-39** · réseau loopback/LAN + **TLS hybride PQC** + **auth mutuelle** (`serve --tls --authz`) | ❌ durcissement hors-LAN au-delà de l'auth mutuelle |
 | **4 · Portée** | — | ❌ clients **mobiles** · **Windows** (coop) · bridge **Agent Teams** · surface **MCP** |
 | **5 · Durcissement** | ✅ signatures hybrides **Ed25519 ⊕ ML-DSA-65** | ❌ **audit crypto externe** · autres OS |
 

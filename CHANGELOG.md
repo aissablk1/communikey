@@ -46,6 +46,16 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   (Homebrew cask `antigravity-cli` 1.0.16, `agy`) — pas de capture d'écran live (session OAuth
   Google complète requise). `provider list` le référence en `provisoire`, même statut que
   codex/gemini.
+- **Authentification MUTUELLE au niveau TLS** (`serve --tls --authz`) : le serveur exige
+  désormais un certificat client et vérifie son empreinte contre la MÊME allowlist que
+  `--authz` — un pair non autorisé est rejeté au handshake TLS, avant la lecture du frame
+  (`serverTLSConfigMutual`, `tlsbus.go`). Le certificat client dérive de la clé Ed25519 de
+  signature de l'identité, généré **en mémoire uniquement** (jamais écrit en clair sur
+  disque, contrairement au certificat serveur qui est une clé jetable dédiée au transport).
+  `remote --tls` le présente automatiquement si le vault local est déverrouillable ; sinon
+  connexion sans certificat (le serveur distant refuse alors clairement, jamais de
+  dégradation silencieuse). Ferme la limite « sans authentification mutuelle des pairs »
+  documentée depuis 0.2.0.
 
 ### Changé
 - **Licence** : MIT → **Apache-2.0** (grant de brevet, vital vu la crypto PQC).

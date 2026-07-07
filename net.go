@@ -8,8 +8,10 @@ package main
 // ne voit que du chiffré. Le transport est DÉJÀ TLS 1.3 hybride post-quantique
 // (tlsbus.go, `--tls`) avec épinglage d'empreinte côté client ; l'authentification
 // des EXPÉDITEURS de messages existe aussi (`--authz`, authz.go : signature Ed25519
-// vérifiée + allowlist de fingerprints). Ce qui manque encore : l'authentification
-// mutuelle au niveau TLS (certificat client) et le durcissement au-delà du
+// ⊕ ML-DSA-65 vérifiée + allowlist de fingerprints). `serve --tls --authz` active EN
+// PLUS l'authentification MUTUELLE au niveau TLS (tlsbus.go,
+// serverTLSConfigMutual) : un pair sans certificat client autorisé n'atteint même
+// pas la lecture du frame. Ce qui manque encore : le durcissement au-delà du
 // loopback/LAN de confiance (§38 : ne pas exposer hors loopback sans durcir).
 
 import (
@@ -170,15 +172,8 @@ func cmdServe(args []string) {
 		}
 	}
 	s := mustStore()
-	var cfg *tls.Config
-	if useTLS {
-		c, fp, err := serverTLSConfig(s)
-		if err != nil {
-			fail(err.Error())
-		}
-		cfg = c
-		fmt.Printf("TLS 1.3 hybride PQC actif. Fingerprint à épingler côté client :\n  %s\n", fp)
-	}
+	// allow AVANT le TLS config : une allowlist (--authz) active l'auth MUTUELLE
+	// (serverTLSConfigMutual a besoin de `allow` pour vérifier le certificat client).
 	var allow map[string]bool
 	if authz || len(allowFlags) > 0 {
 		a, configured := loadAllowlist(s, allowFlags)
@@ -187,6 +182,25 @@ func cmdServe(args []string) {
 		}
 		allow = a
 		fmt.Printf("Autorisation active : %d expéditeur(s) autorisé(s) — E2E signé requis.\n", len(allow))
+	}
+	var cfg *tls.Config
+	if useTLS {
+		var c *tls.Config
+		var fp string
+		var err error
+		if allow != nil {
+			c, fp, err = serverTLSConfigMutual(s, allow)
+		} else {
+			c, fp, err = serverTLSConfig(s)
+		}
+		if err != nil {
+			fail(err.Error())
+		}
+		cfg = c
+		fmt.Printf("TLS 1.3 hybride PQC actif. Fingerprint à épingler côté client :\n  %s\n", fp)
+		if allow != nil {
+			fmt.Println("Authentification MUTUELLE active : certificat client requis, vérifié contre l'allowlist.")
+		}
 	}
 	if err := serveBus(s, addr, cfg, allow); err != nil {
 		fail(err.Error())
@@ -226,8 +240,23 @@ func cmdRemote(args []string) {
 	var cfg *tls.Config
 	tlsNote := ""
 	if useTLS {
-		cfg = tlsClientConfig(pin)
+		// Présente un certificat client dérivé de l'identité locale SI le vault est
+		// déverrouillable — sans ça, aucune conséquence si le serveur distant n'exige
+		// pas l'auth mutuelle ; sinon le handshake TLS échoue clairement côté serveur
+		// (jamais une connexion silencieusement dégradée en moins sûr).
+		var clientCert *tls.Certificate
+		if pass, ok := resolveVaultPass(); ok {
+			if id, err := loadIdentity(mustStore(), pass); err == nil {
+				if cert, err := clientTLSCert(id); err == nil {
+					clientCert = &cert
+				}
+			}
+		}
+		cfg = tlsClientConfig(pin, clientCert)
 		tlsNote = " · TLS PQC"
+		if clientCert != nil {
+			tlsNote += " (auth mutuelle)"
+		}
 		if shouldWarnUnpinnedTLS(pin, addr) {
 			fmt.Printf("⚠ --tls sans --pin vers %s (hors loopback) : n'importe quel certificat serveur est accepté (§38).\n", addr)
 		}
