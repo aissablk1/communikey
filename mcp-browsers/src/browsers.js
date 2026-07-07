@@ -60,8 +60,8 @@ export const browsers = {
   dia: {
     id: "dia", label: "Dia (The Browser Company)", appPath: mac("Dia"),
     bundleId: "company.thebrowser.dia", defaultPort: 9230, chromium: true,
-    controllable: "cdp", verified: false, aiRecipe: null,
-    notes: "IA conversationnelle native, Skills, mémoire 7 jours. macOS Apple Silicon. Chemin à vérifier.",
+    controllable: "cdp", verified: true, aiRecipe: null,
+    notes: "IA conversationnelle native, Skills, mémoire 7 jours. macOS Apple Silicon. Chemin + bundle id vérifiés sur la machine le 2026-07-08.",
   },
   comet: {
     id: "comet", label: "Perplexity Comet", appPath: mac("Comet"),
