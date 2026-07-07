@@ -53,6 +53,16 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   want to proceed?"/"Would you like to proceed?", glyph composer **"❯" confirmé par test
   unitaire amont** (même glyph que Claude Code — `TestClawCodexAbstainedByClaude` prouve
   que Claude abstient correctement grâce à des footers disjoints).
+- **5 adaptateurs CLI supplémentaires** (`adapters.go`, LOT 2, calibrés sur source primaire
+  le 2026-07-08) : **aider** (Aider-AI/aider — confirm `(Y)es/(N)o` + busy `Waiting for <modèle>` ;
+  idle volontairement non détecté, prompt trop générique sans footer → sûr par défaut),
+  **goose** (block/goose — busy `(Ctrl+C to interrupt)`, idle `Enter to send`/`goose is ready`,
+  confirm `do you allow`), **opencode** (sst/opencode — confirm `Permission required`, idle
+  `Ask anything…`), **crush** (charmbracelet/crush — confirm `Permission Required`, busy
+  `Thinking`, idle `Ready…`/marque `CRUSH`), **qwen-code** (QwenLM/qwen-code, fork gemini-cli —
+  confirm `Do you want to proceed?`, busy `esc to cancel`, idle `? for shortcuts`). Mêmes
+  garanties safety-first (confirm > busy > idle à double signal > unknown), abstention sur shell
+  nu et écran Claude testée, caveats d'attribution partagée documentés.
 - **Authentification MUTUELLE au niveau TLS** (`serve --tls --authz`) : le serveur exige
   désormais un certificat client et vérifie son empreinte contre la MÊME allowlist que
   `--authz` — un pair non autorisé est rejeté au handshake TLS, avant la lecture du frame
