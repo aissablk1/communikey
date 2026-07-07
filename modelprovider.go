@@ -15,6 +15,11 @@ import (
 // modelDefaultTimeout is used when ModelOptions.Timeout is zero.
 const modelDefaultTimeout = 30 * time.Second
 
+// modelUnnamedLabel is the placeholder shown for a models.json entry that has no
+// name. Une telle entrée est rejetée par le registre (jamais "actif") ; la clé
+// est partagée avec model.go pour que `model list` l'affiche cohéremment.
+const modelUnnamedLabel = "(sans nom)"
+
 // ModelOptions are per-call overrides.
 type ModelOptions struct {
 	Model   string        // override du modèle par défaut du spec ; "" = défaut du spec
@@ -50,7 +55,7 @@ func buildModelRegistry() ([]ModelProvider, []modelRegistryIssue, error) {
 	var issues []modelRegistryIssue
 	for _, spec := range specs {
 		if spec.Name == "" {
-			issues = append(issues, modelRegistryIssue{Name: "(sans nom)", Reason: "name manquant"})
+			issues = append(issues, modelRegistryIssue{Name: modelUnnamedLabel, Reason: "name manquant"})
 			continue
 		}
 		if spec.Kind != "openai-compatible" {

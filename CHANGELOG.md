@@ -46,10 +46,12 @@ adopte le [versionnage sémantique](https://semver.org/lang/fr/).
   (Homebrew cask `antigravity-cli` 1.0.16, `agy`) — pas de capture d'écran live (session OAuth
   Google complète requise). `provider list` le référence en `provisoire`, même statut que
   codex/gemini.
-- `communikey model list|test|call` : client multi-provider de modèles (Ollama, LocalAI,
-  HuggingFace Inference API et tout endpoint compatible OpenAI), déclaratif via
-  `~/.claude/communikey/models.json`, secrets scellés dans le vault existant
-  (`communikey model secret set`). Phase 1 seulement — voir
+- `communikey model list|test|call` : client multi-provider de modèles via un adaptateur
+  générique compatible OpenAI, déclaratif via `~/.claude/communikey/models.json`, secrets
+  scellés dans le vault existant (`communikey model secret set`, valeur lue sur stdin).
+  Vérifié de bout en bout contre **Ollama** ; LocalAI, HuggingFace Inference API et tout autre
+  endpoint compatible OpenAI sont supportés par conception mais pas encore vérifiés en
+  conditions réelles. Phase 1 seulement — voir
   `docs/superpowers/specs/2026-07-06-communikey-model-provider-design.md` pour le design complet.
 
 ### Changé

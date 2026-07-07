@@ -55,7 +55,7 @@ Usage:
   communikey model list                 providers de modèle configurés (models.json)
   communikey model test <name>          vérifie qu'un provider de modèle répond
   communikey model call <name> "<p>"    appelle un provider de modèle (prompt en argument ou stdin)
-  communikey model secret set <n> <v>   enregistre un secret de provider dans le vault
+  communikey model secret set <n> [<v>] enregistre un secret de provider (valeur sur stdin si <v> omis)
   communikey version                    affiche la version
   communikey help
 

@@ -15,10 +15,10 @@ import (
 // modelSpec is one entry of models.json.
 type modelSpec struct {
 	Name    string `json:"name"`
-	Kind    string `json:"kind"`            // seule valeur supportée v1 : "openai-compatible"
-	BaseURL string `json:"base_url"`        // ex. "http://localhost:11434/v1"
-	Model   string `json:"model"`           // modèle par défaut si ModelOptions.Model est vide
-	Auth    string `json:"auth,omitempty"`  // "", "env:NOM", ou "vault:NOM"
+	Kind    string `json:"kind"`           // seule valeur supportée v1 : "openai-compatible"
+	BaseURL string `json:"base_url"`       // ex. "http://localhost:11434/v1"
+	Model   string `json:"model"`          // modèle par défaut si ModelOptions.Model est vide
+	Auth    string `json:"auth,omitempty"` // "", "env:NOM", ou "vault:NOM"
 }
 
 func modelsConfigPath() string {

@@ -71,6 +71,9 @@ func saveModelSecret(name, value string) error {
 	if err != nil {
 		return err
 	}
+	if secrets == nil { // garde défensive : écrire dans une map nil paniquerait
+		secrets = map[string]string{}
+	}
 	secrets[name] = value
 	pt, err := json.Marshal(secrets)
 	if err != nil {
@@ -112,7 +115,7 @@ func resolveModelSecret(auth string) (string, error) {
 		}
 		v, ok := secrets[name]
 		if !ok {
-			return "", fmt.Errorf("secret %q absent du vault (communikey model secret set %s <valeur>)", name, name)
+			return "", fmt.Errorf("secret %q absent du vault (communikey model secret set %s — valeur sur stdin)", name, name)
 		}
 		return v, nil
 	default:
