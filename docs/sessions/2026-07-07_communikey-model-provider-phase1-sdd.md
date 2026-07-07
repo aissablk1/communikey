@@ -3,10 +3,11 @@ session_id: N/A (hook §23 non déclenché — le workspace de CETTE session Cla
   Code est $HOME, explicitement exclu par le hook `session-journal-qqoqccp.sh` ;
   journal tenu manuellement, à la demande explicite d'Aïssa)
 date_debut: 2026-07-05 ~20:26 (brainstorming initial du sujet communikey/LMP)
-date_fin: en cours
+date_fin: 2026-07-07 ~12:09 (suspendue — déduit de l'horodatage du dernier commit réel)
 workspace: /Volumes/Professionnel/Projets/Développement/Outils/communikey/.worktrees/model-provider-phase1 (worktree isolé, branche feat/model-provider-phase1 ; cwd réel de la session Claude Code = /Users/aissabelkoussa)
 auteur: Aïssa BELKOUSSA
-statut: en_cours
+statut: suspendue (6/6 tâches + revue finale de branche terminées et approuvées ;
+  en attente de la décision d'Aïssa sur la suite — cf. Notes/Blocages)
 tags: [communikey, feature, model-provider, sdd, tdd, go]
 ---
 
@@ -163,16 +164,54 @@ tags: [communikey, feature, model-provider, sdd, tdd, go]
 
 **LES 6 TÂCHES DU PLAN SONT TERMINÉES ET APPROUVÉES.**
 
-## Actions à mener à l'avenir (TODO / follow-up)
+- [2026-07-07 ~12:09] **Revue finale de branche** (Opus, diff complet
+  merge-base `d26f30c`..`97ec489`, 14 trouvailles Minor accumulées transmises
+  pour triage).
+  - **Verdict : « Ready to merge = Yes »** (optionnellement « avec
+    correctifs » — rien de bloquant). Zéro Critical.
+  - **1 trouvaille Important NOUVELLE** (transverse, invisible aux revues
+    par tâche) : `communikey model secret set <name> <value>` prend le
+    secret en **argument shell** — visible dans l'historique shell/`ps`/
+    `/proc` pendant l'exécution. Non bloquant pour un socle Phase 1 local,
+    mais à corriger (lecture stdin, comme `model call`) **avant tout usage
+    avec une vraie clé cloud**.
+  - Triage des 14 Minor : **aucune promue** à Important/Critical, toutes
+    acceptées comme dette documentée. 4 « gains à coût quasi nul »
+    recommandés pour un commit de nettoyage optionnel : `gofmt -w
+    modelconfig.go` ; garde `if secrets == nil { secrets = map[string]
+    string{} }` dans `saveModelSecret` ; `model list --json` sur config
+    vide devrait émettre `[]` plutôt que `null` (initialiser `entries :=
+    []modelListEntry{}`) ; extraire en un helper la logique dupliquée
+    « résoudre le provider ou fail avec la raison de l'issue » entre
+    `cmdModelTest`/`cmdModelCall`. + 1 trouvaille neuve : une entrée
+    `models.json` sans nom apparaît listée en statut « actif » alors
+    qu'elle est rejetée par le registre (mislabel cosmétique).
+  - Note d'honnêteté sur le CHANGELOG : seul **Ollama** a été réellement
+    testé de bout en bout (HuggingFace jamais réellement appelé) —
+    reformulation suggérée pour ne pas sur-affirmer la couverture.
 
-- [ ] Revue finale de branche (modèle le plus capable) + `superpowers:
-  finishing-a-development-branch`.
+## Actions à mener à l'avenir (TODO / follow-up) — RIEN N'EST BLOQUÉ, TOUT ATTEND UNE DÉCISION
+
+- [ ] **Décision immédiate d'Aïssa** (posée, interrompue avant réponse) :
+  - **Option A** — fusionner la branche telle quelle maintenant
+    (`superpowers:finishing-a-development-branch`), laisser les 14 Minor +
+    le point secret-via-argv en dette documentée pour plus tard.
+  - **Option B (recommandée par le reviewer)** — d'abord un petit commit
+    de nettoyage (les 4 corrections à coût quasi nul ci-dessus + le
+    mislabel nameless-entry) **et** faire lire le secret de
+    `model secret set` depuis stdin plutôt que l'argv, **puis** fusionner.
+- [ ] Une fois la décision prise : exécuter `superpowers:
+  finishing-a-development-branch` (merge/PR + nettoyage du worktree —
+  pas encore fait).
 - [ ] Phases 2 (hooks enrichis) et 3 (workers-comme-nœuds-du-bus) — hors
   scope de ce plan, chacune sa propre spec, une fois ce socle utilisé en
   conditions réelles.
-- [ ] Trouvailles Minor accumulées (voir ledger `.superpowers/sdd/progress.md`)
-  à trier lors de la revue finale : lesquelles corriger avant merge, lesquelles
-  documenter comme dette assumée.
+- [ ] Vérifier réellement HuggingFace Inference API de bout en bout (seul
+  Ollama a été testé manuellement jusqu'ici) avant de considérer la
+  mention CHANGELOG comme pleinement prouvée.
+- [ ] Décider si `EnterWorktree`/le réglage `worktree.baseRef` doivent être
+  documentés quelque part pour la prochaine fois (piège rencontré ce
+  tour-ci : défaut `fresh` part d'`origin/<branche>`, pas du HEAD local).
 
 ## Notes / Décisions / Blocages
 
@@ -196,7 +235,19 @@ tags: [communikey, feature, model-provider, sdd, tdd, go]
   `gofmt`-clean (hérité du plan, CI ne vérifie pas gofmt) ; contenu vide sur
   `choices[0].message.content` non distingué d'un échec (Minor, plan-mandated,
   cf. revue Task 2) ; absence de test sur l'en-tête Authorization absent.
-  Toutes consignées pour la revue finale de branche.
+  Toutes consignées pour la revue finale de branche (et re-triagées là,
+  cf. entrée du 2026-07-07 ~12:09 ci-dessus).
+- **Point d'arrêt de cette session (2026-07-07 ~12:09)** : Aïssa a interrompu
+  la question posée sur la suite (fusionner tel quel vs. nettoyage d'abord)
+  et a demandé d'enregistrer la session complète + les tâches non
+  terminées avant de trancher. **Rien n'est cassé ni bloqué techniquement** —
+  la branche est verte (build/vet/test), approuvée par la revue finale, et
+  committée jusqu'à `97ec489` inclus. Il ne manque que la décision
+  merge-vs-nettoyage puis l'exécution de `finishing-a-development-branch`
+  pour clore réellement le travail. Le worktree (`.worktrees/
+  model-provider-phase1`) et la branche (`feat/model-provider-phase1`)
+  restent en l'état, prêts à être repris à tout moment (`EnterWorktree` avec
+  `path: .worktrees/model-provider-phase1`, ou `cd` direct).
 
 ---
 
