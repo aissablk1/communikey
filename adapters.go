@@ -234,3 +234,145 @@ func newClawCodexProvider() patternProvider {
 		idleFooter: regexp.MustCompile(`(?i)to quit clawcodex|to start a fresh chat`),
 	}
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOT 2 (2026-07-08) — adaptateurs pour d'autres CLI d'agents de code.
+// Tokens VÉRIFIÉS SUR SOURCE PRIMAIRE (dépôts officiels, raw GitHub, 2026-07-08).
+// Aucune capture d'écran live (chaque agent exige un compte/exécution) — les
+// tokens viennent du CODE réel, pas d'un rendu observé ; une capture live figerait
+// la mise en page exacte. Même logique safety-first que ci-dessus : confirm > busy
+// > idle (double signal) > unknown ; un shell nu ou un écran Claude ne sont JAMAIS
+// lus comme idle.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// newAiderProvider — Aider (Aider-AI/aider, REPL prompt_toolkit ligne-à-ligne, PAS
+// un TUI plein écran). Calibré (§2/§29) sur main : confirm suffixe "(Y)es/(N)o"
+// (aider/io.py confirm_ask) ; busy spinner "Waiting for <modèle>"/"Waiting for LLM"
+// (aider/waiting.py, base_coder.py). IDLE VOLONTAIREMENT NON DÉTECTÉ : le prompt
+// idle est "> "/"architect> " (aider/io.py) — trop générique — et aider n'a AUCUN
+// footer persistant (0 bottom_toolbar dans io.py, vérifié). Sans second signal, un
+// shell nu serait indistinguable → on renvoie UNKNOWN (jamais d'auto-submit), le
+// côté sûr. On détecte donc seulement confirm et busy (déjà utile : ne jamais
+// soumettre pendant une confirmation ou une génération).
+func newAiderProvider() patternProvider {
+	return patternProvider{
+		name: "aider",
+		confirm: []*regexp.Regexp{
+			regexp.MustCompile(`(?i)\(y\)es/\(n\)o`), // suffixe distinctif d'aider
+			reAdptConfirmYN, reAdptConfirmVerb,
+		},
+		busy: []*regexp.Regexp{
+			// "Waiting for LLM" / "Waiting for <modèle>". RE2 n'a pas de look-ahead :
+			// on ancre sur des tokens de modèle pour NE PAS matcher l'idle
+			// "Aider is waiting for your input" (aider/io.py) — "your input" ne matche pas.
+			regexp.MustCompile(`(?i)waiting for (llm\b|[\w.:/-]*(gpt|claude|sonnet|opus|haiku|gemini|llama|deepseek|mistral|qwen|kimi|glm|grok|command|o[1-9])[\w.:/-]*)`),
+		},
+		idlePrompt: nil, // pas de double signal fiable → idle non détecté (sûr)
+		idleFooter: nil,
+	}
+}
+
+// newGooseProvider — goose (block/goose, REPL rustyline, Rust). Calibré (§2/§29)
+// sur main : confirm "…do you allow?" + menu Allow/Deny (crates/goose-cli/src/
+// session/mod.rs) ; busy spinner se terminant par "(Ctrl+C to interrupt)" (le
+// préfixe est un message aléatoire — on matche le hint d'interruption, pas le
+// verbe : output.rs + thinking.rs) ; idle prompt rustyline "> " + hint distinctif
+// "Enter to send · Ctrl+J newline" ou bannière "goose is ready" (completion.rs,
+// output.rs). NB : l'art ASCII "( O)>" de la bannière n'est PAS utilisé comme
+// détecteur d'idle (il apparaît aussi au démarrage).
+func newGooseProvider() patternProvider {
+	return patternProvider{
+		name: "goose",
+		confirm: []*regexp.Regexp{
+			regexp.MustCompile(`(?i)do you allow`),
+			reAdptConfirmNum, reAdptConfirmYN, reAdptConfirmVerb,
+		},
+		busy: []*regexp.Regexp{
+			regexp.MustCompile(`(?i)ctrl\+c to interrupt`),
+		},
+		// Prompt rustyline nu "> " : générique SEUL, mais verrouillé par le footer
+		// distinctif ci-dessous (un shell — même un PS2 "> " — n'a jamais "Enter to
+		// send"/"goose is ready"). Double signal obligatoire.
+		idlePrompt: regexp.MustCompile(`(?m)^\s*>\s*$`),
+		idleFooter: regexp.MustCompile(`(?i)enter to send|goose is ready`),
+	}
+}
+
+// newOpencodeProvider — opencode (sst/opencode, TUI SolidJS @opentui, branche dev).
+// Calibré (§2/§29) : confirm dialogue "Permission required" + boutons "Allow once"/
+// "Allow always"/"Reject" (packages/tui/src/routes/session/permission.tsx) ; busy
+// "esc … interrupt" dans la ligne de statut du prompt (component/prompt/index.tsx,
+// rendu seulement si status ≠ idle) ; idle placeholder "Ask anything…" (ou "Run a
+// command…" en mode shell) + rangée de hints "agents"/"commands" (prompt/index.tsx,
+// home.tsx). CAVEAT : "esc … interrupt" est partagé avec Claude/Codex (registrés
+// avant) — l'ÉTAT reste correct, seul le nom d'attribution peut différer.
+func newOpencodeProvider() patternProvider {
+	return patternProvider{
+		name: "opencode",
+		confirm: []*regexp.Regexp{
+			regexp.MustCompile(`(?i)permission required`),
+			regexp.MustCompile(`(?i)allow once|allow always`),
+			reAdptConfirmVerb,
+		},
+		busy: []*regexp.Regexp{
+			regexp.MustCompile(`(?i)esc\b.{0,16}interrupt`),
+		},
+		// Le placeholder "Ask anything…" n'apparaît QU'À l'idle (saisie vide) — signal
+		// distinctif ; verrouillé par la rangée de hints agents/commands / footer.
+		idlePrompt: regexp.MustCompile(`(?i)ask anything\.\.\.|run a command\.\.\.`),
+		idleFooter: regexp.MustCompile(`(?i)\bagents\b|\bcommands\b|/status`),
+	}
+}
+
+// newCrushProvider — crush (charmbracelet/crush, TUI Bubbletea v2, branche main ;
+// le TUI vit dans internal/ui/). Calibré (§2/§29) : confirm dialogue "Permission
+// Required" + boutons "Allow"/"Allow for Session"/"Deny" (internal/ui/dialog/
+// permissions.go) ; busy label spinner "Thinking"/"Summarizing" ou placeholders de
+// travail ("Working!", "Processing…", "Brrrrr…") ou binding "esc … cancel"
+// (internal/ui/model/ui.go, chat/assistant.go, keys.go) ; idle placeholders "Ready!"/
+// "Ready for instructions" (readyPlaceholders) + marque persistante "CRUSH"/"Charm™"
+// (header.go). Les placeholders sont aléatoires → on matche l'UNION, pas un mot.
+// CAVEAT : "Permission Required" est partagé avec opencode (registré avant) —
+// l'ÉTAT (confirm) reste correct, seul le nom d'attribution peut différer.
+func newCrushProvider() patternProvider {
+	return patternProvider{
+		name: "crush",
+		confirm: []*regexp.Regexp{
+			regexp.MustCompile(`(?i)permission required`),
+			regexp.MustCompile(`(?i)allow for session`),
+			reAdptConfirmVerb,
+		},
+		busy: []*regexp.Regexp{
+			regexp.MustCompile(`(?i)\bthinking\b|\bsummarizing\b`),
+			regexp.MustCompile(`(?i)working!|working\.\.\.|processing\.\.\.|brrrr|prrrr`),
+		},
+		idlePrompt: regexp.MustCompile(`(?i)ready!|ready\.\.\.|ready\?|ready for instructions`),
+		idleFooter: regexp.MustCompile(`CRUSH|Charm`),
+	}
+}
+
+// newQwenCodeProvider — Qwen Code (QwenLM/qwen-code, TUI Ink/React, fork de
+// gemini-cli, branche main). Calibré (§2/§29) : confirm "Apply this change?" /
+// "Allow execution of:" / "Do you want to proceed?" / "Waiting for user
+// confirmation…" + "Yes, allow once" (components/messages/ToolConfirmationMessage.
+// tsx) ; busy suffixe "· esc to cancel)" (components/LoadingIndicator.tsx) ; idle
+// prompt "> " (InputPrompt.tsx) + footer "? for shortcuts" (Footer.tsx). CAVEATS :
+// (1) "esc to cancel" est PARTAGÉ avec Gemini (registré avant) → un écran qwen busy
+// peut être attribué à "gemini" ; état correct. (2) idle "> " + "? for shortcuts"
+// est la MÊME signature que Codex (registré avant) → un écran qwen idle peut être
+// attribué à "codex" ; l'ÉTAT (idle) reste correct, seul le nom diffère. Les
+// chaînes UI passent par i18n t() → matches possibles seulement en locale `en`.
+func newQwenCodeProvider() patternProvider {
+	return patternProvider{
+		name: "qwen-code",
+		confirm: []*regexp.Regexp{
+			reAdptConfirmNum, reAdptConfirmYN, reAdptConfirmVerb,
+			regexp.MustCompile(`(?i)apply this change\?|allow execution of|waiting for user confirmation`),
+		},
+		busy: []*regexp.Regexp{
+			regexp.MustCompile(`(?i)esc to cancel`),
+		},
+		idlePrompt: reAdptIdleBox,
+		idleFooter: regexp.MustCompile(`(?i)\?\s*for shortcuts`),
+	}
+}

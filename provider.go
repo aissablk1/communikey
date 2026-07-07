@@ -40,6 +40,11 @@ func buildProviderRegistry() []Provider {
 		newGeminiProvider(),      // provisoire — Gemini CLI individuel retiré le 18/06/2026, garde la licence Enterprise
 		newAntigravityProvider(), // provisoire — successeur officiel de Gemini CLI, calibré par extraction statique (adapters.go)
 		newClawCodexProvider(),   // provisoire — MIT, calibré sur le dépôt officiel agentforce314/clawcodex (adapters.go)
+		newAiderProvider(),       // provisoire — Aider-AI/aider (REPL) : confirm+busy only, idle non détecté (sûr) (adapters.go)
+		newGooseProvider(),       // provisoire — block/goose (REPL rustyline), calibré source (adapters.go)
+		newOpencodeProvider(),    // provisoire — sst/opencode (TUI SolidJS), calibré source (adapters.go)
+		newCrushProvider(),       // provisoire — charmbracelet/crush (TUI Bubbletea), calibré source (adapters.go)
+		newQwenCodeProvider(),    // provisoire — QwenLM/qwen-code (TUI Ink, fork gemini-cli), calibré source (adapters.go)
 	}
 	return append(list, loadUserProviders()...)
 }
