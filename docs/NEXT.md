@@ -5,10 +5,12 @@ réelle** (souvent un blocage physique : besoin d'un appareil, d'un autre runtim
 vraies données à observer) et le **plan**. Rien ici n'est fait à moitié et présenté comme
 fini.
 
-## Livré récemment sur branches (en attente de merge — §7)
+## Livré et MERGÉ sur `main` (2026-07-08, local — non poussé)
 
-Ces travaux sont **verts et committés dans des worktrees isolés**, pas encore fusionnés
-sur `main` (décision de merge = feu vert d'Aïssa) :
+> État courant exhaustif : voir `docs/HANDOFF.md`. Entrée cross-provider : `AGENTS.md`.
+
+Ces travaux sont **verts et fusionnés sur `main`** (local ; **push/publication = feu vert
+d'Aïssa, non fait**) :
 
 - **Catalogue multi-provider de modèles** (`feat/model-provider-phase1`) : `communikey
   model presets|add` — ~45 providers vérifiés (25 portés du dépôt clawcodex + ~20

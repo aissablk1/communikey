@@ -4,7 +4,7 @@ date_debut: 2026-07-08
 date_fin: 2026-07-08
 workspace: /Volumes/Professionnel/Projets/Développement/Outils/communikey
 auteur: Aïssa BELKOUSSA
-statut: en cours
+statut: clôturée — consolidée sur main
 tags: [communikey, model-provider, cli-adapters, browser-mcp, backlog]
 ---
 
@@ -66,5 +66,23 @@ tags: [communikey, model-provider, cli-adapters, browser-mcp, backlog]
   tâche frontend dans cette session (Go + serveur MCP Node), §10 non applicable.
 - Honnêteté maintenue (§29/§2) : rien inventé pour masquer un blocage ; base_urls non
   vérifiées marquées `[à valider]`, adaptateurs non confirmés live marqués `provisoire`.
+
+## Suite — consolidation « Let's go » + logging cross-provider (fin de session)
+
+- **Merge des 4 branches sur `main`** (local, 4 merges, zéro conflit, verts à chaque étape) :
+  `27496cd` (catalogue modèle), `b74fa10` (5 adaptateurs CLI), `91bb963` (MCP navigateurs),
+  `32f2279` (docs/backlog/journal). Travail de la session parallèle « Ensemble » préservé (§7).
+- **Blocage §7 rencontré puis levé** : `main` avait avancé (session parallèle `d967329c`,
+  docs-only disjoint) → investigation avant merge, aucun clobber. Signalé, non contourné.
+- **Registre navigateurs corrigé (§29)** : Dia `verified:true` (`08c7dd6`) — chemin + bundle id
+  confirmés sur la machine (Chrome, Dia, Perplexity.app installés ; Perplexity.app ≠ Comet).
+- **MCP navigateurs activé** : `npm install` dans `main/mcp-browsers` + entrée
+  `mcpServers.communikey-browsers` ajoutée à `~/.claude/settings.json` (backup + écriture
+  atomique + revalidation JSON). Nécessite un redémarrage de Claude Code pour se charger.
+- **Constat honnête Phase 2** : `browser_ai_ask` bloqué (IA dans le chrome du navigateur, pas
+  le DOM ; cibles CDP page insuffisantes) — non contourné, documenté.
+- **Système de logging cross-provider mis en place** (`4cf64b8`) : `AGENTS.md` (entrée +
+  protocole de journalisation continue pour tout provider) + `docs/HANDOFF.md` (état courant
+  exhaustif). Le repo devient la mémoire commune, indépendante d'un provider.
 
 **Auteur** : Aïssa BELKOUSSA
