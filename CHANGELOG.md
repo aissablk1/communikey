@@ -5,7 +5,9 @@ Toutes les évolutions notables de communikey sont consignées ici.
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et le projet
 adopte le [versionnage sémantique](https://semver.org/lang/fr/).
 
-## [Non publié] — vers 0.3.0
+## [Non publié]
+
+## [0.3.0] — 2026-07-08
 
 ### ⚠️ Changements incompatibles (BREAKING)
 - **Cryptographie** : le transcript signé + l'AEAD lient désormais la clé publique de
@@ -210,5 +212,6 @@ vert) ; rien n'est promis sans être livré.
 - Adaptateurs Codex/Gemini, passkey, auth mutuelle réseau, clients mobiles et surface
   MCP : **non livrés** (feuille de route).
 
-[Non publié]: https://github.com/aissablk1/communikey/compare/v0.2.0...HEAD
+[Non publié]: https://github.com/aissablk1/communikey/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/aissablk1/communikey/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/aissablk1/communikey/releases/tag/v0.2.0
