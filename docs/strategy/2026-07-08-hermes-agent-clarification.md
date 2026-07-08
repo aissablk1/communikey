@@ -46,6 +46,51 @@ who you are across sessions. » **Général** (le code est *une* capacité, pas 
 > la doctrine du projet (AGENTS.md §3) impose de toute façon la capture réelle, pas les strings du
 > source (composées/stylées au rendu). Adaptateur = **bloqué** tant que cette capture n'existe pas.
 
+### Calibration Python `cli.py` — DÉFINITIVE (source 0.18.2 en ligne + cross-check 0.14.0 local)
+
+**Dispatch** : `hermes` nu → `cmd_chat` → défaut `display.interface = "cli"` → REPL **Python
+`cli.py`** (prompt_toolkit). Le node `ui-tui` (ink) ne se lance QUE sur opt-in (`--tui`,
+`HERMES_TUI=1`, `display.interface: tui`). En **0.14.0**, `_resolve_use_tui` **n'existe pas** →
+c'est **toujours** le `cli.py` Python.
+
+**Stabilité vérifiée** : tous les tokens ci-dessous, trouvés dans `main` (0.18.2) en ligne, sont
+**présents dans le `cli.py` 0.14.0 local d'Aïssa** (grep, comptes ≥1) → sûrs à calibrer.
+
+**CONFIRM — sécurité critique (l'adaptateur DOIT détecter ceci comme `confirm` et NE JAMAIS
+auto-valider)** :
+- Titre panneau : **`⚠️  Dangerous Command`** (⚠️ + **deux** espaces).
+- Options : **`❯ 1. Allow once`** / **`  2. Allow for this session`** / **`  3. Add to permanent
+  allowlist`** / **`  4. Deny`** (+ `Show full command`).
+- Indice : **`↑/↓ to select, Enter to confirm`** (+ `  (Ns)`).
+- ⚠️ **DANGER** : **Enter valide le choix surligné — défaut = « Allow once » = APPROUVE** ; les
+  chiffres `1`–`9`/`0` valident **immédiatement** ; **pas** de binding `y`/`n` dans ce panneau. →
+  un outil externe qui tape Entrée ou un chiffre **approuve une commande dangereuse**. Détection
+  = non négociable.
+- Confirm secondaire (slash destructif `/clear`,`/reset`) : footer `Type 1/2/3 or use ↑/↓ then
+  Enter. ESC/Ctrl+C cancels.` — ici `y`/`n` marchent comme texte tapé (≠ panneau dangereux).
+
+**BUSY** :
+- Symbole prompt : **`⚕ ❯ `** (style `prompt-working`).
+- Placeholder saisie : **`msg=interrupt · /queue · /bg · /steer · Ctrl+C cancel`**.
+- Spinner : frames braille `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏` + `  {txt}  ({elapsed}s)` ; `Processing command...` ;
+  `⚡ Interrupting agent...`.
+
+**IDLE** :
+- Symbole prompt : **`❯ `** (SANS `⚕`).
+- Placeholder = **vide** (`""`). → idle = `❯ ` **seul** + statut vide + **pas** de spinner.
+- Accueil (démarrage uniquement, PAS le prompt live) : `Welcome to Hermes Agent! Type your
+  message or /help for commands.`
+
+**Invariant adaptateur** (comme les autres, safety-first) : **confirm > busy > idle > unknown**.
+Idle exige le **double signal** : prompt `❯ ` **sans** `⚕` **ET** absence de spinner/`Processing`.
+Le panneau `⚠️  Dangerous Command` / options `Allow`/`Deny` = **confirm absolu**. Écran ambigu ou
+shell nu → `unknown`, jamais idle.
+
+**Statut calibration** : **SOLIDE** (tokens vérifiés dans la source 0.18.2 + confirmés dans le
+0.14.0 local d'Aïssa). Idéalement une **capture d'écran live** confirmera le RENDU exact
+(ANSI/couleurs/troncature) avant de lever le flag `provisoire` — mais l'adaptateur est **écrivable
+avec confiance**, ce qui n'était pas le cas sur les tokens ui-tui.
+
 ### (Référence UI TS `ui-tui` — NE PAS utiliser pour l'install Python d'Aïssa)
 
 **⚠️ CAVEAT DÉCISIF** : ces tokens viennent du **front-end TS `ui-tui`**. Il existe **AUSSI** un
