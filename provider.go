@@ -45,6 +45,7 @@ func buildProviderRegistry() []Provider {
 		newOpencodeProvider(),    // provisoire — sst/opencode (TUI SolidJS), calibré source (adapters.go)
 		newCrushProvider(),       // provisoire — charmbracelet/crush (TUI Bubbletea), calibré source (adapters.go)
 		newQwenCodeProvider(),    // provisoire — QwenLM/qwen-code (TUI Ink, fork gemini-cli), calibré source (adapters.go)
+		newHermesProvider(),      // provisoire — Hermes Agent (Nous Research, MIT), cli.py Python : confirm+busy only, idle non détecté (sûr) (adapters_hermes.go)
 	}
 	return append(list, loadUserProviders()...)
 }
