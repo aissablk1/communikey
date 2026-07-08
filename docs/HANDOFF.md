@@ -16,9 +16,12 @@
   `GITHUB_TOKEN` par défaut d'Actions ne peut pas écrire dans le tap. *Fix (décision Aïssa)* :
   créer un **PAT scope `repo`** + l'ajouter en secret du repo, et référencer ce secret pour
   l'étape `brews` dans `.github/workflows/release.yml` (ne pas minter/stocker le secret à sa place).
-- **CI rouge sur `windows-latest` UNIQUEMENT** (`TestDiscoverAgentTeams*`, `TestLoadRelations*`)
-  — **pré-existant, Windows-spécifique (chemins/FS), non causé par le travail de cette session** ;
-  macOS + Linux + race = verts. À corriger séparément (portabilité Windows des tests).
+- **CI verte sur TOUS les OS** (ubuntu + macos + windows + race) ✅. Le bug Windows
+  pré-existant (`TestDiscoverAgentTeams*`/`TestLoadRelations*`) est **corrigé** : `os.UserHomeDir()`
+  lit `USERPROFILE` sur Windows (pas `HOME`) → helper de test `setTestHome` qui pose les deux
+  (commit `e14f8c1`, confirmé par le run CI windows-latest = success).
+- Petit reste : les actions `actions/checkout`/`setup-go` ciblent Node 20 (déprécié → forcé Node 24
+  par GitHub) — simple avertissement, à bumper un jour (non bloquant).
 
 ## 0. État de `main` en un coup d'œil
 
