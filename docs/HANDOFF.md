@@ -12,10 +12,12 @@
 
 - **`main` poussé public** (`github.com/aissablk1/communikey`) + **Release `v0.3.0` LIVE**
   (binaires darwin/linux/windows × amd64/arm64 + SBOMs CycloneDX + checksums).
-- **Bloqué — formule Homebrew** : goreleaser 403 sur `aissablk1/homebrew-tap` — le
-  `GITHUB_TOKEN` par défaut d'Actions ne peut pas écrire dans le tap. *Fix (décision Aïssa)* :
-  créer un **PAT scope `repo`** + l'ajouter en secret du repo, et référencer ce secret pour
-  l'étape `brews` dans `.github/workflows/release.yml` (ne pas minter/stocker le secret à sa place).
+- **Homebrew tap : FAIT** ✅ — la formule `communikey.rb` (v0.3.0) a été poussée manuellement
+  dans `aissablk1/homebrew-tap` (via un `gh` scope `repo`) ; `brew install aissablk1/tap/communikey`
+  fonctionne (vérifié : `brew info` lit « stable 0.3.0 »). ⚠️ Pour les **futures** releases,
+  l'auto-push goreleaser en Actions re-échouera en 403 tant qu'un **PAT scope `repo`** n'est pas
+  ajouté en secret + référencé pour l'étape `brews` de `release.yml` (sinon refaire le push manuel).
+  NB : le tap contient encore l'ancienne formule `csend.rb` (avant rebrand) — à supprimer un jour.
 - **CI verte sur TOUS les OS** (ubuntu + macos + windows + race) ✅. Le bug Windows
   pré-existant (`TestDiscoverAgentTeams*`/`TestLoadRelations*`) est **corrigé** : `os.UserHomeDir()`
   lit `USERPROFILE` sur Windows (pas `HOME`) → helper de test `setTestHome` qui pose les deux
