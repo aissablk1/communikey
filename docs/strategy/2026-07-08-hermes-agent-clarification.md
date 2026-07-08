@@ -35,7 +35,18 @@ who you are across sessions. » **Général** (le code est *une* capacité, pas 
 - Install : `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash` (installeur git ;
   uv + Python 3.11 + Node). ⚠️ `curl|bash` : à auditer avant exécution (§19/§38).
 
-## 3. Données de calibration (source primaire — TUI TypeScript `ui-tui`, `@hermes/ink`)
+## 3. Données de calibration (⚠️ mauvais front-end pour l'install d'Aïssa — voir mise à jour)
+
+> **MISE À JOUR 2026-07-08 (front-end CONFIRMÉ, §29)** : diagnostic read-only de l'install
+> d'Aïssa → `~/.local/bin/hermes` exec `~/.hermes/hermes-agent/venv/bin/hermes`, point d'entrée
+> Python `from hermes_cli.main import main`, version **`hermes-agent 0.14.0`**. Son front-end réel
+> est le **CLI Python `hermes_cli`**, PAS le `ui-tui` TS. **Les tokens ci-dessous (extraits du
+> `ui-tui`) ne s'appliquent donc PAS à son install** — conservés seulement comme référence de l'UI
+> TS. La calibration correcte exige une **capture d'écran live du TUI Python `hermes_cli`** (§5) ;
+> la doctrine du projet (AGENTS.md §3) impose de toute façon la capture réelle, pas les strings du
+> source (composées/stylées au rendu). Adaptateur = **bloqué** tant que cette capture n'existe pas.
+
+### (Référence UI TS `ui-tui` — NE PAS utiliser pour l'install Python d'Aïssa)
 
 **⚠️ CAVEAT DÉCISIF** : ces tokens viennent du **front-end TS `ui-tui`**. Il existe **AUSSI** un
 CLI **Python `cli.py`** (`prompt_toolkit`, 743 Ko) dont les strings **n'ont PAS été vérifiés** et
