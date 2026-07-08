@@ -8,6 +8,18 @@
 
 ---
 
+## 0bis. PUBLIÉ le 2026-07-08 ✅
+
+- **`main` poussé public** (`github.com/aissablk1/communikey`) + **Release `v0.3.0` LIVE**
+  (binaires darwin/linux/windows × amd64/arm64 + SBOMs CycloneDX + checksums).
+- **Bloqué — formule Homebrew** : goreleaser 403 sur `aissablk1/homebrew-tap` — le
+  `GITHUB_TOKEN` par défaut d'Actions ne peut pas écrire dans le tap. *Fix (décision Aïssa)* :
+  créer un **PAT scope `repo`** + l'ajouter en secret du repo, et référencer ce secret pour
+  l'étape `brews` dans `.github/workflows/release.yml` (ne pas minter/stocker le secret à sa place).
+- **CI rouge sur `windows-latest` UNIQUEMENT** (`TestDiscoverAgentTeams*`, `TestLoadRelations*`)
+  — **pré-existant, Windows-spécifique (chemins/FS), non causé par le travail de cette session** ;
+  macOS + Linux + race = verts. À corriger séparément (portabilité Windows des tests).
+
 ## 0. État de `main` en un coup d'œil
 
 - **Branche `main`** : verte (`go vet`/`build`/`test` OK ; MCP registre 4/4). Tout le travail
