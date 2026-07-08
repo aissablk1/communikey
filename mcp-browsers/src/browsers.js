@@ -61,7 +61,7 @@ export const browsers = {
     id: "dia", label: "Dia (The Browser Company)", appPath: mac("Dia"),
     bundleId: "company.thebrowser.dia", defaultPort: 9230, chromium: true,
     controllable: "cdp", verified: true, aiRecipe: null,
-    notes: "IA conversationnelle native, Skills, mémoire 7 jours. macOS Apple Silicon. Chemin + bundle id vérifiés sur la machine le 2026-07-08.",
+    notes: "IA conversationnelle native, Skills, mémoire 7 jours. macOS Apple Silicon. Chemin + bundle id vérifiés le 2026-07-08. Port de debug CDP confirmé ACTIF (sonde 2026-07-08) → launch/attach OK ; MAIS en profil neuf : 1 cible 'other', 0 'page' → l'UI IA n'est pas une cible page standard → browser_ai_ask (Phase 2) nécessite la vraie session Dia connectée + déterminer la cible de l'IA (page vs native).",
   },
   comet: {
     id: "comet", label: "Perplexity Comet", appPath: mac("Comet"),
