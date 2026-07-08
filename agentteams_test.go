@@ -6,6 +6,15 @@ import (
 	"testing"
 )
 
+// setTestHome pointe le répertoire home vers dir de façon PORTABLE. os.UserHomeDir()
+// lit $HOME sur Unix mais %USERPROFILE% sur Windows — poser seulement HOME laisse
+// les tests échouer sur Windows (le code lit alors le vrai profil). On pose les deux.
+func setTestHome(t *testing.T, dir string) {
+	t.Helper()
+	t.Setenv("HOME", dir)
+	t.Setenv("USERPROFILE", dir)
+}
+
 // Fixture = le VRAI config.json capturé le 2026-07-05 (session Claude Code réelle,
 // CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1), UUIDs remplacés par des valeurs stables
 // pour le test — la STRUCTURE et les noms de champs sont ceux réellement observés,
@@ -42,7 +51,7 @@ func writeTeamConfig(t *testing.T, home, teamName, content string) {
 
 func TestDiscoverAgentTeamsRealSchema(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("HOME", home)
+	setTestHome(t, home)
 	writeTeamConfig(t, home, "session-2a1598bb", realAgentTeamConfigFixture)
 
 	teams, errs := discoverAgentTeams()
@@ -71,7 +80,7 @@ func TestDiscoverAgentTeamsRealSchema(t *testing.T) {
 }
 
 func TestDiscoverAgentTeamsNoDirYieldsEmpty(t *testing.T) {
-	t.Setenv("HOME", t.TempDir())
+	setTestHome(t, t.TempDir())
 
 	teams, errs := discoverAgentTeams()
 	if teams != nil || errs != nil {
@@ -81,7 +90,7 @@ func TestDiscoverAgentTeamsNoDirYieldsEmpty(t *testing.T) {
 
 func TestDiscoverAgentTeamsSkipsMalformedButKeepsOthers(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("HOME", home)
+	setTestHome(t, home)
 	writeTeamConfig(t, home, "session-bad", `{ceci n'est pas du json`)
 	writeTeamConfig(t, home, "session-good", `{"name":"session-good","members":[]}`)
 
@@ -98,7 +107,7 @@ func TestDiscoverAgentTeamsSkipsMalformedButKeepsOthers(t *testing.T) {
 // écrit, ou déjà supprimé) ne doit jamais être une erreur — juste ignorée.
 func TestDiscoverAgentTeamsIgnoresDirWithoutConfig(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("HOME", home)
+	setTestHome(t, home)
 	if err := os.MkdirAll(filepath.Join(home, ".claude", "teams", "session-vide"), 0o755); err != nil {
 		t.Fatal(err)
 	}

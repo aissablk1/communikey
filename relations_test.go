@@ -128,7 +128,7 @@ func TestRelationsWouldCycleFalseOnLegitimateReparenting(t *testing.T) {
 // de relations d'Aïssa dans ~/.claude/communikey/relations.json) ---
 
 func TestRelationsSaveLoadRoundtrip(t *testing.T) {
-	t.Setenv("HOME", t.TempDir())
+	setTestHome(t, t.TempDir())
 
 	r := loadRelations()
 	r.link("PARENT", "ENFANT")
@@ -148,7 +148,7 @@ func TestRelationsSaveLoadRoundtrip(t *testing.T) {
 }
 
 func TestLoadRelationsNoFileYieldsEmpty(t *testing.T) {
-	t.Setenv("HOME", t.TempDir())
+	setTestHome(t, t.TempDir())
 
 	r := loadRelations()
 	if r == nil {
