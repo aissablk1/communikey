@@ -126,18 +126,19 @@ l'expérience, modélise l'utilisateur entre sessions ») en fait un bon **membr
 de continuité**, ou un builder/checker vendeur de plus (diversité cross-vendor = le moat). Caveat :
 étant généraliste, ne pas le présenter comme un builder de code spécialisé sans dogfood.
 
-## 5. Garde-fous & plan (STRICT)
+## 5. État & garde-fous (STRICT)
 
-- **§7 — `adapters.go` intouchable maintenant** : la session concurrente y ajoute des adaptateurs en
-  direct. **Ne PAS y écrire** en parallèle. L'adaptateur Hermes s'écrira sur une **branche dédiée**
-  ou quand le fichier est stable, en suivant le pattern `aider`/`goose` + tests `*_test.go`.
-- **§2/§29 — calibration honnête** : tant que le front-end réel (`ui-tui` vs `cli.py`) n'est pas
-  confirmé (réponse d'Aïssa ou **capture d'écran live**, comme pour les autres adaptateurs),
-  l'adaptateur reste **`provisoire`** et **NE DOIT PAS** auto-valider (invariant confirm > busy >
-  idle-double-signal ; abstention sur écran ambigu). Un token de confirm faux = validation dans un
-  dialogue « Allow/Deny » = danger.
-- **Prochain pas déblocant** : identifier le front-end lancé par `hermes` (interactif : lancer
-  `hermes`, capturer l'écran busy/idle/confirm réel → pseudo-tty), puis lever le caveat §3.
+- **✅ Adaptateur ÉCRIT & mergé dans `main`** (`fad068d`, 2026-07-09) : `adapters_hermes.go`
+  (`newHermesProvider()`) + enregistrement `provider.go` + `adapters_hermes_test.go` (5 tests verts).
+  Écrit sur branche isolée `feat/hermes-adapter` (fichier neuf → **zéro conflit `adapters.go`**, §7),
+  fast-forward propre dans `main`. **confirm + busy détectés ; idle NON détecté** (sûr, comme aider —
+  prompt `❯` = glyph Claude + placeholder vide + pas de footer persistant → pas de double signal).
+- **STATUT `provisoire`** (§2/§29) : calibré sur SOURCE (repo 0.18.2 + cross-check install locale
+  0.14.0 → tokens stables), **pas sur capture d'écran live**. Fixtures de test SYNTHÉTIQUES (pas
+  `*Real`). Invariant tenu : confirm > busy, jamais d'auto-validation ; écran ambigu → `unknown`.
+- **Seul reste pour lever `provisoire`** : une **capture d'écran live** du `cli.py` (lancer `hermes`,
+  capturer busy/idle/confirm réels) pour confirmer le RENDU (ANSI/couleurs/troncature) vs les tokens
+  source. Cette capture pourrait aussi révéler un footer idle sûr → activer la détection idle.
 
 ## 6. Sources & non-vérifié
 
