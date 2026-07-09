@@ -22,8 +22,10 @@
   pré-existant (`TestDiscoverAgentTeams*`/`TestLoadRelations*`) est **corrigé** : `os.UserHomeDir()`
   lit `USERPROFILE` sur Windows (pas `HOME`) → helper de test `setTestHome` qui pose les deux
   (commit `e14f8c1`, confirmé par le run CI windows-latest = success).
-- Petit reste : les actions `actions/checkout`/`setup-go` ciblent Node 20 (déprécié → forcé Node 24
-  par GitHub) — simple avertissement, à bumper un jour (non bloquant).
+- **Node 20 déprécié : traité** (2026-07-09, commit `e57af1e`) — `actions/checkout` bumpé
+  v4→**v7.0.0**, `actions/setup-go` v5→**v6.5.0** (Node 24), pins par SHA vérifiés maintenus.
+  YAML validé ; run CI de confirmation **en file d'attente côté GitHub** au moment de l'écriture
+  (à confirmer vert — bump SHA à faible risque).
 
 ## 0. État de `main` en un coup d'œil
 
