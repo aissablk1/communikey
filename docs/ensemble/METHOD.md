@@ -28,8 +28,15 @@ Le vendeur est un *paramètre*, pas un dogme. Mapper selon ce qui tourne réelle
 |---|---|---|
 | **Architecte** | Juge l'état, écrit la spec de *slice*, arbitre. **N'écrit jamais de code.** | Claude/Opus (jugement) |
 | **Builders** (≤ 3-4) | Exécutent la slice sur **modules isolés**, en parallèle. | Codex, ou tout CLI rapide/bon marché |
-| **Checker** | Vérif **adversariale** (instruit pour *réfuter*). Vendeur **DIFFÉRENT** du builder. | Gemini / Antigravity (autre vendeur) |
+| **Checker** | Vérif **adversariale** (instruit pour *réfuter*). Vendeur **DIFFÉRENT** du builder. | **Antigravity** (`agy`, Google) — autre vendeur¹ |
 | **Chef d'orchestre** | Décide kill/continue, fournit les inputs que lui seul a. | Toi (humain) |
+
+> ¹ **Gemini CLI (comptes individuels) a été retiré le 18/06/2026** → transition officielle vers
+> **Antigravity CLI** (`agy`, binaire Go, multi-agent, closed-source ; annoncé Google I/O
+> 19/05/2026 — vérifié 2026-07-09, developers.googleblog.com + compte @geminicli). Gemini CLI
+> survit **uniquement pour l'Enterprise** (licences Gemini Code Assist + clé API). Pour un compte
+> individuel, le vendeur « Google » de la flotte = **Antigravity** (communikey a déjà l'adaptateur
+> `antigravity`, `provisoire`).
 
 > Hermes Agent (Nous Research) est désormais **supporté** par communikey (adaptateur `provisoire`) —
 > utilisable comme **builder/checker supplémentaire** ou **rôle mémoire** (sa *learning loop*), une
@@ -77,7 +84,8 @@ Objectif : livrer une vraie petite tâche par une flotte hétérogène **sans hu
 
 **Prérequis (côté Aïssa — je ne peux pas les lancer headless, §2)** :
 - 3 terminaux/panneaux avec 3 vendeurs DIFFÉRENTS configurés (clés/OAuth) et lancés, rejoints au bus
-  (`communikey register` dans chacun). Ex. : Architecte=Claude, Builder=Codex, Checker=Gemini.
+  (`communikey register` dans chacun). Ex. : Architecte=Claude, Builder=Codex, Checker=**Antigravity**
+  (`agy`) — ou Hermes (supporté). Gemini CLI individuel n'est plus une option (retiré 18/06/2026, cf. ¹).
 - Un dépôt Git de travail (worktrees pour isoler les builders), `docs/HANDOFF.md` scaffoldé.
 
 **Tâche exemple (remplaçable)** : une feature petite, bien bornée, à critères durs — ex. « ajouter
