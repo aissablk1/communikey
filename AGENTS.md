@@ -10,6 +10,20 @@
 
 ---
 
+## STATUT ACTUEL (2026-07-09)
+
+- **PUBLIC** : `github.com/aissablk1/communikey` — code poussé, **CI verte sur tous les OS**
+  (ubuntu/macOS/windows/race). Licence Apache-2.0.
+- **Release `v0.3.0` LIVE** : binaires darwin/linux/windows × amd64/arm64 + SBOMs CycloneDX + checksums.
+- **Installable** : `brew tap aissablk1/tap` puis la formule `communikey` (formule `communikey.rb`
+  poussée manuellement dans le tap ; l'auto-push goreleaser des **futures** releases exige un PAT — cf. `HANDOFF.md`).
+- **3 piliers** (bus messagerie · détection d'état CLI · client modèles) **+ MCP navigateurs Phase 1**,
+  tous mergés sur `main`, verts.
+- **Contexte tout loggé** : ce fichier + `docs/HANDOFF.md` (état exhaustif) + `docs/NEXT.md` (backlog)
+  + `docs/sessions/*.md` (historique). N'importe quel agent, tout provider, ouvre et reprend.
+- **Ce qui reste** = bloqué sur ressource externe/physique (Phase 2 Dia = ta session connectée ; HF ;
+  captures live ; Agent Teams ; WebAuthn ; audit crypto) ou décision d'Aïssa. Détail : `HANDOFF.md §2-3`.
+
 ## 1. Ce qu'est communikey
 
 Outil **Go** (binaire unique, package `main`, module `github.com/aissablk1/communikey`,

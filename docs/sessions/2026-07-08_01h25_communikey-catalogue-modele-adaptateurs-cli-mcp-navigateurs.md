@@ -85,4 +85,36 @@ tags: [communikey, model-provider, cli-adapters, browser-mcp, backlog]
   protocole de journalisation continue pour tout provider) + `docs/HANDOFF.md` (état courant
   exhaustif). Le repo devient la mémoire commune, indépendante d'un provider.
 
+## Finale — publication & durcissement (2026-07-08 → 2026-07-09)
+
+Décisions d'Aïssa via QCM : « Publier maintenant » + « Phase 2 Dia avec ma session » + petits +.
+
+- **Publication** (scan PII/secrets §35 PASSÉ : zéro email perso working-tree+historique, auteur
+  `noreply` GitHub, zéro secret) :
+  - `git push origin main` → repo **public** `github.com/aissablk1/communikey`.
+  - Tag **`v0.3.0`** (CHANGELOG figé, `docs(changelog)` `c138ad8`) → workflow `release.yml`.
+  - **Release GitHub v0.3.0 LIVE** : binaires darwin/linux/windows × amd64/arm64 + SBOMs CycloneDX
+    + checksums (goreleaser en Actions ; Actions **débloqué**, la facturation ne bloque plus).
+- **Homebrew** : l'auto-push goreleaser a échoué (403 — `GITHUB_TOKEN` d'Actions ne peut pas écrire
+  dans un autre repo). **Contourné proprement** : formule `communikey.rb` (v0.3.0, sha256 vérifiés
+  depuis checksums.txt) **poussée manuellement** dans `aissablk1/homebrew-tap` via `gh` (scope `repo`
+  déjà autorisé, PAS de nouveau secret). Validé `brew info` → « stable 0.3.0 ». Le tap garde l'ancien
+  `csend.rb` (avant rebrand, à supprimer un jour).
+- **CI rouge Windows corrigée** : `os.UserHomeDir()` lit `USERPROFILE` sur Windows (pas `HOME`) →
+  helper de test `setTestHome` (pose HOME+USERPROFILE), commit `e14f8c1` → **CI verte sur tous les OS**
+  (confirmé par le run windows-latest = success). Bug pré-existant, pas causé par cette session.
+- **Node 20 déprécié traité** : `actions/checkout` v4→v7.0.0, `actions/setup-go` v5→v6.5.0 (Node 24,
+  SHA vérifiés §29), commit `e57af1e`. Run CI de confirmation en file d'attente GitHub à l'écriture.
+- **Logging cross-provider mis à jour** : bandeau STATUT dans `AGENTS.md`, `docs/HANDOFF.md` §0bis
+  (publication/Homebrew/CI/Node20), cette finale.
+
+### Restant à la clôture (jamais masqué)
+- **Bloqué (ressource externe)** : Browser MCP Phase 2 `browser_ai_ask` (exige la session Dia
+  connectée d'Aïssa lancée avec `--remote-debugging-port=9230` — Dia expose CDP, prouvé, mais son IA
+  n'est pas une cible page en profil neuf), HuggingFace bout-en-bout (clé+réseau), captures live des
+  adaptateurs (OAuth/PATH), bridge Agent Teams (format), WebAuthn (authentificateur), audit crypto (humain).
+- **Décision Aïssa** : durcissement réseau (non cadré), sous-commande Go `communikey browsers`
+  (déconseillée §57), valider les 20 providers `[à valider]` (cosmétique), PAT pour l'auto-push Homebrew
+  des futures releases, suppression de `csend.rb`, clarifier « claude.ai » (défaut = Claude Code).
+
 **Auteur** : Aïssa BELKOUSSA
